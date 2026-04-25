@@ -4,6 +4,8 @@ Dự án thương mại điện tử sử dụng Spring Boot và ReactJS.
 ## 🚀 Công nghệ sử dụng
 - **Backend:** Spring Boot, Spring Security (JWT), MySQL.
 - **Frontend:** ReactJS (Vite), Tailwind CSS.
+- **AI Integration:** Gemini API / OpenAI API (Cơ chế RAG).
+
 ## 🚀 Hạ tầng & Deploy
 - **Backend & Database:** Deploy trên **Railway** (Tự động hóa CI/CD từ GitHub).
 - **Frontend:** Deploy trên **Vercel** (Tối ưu tốc độ tải trang và SSL).
@@ -11,7 +13,8 @@ Dự án thương mại điện tử sử dụng Spring Boot và ReactJS.
 
 ## 📋 Phân chia Task chi tiết (Từng cá nhân)
 
-### 1. Đức - Backend Security & Infrastructure
+### 1. Đức - Backend Security, Infrastructure & AI Integration
+*   **AI Shopping Assistant:** Tích hợp Gemini/OpenAI API, xây dựng cơ chế **RAG (Retrieval-Augmented Generation)** để AI tư vấn sản phẩm dựa trên dữ liệu từ Database.
 *   **Security:** Thiết lập hệ thống JWT, mã hóa mật khẩu, phân quyền Role-based (Admin/User).
 *   **Email:** Tích hợp dịch vụ gửi Mail (Resend/Nodemailer) để xác thực tài khoản và báo đơn hàng.
 *   **Infrastructure:** Chủ trì cấu hình môi trường **Railway** cho Backend, quản lý biến môi trường (Env).
@@ -36,10 +39,11 @@ Dự án thương mại điện tử sử dụng Spring Boot và ReactJS.
 *   **Fullstack Category:** Chịu trách nhiệm cả API Backend và Giao diện Frontend cho phần quản lý danh mục (Category).
 
 ### 5. Việt Anh - UI Static & UX Enhancement
+*   **AI UI:** Thiết kế giao diện khung chat (Chat bubble) và giao diện tin nhắn AI mượt mà.
 *   **Static Pages:** Code giao diện trang Đăng nhập/Đăng ký, Contact, About Us, Footer và trang 404.
-*   **UX Components:** Xây dựng hệ thống **Toast Notifications** (thông báo) và **Loading Skeletons** (hiệu ứng chờ) cho toàn bộ web.
+*   **UX Components:** Xây dựng hệ thống **Toast Notifications** và **Loading Skeletons** cho toàn bộ web.
 *   **Search & Filter UI:** Code giao diện Thanh tìm kiếm và Sidebar lọc sản phẩm (Visual).
-*   **SEO & Support:** Tối ưu Meta tags, ảnh. Nhập liệu dữ liệu mẫu (Seeding) và viết tài liệu báo cáo dự án.
+*   **SEO & Support:** Tối ưu Meta tags, ảnh. Nhập liệu dữ liệu mẫu và viết báo cáo dự án.
 
 ## 🛠 Quy trình phối hợp
 1. **GitHub Flow:** Mỗi người tạo 1 branch `feat/[tên-mình]-[tên-task]`.
