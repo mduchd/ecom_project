@@ -3,6 +3,8 @@ import Header from './components/Header'
 import Home from './pages/Home'
 import Shop from './pages/Shop'
 import AdminProducts from './pages/AdminProducts'
+import ProductDetail from './pages/ProductDetail'
+import Cart from './pages/Cart'
 
 function App() {
   return (
@@ -12,10 +14,10 @@ function App() {
 
         <Routes>
           <Route path="/" element={<Home />} />
-
-          {/* 2. Thay đoạn chữ tạm thời bằng component <Shop /> */}
           <Route path="/shop" element={<Shop />} />
           <Route path="/admin/products" element={<AdminProducts />} />
+          <Route path="/product/:id" element={<ProductDetail />} />
+          <Route path="/cart" element={<Cart />} />
         </Routes>
       </div>
     </BrowserRouter>

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from 'react-router-dom';
 
 // ── Star Rating ──────────────────────────────────────────────────────────────
 function StarRating({ rating, reviews }) {
@@ -59,7 +60,7 @@ export default function ProductCard({ product }) {
     };
 
     return (
-        <div className="group relative bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col">
+        <Link to={`/product/${product.id}`} className="group relative bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col">
 
             {/* Wishlist button */}
             <button
@@ -161,6 +162,6 @@ export default function ProductCard({ product }) {
                     )}
                 </button>
             </div>
-        </div>
+        </Link>
     );
 }
