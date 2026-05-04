@@ -392,12 +392,12 @@ function OrderSummary({ items }) {
                         <CheckCircleIcon /> Order Placed!
                     </div>
                 ) : (
-                    <button
-                        onClick={() => setCheckedOut(true)}
+
+                    < Link to="/checkout"
                         className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-blue-100 transition-all duration-150"
                     >
                         Proceed to Checkout <ChevronRight />
-                    </button>
+                    </Link>
                 )}
 
                 {/* Security note */}
@@ -415,7 +415,7 @@ function OrderSummary({ items }) {
                     ))}
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
 
