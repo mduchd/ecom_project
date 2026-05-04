@@ -1,22 +1,24 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
-import HeroBanner from './components/HeroBanner'
-import ProductSection from './components/ProductSection' // Import phần sản phẩm
+import Home from './pages/Home'
+import Shop from './pages/Shop'
+import AdminProducts from './pages/AdminProducts'
 
 function App() {
   return (
-    <div className="min-h-screen bg-white pb-20">
-      <Header />
+    <BrowserRouter>
+      <div className="min-h-screen bg-white pb-20">
+        <Header />
 
-      <main className="container mx-auto px-4 mt-6">
-        <HeroBanner />
+        <Routes>
+          <Route path="/" element={<Home />} />
 
-        {/* Khoảng cách giữa Banner và phần Sản phẩm */}
-        <div className="mt-16">
-          <ProductSection />
-        </div>
-      </main>
-
-    </div>
+          {/* 2. Thay đoạn chữ tạm thời bằng component <Shop /> */}
+          <Route path="/shop" element={<Shop />} />
+          <Route path="/admin/products" element={<AdminProducts />} />
+        </Routes>
+      </div>
+    </BrowserRouter>
   )
 }
 

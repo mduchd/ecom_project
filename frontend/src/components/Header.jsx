@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from 'react-router-dom';
 
 // ── Icons (inline SVG helpers) ──────────────────────────────────────────────
 const PhoneIcon = () => (
@@ -184,19 +185,19 @@ function SearchBar() {
 
 function Logo() {
     return (
-        <a href="/" className="flex items-center gap-1 select-none flex-shrink-0">
+        <Link to="/" className="flex items-center gap-1 select-none flex-shrink-0">
             <span className="text-2xl font-black tracking-tight">
                 <span className="text-blue-600">Snap</span>
                 <span className="text-yellow-400">cart</span>
             </span>
-        </a>
+        </Link>
     );
 }
 
 function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
     return (
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <a href="#" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors group">
+            <Link to="/login" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors group">
                 <span className="w-8 h-8 rounded-full border-2 border-gray-200 group-hover:border-blue-400 flex items-center justify-center transition-colors">
                     <UserIcon />
                 </span>
@@ -204,11 +205,11 @@ function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
                     <p className="text-[10px] text-gray-400 font-medium">Welcome</p>
                     <p className="text-xs font-bold">Log In / Sign Up</p>
                 </div>
-            </a>
+            </Link>
 
             <div className="hidden md:block w-px h-8 bg-gray-200" />
 
-            <a href="#" className="flex items-center gap-2 group">
+            <Link to="/cart" className="flex items-center gap-2 group">
                 <div className="relative">
                     <span className="w-9 h-9 rounded-full bg-yellow-400 group-hover:bg-yellow-500 flex items-center justify-center text-gray-800 transition-colors shadow-sm">
                         <CartIcon />
@@ -223,7 +224,7 @@ function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
                     <p className="text-[10px] text-gray-400 font-medium">Cart</p>
                     <p className="text-xs font-bold text-gray-800">${cartTotal}</p>
                 </div>
-            </a>
+            </Link>
         </div>
     );
 }
@@ -232,14 +233,15 @@ function DesktopNav() {
     return (
         <nav className="hidden lg:flex items-center gap-1">
             {NAV_LINKS.map((link) => (
-                <a
+                <Link
                     key={link}
-                    href="#"
+                    /* Đoạn này giúp tự động tạo link: Home -> /, Products -> /shop */
+                    to={link === "Home" ? "/" : link === "Products" ? "/shop" : `/${link.toLowerCase()}`}
                     className="flex items-center gap-0.5 text-sm font-semibold text-gray-700 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all duration-150"
                 >
                     {link}
                     {link !== "Contact" && <ChevronDown className="w-3 h-3 mt-0.5 text-gray-400" />}
-                </a>
+                </Link>
             ))}
         </nav>
     );
@@ -265,15 +267,15 @@ function MobileMenu({ open, onClose }) {
                 <nav className="flex-1 overflow-y-auto py-4">
 
                     {NAV_LINKS.map((link) => (
-                        <a
+                        <Link
                             key={link}
-                            href="#"
+                            to={link === "Home" ? "/" : link === "Products" ? "/shop" : `/${link.toLowerCase()}`}
                             onClick={onClose}
                             className="flex items-center justify-between px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                         >
                             {link}
                             <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-gray-400" />
-                        </a>
+                        </Link>
                     ))}
 
                     <div className="border-t border-gray-100 mt-4 pt-4 px-5 space-y-3">
