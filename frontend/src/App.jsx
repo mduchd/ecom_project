@@ -1,5 +1,6 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Header from './components/Header'
+import AIChatBot from './components/AIChatBot'
 import Home from './pages/Home'
 import Shop from './pages/Shop'
 import AdminProducts from './pages/AdminProducts'
@@ -13,6 +14,7 @@ function App() {
     <BrowserRouter>
       <div className="min-h-screen bg-white pb-20">
         <Header />
+        <AIChatBot />
 
         <Routes>
           <Route path="/" element={<Home />} />
