@@ -1,14 +1,14 @@
-import HeroBanner from '../components/HeroBanner'
-import ProductSection from '../components/ProductSection'
+// src/pages/Home.jsx
+import ServiceBanner from "../components/ServiceBanner";
+import HeroBanner from "../components/HeroBanner";
+import ProductSection from "../components/ProductSection";
 
 export default function Home() {
     return (
-        <main className="container mx-auto px-4 mt-6">
+        <main className="min-h-screen bg-gray-50">
             <HeroBanner />
-
-            <div className="mt-16">
-                <ProductSection title="Best Seller" />
-            </div>
+            <ServiceBanner />
+            <ProductSection title="Best Seller" />
         </main>
-    )
+    );
 }

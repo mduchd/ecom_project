@@ -230,7 +230,7 @@ export default function HeroBanner() {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_320px] gap-4">
 
         {/* ── Left: Main Hero Slider ── */}
-        <div className="relative h-[320px] md:h-[360px] rounded-2xl overflow-hidden shadow-lg">
+        <div className="relative h-[320px] md:h-[360px] lg:h-full rounded-2xl overflow-hidden shadow-lg">
           {HERO_SLIDES.map((slide, i) => (
             <HeroSlide key={slide.id} slide={slide} isActive={i === current} />
           ))}

@@ -229,19 +229,112 @@ function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
     );
 }
 
+const NAV_ITEMS = [
+    { label: "Home", to: "/", children: null },
+    {
+        label: "Pages",
+        to: "#",
+        children: [
+            { label: "About Us", to: "/about", icon: "👋" },
+            { label: "FAQ", to: "/faq", icon: "❓" },
+            { label: "Contact", to: "/contact", icon: "✉️" },
+        ],
+    },
+    {
+        label: "Products",
+        to: "/shop",
+        children: [
+            { label: "Laptops", to: "/shop?cat=Laptops", icon: "💻" },
+            { label: "Cameras", to: "/shop?cat=Cameras", icon: "📷" },
+            { label: "Accessories", to: "/shop?cat=Accessories", icon: "🎧" },
+        ],
+    },
+    { label: "Contact", to: "/contact", children: null },
+];
+
+// ── Nav Dropdown Item ────────────────────────────────────────────────────────
+function NavDropdown({ item }) {
+    const [open, setOpen] = useState(false);
+    let closeTimer = null;
+
+    const handleMouseEnter = () => {
+        clearTimeout(closeTimer);
+        setOpen(true);
+    };
+
+    const handleMouseLeave = () => {
+        // small delay so cursor can move into dropdown
+        closeTimer = setTimeout(() => setOpen(false), 120);
+    };
+
+    // No children → plain link
+    if (!item.children) {
+        return (
+            <Link
+                to={item.to}
+                className="flex items-center gap-0.5 text-sm font-semibold text-gray-700 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all duration-150"
+            >
+                {item.label}
+            </Link>
+        );
+    }
+
+    return (
+        <div
+            className="relative"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+        >
+            {/* Trigger */}
+            <button
+                className={`flex items-center gap-1 text-sm font-semibold px-3 py-1.5 rounded-lg transition-all duration-150
+          ${open
+                        ? "text-blue-600 bg-blue-50"
+                        : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
+                    }`}
+            >
+                {item.label}
+                <svg
+                    className={`w-3 h-3 transition-transform duration-200 ${open ? "rotate-180 text-blue-500" : "text-gray-400"}`}
+                    fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"
+                >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
+            {/* Dropdown panel */}
+            {open && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden animate-fadeIn">
+                    {/* Arrow tip */}
+                    <div className="absolute -top-1.5 left-5 w-3 h-3 bg-white border-l border-t border-gray-100 rotate-45" />
+
+                    <div className="py-2 relative">
+                        {item.children.map((child, i) => (
+                            <Link
+                                key={child.to}
+                                to={child.to}
+                                onClick={() => setOpen(false)}
+                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 font-medium hover:bg-blue-50 hover:text-blue-600 transition-colors duration-100 group"
+                            >
+                                <span className="text-base flex-shrink-0">{child.icon}</span>
+                                <span className="group-hover:translate-x-0.5 transition-transform duration-150">
+                                    {child.label}
+                                </span>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ── DesktopNav ───────────────────────────────────────────────────────────────
 function DesktopNav() {
     return (
         <nav className="hidden lg:flex items-center gap-1">
-            {NAV_LINKS.map((link) => (
-                <Link
-                    key={link}
-                    /* Đoạn này giúp tự động tạo link: Home -> /, Products -> /shop */
-                    to={link === "Home" ? "/" : link === "Products" ? "/shop" : `/${link.toLowerCase()}`}
-                    className="flex items-center gap-0.5 text-sm font-semibold text-gray-700 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all duration-150"
-                >
-                    {link}
-                    {link !== "Contact" && <ChevronDown className="w-3 h-3 mt-0.5 text-gray-400" />}
-                </Link>
+            {NAV_ITEMS.map((item) => (
+                <NavDropdown key={item.label} item={item} />
             ))}
         </nav>
     );
