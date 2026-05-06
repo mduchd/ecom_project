@@ -1,6 +1,7 @@
 // src/pages/Cart.jsx
 import { useState } from "react";
 import { Link } from 'react-router-dom';
+import ThanhToan from "./ThanhToan";
 
 // ── Dummy Cart Data ──────────────────────────────────────────────────────────
 const INITIAL_ITEMS = [
