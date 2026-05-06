@@ -1,6 +1,7 @@
 // src/pages/Shop.jsx
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import ProductCard from "../components/ProductCard";
+import { useSearchParams } from "react-router-dom";
 
 // ── Dummy Data ───────────────────────────────────────────────────────────────
 const ALL_PRODUCTS = [
@@ -332,6 +333,19 @@ export default function Shop() {
     const [category, setCategory] = useState("All");
     const [sort, setSort] = useState("default");
     const [page, setPage] = useState(1);
+    const [searchParams] = useSearchParams();
+    const urlCategory = searchParams.get("category") || searchParams.get("cat");
+
+    useEffect(() => {
+        if (urlCategory) {
+            const matchedCategory = CATEGORIES.find(
+                (c) => c.toLowerCase() === urlCategory.toLowerCase()
+            );
+            setCategory(matchedCategory || "All");
+        } else {
+            setCategory("All");
+        }
+    }, [urlCategory]);
 
     // Filter + sort
     const filtered = useMemo(() => {
@@ -391,28 +405,6 @@ export default function Shop() {
                 />
 
                 {/* ── Product Grid ── */}
-                {/* Phần Tiêu đề và Thanh công cụ bổ sung */}
-                <div className="mb-8 mt-4">
-                    {/* Breadcrumb */}
-                    <div className="text-sm text-gray-500 mb-2">
-                        Home <span className="mx-2">/</span> <span className="text-gray-900 font-medium">Products</span>
-                    </div>
-
-                    {/* Title & Sort */}
-                    <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-4">
-                        <h1 className="text-3xl font-black text-gray-900 tracking-tight">All Products</h1>
-
-                        <div className="flex items-center gap-3">
-                            <span className="text-sm text-gray-500 font-medium hidden sm:block">Sort by:</span>
-                            <select className="border border-gray-200 rounded-lg px-4 py-2.5 text-sm text-gray-700 outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white cursor-pointer shadow-sm hover:border-gray-300 transition-colors">
-                                <option>Featured</option>
-                                <option>Price: Low to High</option>
-                                <option>Price: High to Low</option>
-                                <option>Top Rated</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
                     {paginated.length > 0 ? (
