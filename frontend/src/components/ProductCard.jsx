@@ -58,7 +58,8 @@ export default function ProductCard({ product }) {
         setAddedToCart(true);
         setTimeout(() => setAddedToCart(false), 1500);
     };
-
+// "/chi-tiet"
+// {`/product/${product.id}`}
     return (
         <Link to={`/product/${product.id}`} className="group relative bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col">
 

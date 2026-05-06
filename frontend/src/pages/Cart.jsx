@@ -1,6 +1,7 @@
 // src/pages/Cart.jsx
 import { useState } from "react";
 import { Link } from 'react-router-dom';
+import ThanhToan from "./ThanhToan";
 
 // ── Dummy Cart Data ──────────────────────────────────────────────────────────
 const INITIAL_ITEMS = [
@@ -392,7 +393,6 @@ function OrderSummary({ items }) {
                         <CheckCircleIcon /> Order Placed!
                     </div>
                 ) : (
-
                     < Link to="/checkout"
                         className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-blue-100 transition-all duration-150"
                     >

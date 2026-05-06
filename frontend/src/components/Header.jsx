@@ -220,7 +220,7 @@ function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
                         </span>
                     )}
                 </div>
-                <div className="leading-tight hidden lg:block">
+                <div id="cart-icon" className="leading-tight hidden lg:block">
                     <p className="text-[10px] text-gray-400 font-medium">Cart</p>
                     <p className="text-xs font-bold text-gray-800">${cartTotal}</p>
                 </div>
