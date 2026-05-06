@@ -1,5 +1,5 @@
-import { useState} from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect} from "react";
+import { useNavigate , useParams} from "react-router-dom";
 import GioHang from "./GioHang.jsx";
 import SPLienQuan from "../components/SanPhamLienQuan.jsx";
 import BannerSp from "../components/BannerSP.jsx";
@@ -13,6 +13,8 @@ import Header from "../components/Header.jsx";
 import { ALL_PRODUCTS } from "./Shop.jsx";
 
 export default function ChiTietSP() {
+  const { id } = useParams();
+  const selectedProduct = ALL_PRODUCTS.find(p => p.id === Number(id)) || ALL_PRODUCTS[0];
 
   const images = ["/tainghe1.png", "/tainghe3.png", "/tainghe1.png", "/tainghe1.png"];
   const version = [1, 2, 3];
@@ -25,20 +27,23 @@ export default function ChiTietSP() {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const MuaNgay = () => {
     setCartCount(prev => prev + 1);
-    navigate('/cart')
+    navigate('/cart');
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
-  const [activeImg, setActiveImg] = useState(product.image);
+
+ const [activeImg, setActiveImg] = useState(selectedProduct.image);
+  const [sanPhamHienTai, setSanPhamHienTai] = useState(selectedProduct);
   const [activeSize, setActiveSize] = useState(null);
 
-  const [sanPhamHienTai, setSanPhamHienTai] = useState({
-    label: product.name,    
-    gia: `${product.price.toLocaleString()}đ`, 
-    image: product.image   
-  });
+  useEffect(() => {
+    setSanPhamHienTai(selectedProduct);
+    setActiveImg(selectedProduct.image);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [id, selectedProduct]);
+
   const handleChonSanPhamMoi = (sp) => {
-    setSanPhamHienTai(sp);
-    setActiveImg(sp.image);
-    window.scrollTo({top:0, behavior: "smooth"})
+    // Điều hướng sang URL mới của sản phẩm được chọn
+    navigate(`/product/${sp.id}`);
   }
 
   const [count, setCount] = useState(0);
@@ -180,10 +185,10 @@ export default function ChiTietSP() {
           <div>
             <h1 className="text-4xl font-black text-gray-900 tracking-tight uppercase">{sanPhamHienTai.name}</h1>
             <p className="text-3xl font-bold text-red-600 mt-2">
-                {sanPhamHienTai.gia}
+                {sanPhamHienTai.price?.toLocaleString()}$
             </p>
             <p className="text-gray-500 mt-3 leading-relaxed">
-             {sanPhamHienTai.label} với thiết kế chống ồn dòng cao cấp, được trang bị bộ xử lý QN1. Đây là một trong những tai nghe chụp tai tốt trong phân khúc chống ồn chủ động.
+             {sanPhamHienTai.category} với thiết kế chống ồn dòng cao cấp, được trang bị bộ xử lý QN1. Đây là một trong những tai nghe chụp tai tốt trong phân khúc chống ồn chủ động.
             </p>
           </div>
           
@@ -272,7 +277,9 @@ export default function ChiTietSP() {
         
         </div>
 
-        <SPLienQuan onSelectProduct={handleChonSanPhamMoi}/>
+        <SPLienQuan category = {sanPhamHienTai.category}
+        currentId = {sanPhamHienTai.id}
+        onSelectProduct={handleChonSanPhamMoi}/>
         <BannerSp sanPhamHienTai={sanPhamHienTai} onMuaNgay = {MuaNgay}
          className="absolute bottom-2 right-4"/>
          <DanhGia sanPhamHienTai={sanPhamHienTai}/>

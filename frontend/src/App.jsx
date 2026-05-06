@@ -9,8 +9,10 @@ import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import Auth from './pages/Auth'
 import Checkout from './pages/Checkout'
-import ChiTietSP from "./pages/ChiTietSP";
 import ThanhToan from './pages/ThanhToan'
+import Footer from './components/Footer';
+import ChiTietSP from './pages/ChiTietSP'
+
 function App() {
   return (
     <BrowserRouter>
@@ -23,13 +25,14 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/shop" element={<Shop />} />
           <Route path="/admin/products" element={<AdminProducts />} />
-          <Route path="/product/:id" element={<ProductDetail />} />
+          {/** <Route path="/product/:id" element={<ProductDetail />} /> */}
           <Route path="/cart" element={<Cart />} />
           <Route path="/login" element={<Auth />} />
           <Route path="/checkout" element={<ThanhToan />} />
-          <Route path="/chi-tiet" element={<ChiTietSP />} />
+          <Route path="/product/:id" element={<ChiTietSP />} />
         </Routes>
       </div>
+      <Footer />
     </BrowserRouter>
   )
 }
