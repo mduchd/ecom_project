@@ -10,13 +10,16 @@ import ThongSo from "../components/ThongSoSP.jsx";
 import Camket from "../components/CamKetSP.jsx";
 import DanhGia from "../components/DanhGia.jsx";
 import Header from "../components/Header.jsx";
-
+import { ALL_PRODUCTS } from "./Shop.jsx";
 
 export default function ChiTietSP() {
-  const [selectedID, setSelectedID] = useState(0);
+
   const images = ["/tainghe1.png", "/tainghe3.png", "/tainghe1.png", "/tainghe1.png"];
   const version = [1, 2, 3];
   const colors = ["bg-black", "bg-red-400", "bg-blue-400"];
+
+  const product = ALL_PRODUCTS[0];
+  const [selectedID, setSelectedID] = useState(0);
 
   const navigate = useNavigate();
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -24,13 +27,13 @@ export default function ChiTietSP() {
     setCartCount(prev => prev + 1);
     navigate('/cart')
   }
-  const [activeImg, setActiveImg] = useState(images[0]);
+  const [activeImg, setActiveImg] = useState(product.image);
   const [activeSize, setActiveSize] = useState(null);
 
   const [sanPhamHienTai, setSanPhamHienTai] = useState({
-    label: "JBL Live 660NC",
-    gia: "6.890.000đ", 
-    image: "./tainghe1.png"
+    label: product.name,    
+    gia: `${product.price.toLocaleString()}đ`, 
+    image: product.image   
   });
   const handleChonSanPhamMoi = (sp) => {
     setSanPhamHienTai(sp);
@@ -175,7 +178,7 @@ export default function ChiTietSP() {
 
           {/* BỔ SUNG: TITLE & DESCRIPTION */}
           <div>
-            <h1 className="text-4xl font-black text-gray-900 tracking-tight uppercase">{sanPhamHienTai.label}</h1>
+            <h1 className="text-4xl font-black text-gray-900 tracking-tight uppercase">{sanPhamHienTai.name}</h1>
             <p className="text-3xl font-bold text-red-600 mt-2">
                 {sanPhamHienTai.gia}
             </p>

@@ -4,9 +4,11 @@ import { useState } from "react";
 import { FaHeart } from "react-icons/fa";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { Link, useNavigate  } from "react-router-dom";
+import { ALL_PRODUCTS } from "../pages/Shop.jsx";
 
 export default function SPLienQuan({onSelectProduct}){
-    const listsp = [
+    const listsp = ALL_PRODUCTS.slice(0, 10);
+    /*const listsp = [
         {label: "JBL Live 660NC", image: "tainghe1.png", gia: "5.690.000đ"},
         {label: "Baseus Bowie D05", image: "tainghe2.png", gia: "6.690.000đ"},
         {label: "Picun B8", image: "tainghe3.png", gia: "4.690.000đ"},
@@ -17,7 +19,7 @@ export default function SPLienQuan({onSelectProduct}){
         {label: "Picun B8", image: "tainghe3.png", gia: "4.690.000đ"},
         {label: "Beats Pro", image: "tainghe6.png", gia: "9.690.000đ"},
         {label: "Soundcore Space Q45", image: "tainghe5.png", gia: "8.690.000đ"},
-    ];
+    ];*/
     const [thongBao, setThongBao] = useState({ hien: false, tenSP: "" });
 
     const handleYeuThich = (e, productLabel) => {
@@ -53,7 +55,7 @@ export default function SPLienQuan({onSelectProduct}){
             )}
        
             <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold text-gray-600">Sản Phẩm Tương Tự</h2>
+                <h2 className="text-xl font-semibold text-gray-600 mb-4">Sản Phẩm Tương Tự</h2>
                 <a href="#" className="text-xl font-semibold text-gray-600">View All</a>
             </div>
             <div className=" gap-4 grid gid-cols-2 md:grid-cols-3 
@@ -63,16 +65,18 @@ export default function SPLienQuan({onSelectProduct}){
                     className={`relative group  h-full border rounded-lg border-gray-200
                     shadow-lg shadow-gray-300 shadow-s p-3 flex flex-col pb-12`}
                   >
-                        <div className="cursor-pointer flex-col ">
-                            <div className="h-45 py-3 rounded-xl">
-                                <img className="w-full h-full object-contain group-hover:scale-110 trasition-transform duration-300" src="/tainghe1.png"></img>
+                        <div className="relative w-full aspect-square bg-gray-50 rounded-xl mb-4  overflow-hidden flex items-center justify-center p-2 flex-col">
+                            <div className="h-45 py-3 rounded-xl ">
+                                <img className="w-full h-full object-contain group-hover:scale-110 trasition-transform duration-300" src={item.image} alt={item.name} ></img>
+                               
                             </div>
-                            <p className="font-semibold text-lg line-clamp-2 mb-2">Tai nghe {item.label}</p>
+                            
                         </div>
+                        <p className="font-semibold text-lg mb-2">{item.name}</p>
                         <div className="mt-auto">
                             <div className="flex items-center gap-2 mb-2">
-                                <p className="text-red-600 font-bold text-lg font-bold tracking-tight ">{item.gia}</p>
-                                <p className="text-gray-400 line-through">7.990.000đ</p>
+                                <p className="text-red-600 font-bold text-lg font-bold tracking-tight ">{item.price.toLocaleString()}$</p>
+                                <p className="text-gray-400 line-through">3.990$</p>
                             </div>
                             
                             <div className=" bg-gray-200 rounded-sm px-1 mb-2">
@@ -89,6 +93,7 @@ export default function SPLienQuan({onSelectProduct}){
                            group-hover/heart:opacity-100 group-hover/heart:scale-100 group-hover/heart:animate-blink"/> 
                            <p className="font-normal text-blue-500">Yêu thích</p>
                         </div>
+                        
                         <div className="absolute right-0 top-0 
                         rounded-sm gap-2 p-1 bg-yellow-500 transition-all duration-200 ">
                             <p className="text-sm font-semibold">Trả góp 0%</p>

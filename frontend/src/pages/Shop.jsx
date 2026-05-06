@@ -3,7 +3,7 @@ import { useState, useMemo } from "react";
 import ProductCard from "../components/ProductCard";
 
 // ── Dummy Data ───────────────────────────────────────────────────────────────
-const ALL_PRODUCTS = [
+export const ALL_PRODUCTS = [
     {
         id: 1,
         name: "Gigabyte AI TOP 100 Z890 Core Ultra",
