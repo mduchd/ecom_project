@@ -9,7 +9,7 @@ function StarRating({ rating, reviews }) {
                 {Array.from({ length: 5 }).map((_, i) => (
                     <svg
                         key={i}
-                        className={`w-3 h-3 ${i < rating ? "text-yellow-400" : "text-gray-200"}`}
+                        className={`w-3 h-3 ${rating && i < rating ? "text-yellow-400" : "text-gray-200"}`}
                         fill="currentColor"
                         viewBox="0 0 20 20"
                     >
@@ -59,6 +59,9 @@ export default function ProductCard({ product }) {
         setTimeout(() => setAddedToCart(false), 1500);
     };
 
+    // Kiểm tra còn hàng dựa vào stockQuantity
+    const isAvailable = product.stockQuantity > 0;
+
     return (
         <Link to={`/product/${product.id}`} className="group relative bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col">
 
@@ -70,26 +73,16 @@ export default function ProductCard({ product }) {
                 <HeartIcon filled={wished} />
             </button>
 
-            {/* NEW badge */}
-            {product.isNew && (
-                <span className="absolute top-2.5 left-2.5 z-10 bg-yellow-400 text-gray-800 text-[10px] font-black px-2 py-0.5 rounded-full shadow-sm">
-                    NEW
-                </span>
-            )}
+            {/* NEW badge - Bỏ qua vì backend không trả về, ẩn đi để tránh báo lỗi */}
+            {/* {product.isNew && ... } */}
 
-            {/* Installment badge */}
-            {product.badge && (
-                <div className={`absolute top-0 left-0 right-0 flex justify-center pt-1 z-10 ${product.isNew ? "pl-12" : ""}`}>
-                    <span className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full ${product.badgeColor} border border-current border-opacity-20`}>
-                        {product.badge}
-                    </span>
-                </div>
-            )}
+            {/* Installment badge - Bỏ qua */}
+            {/* {product.badge && ... } */}
 
-            {/* Product Image */}
+            {/* Product Image - Sửa thành imageUrl */}
             <div className="relative h-44 bg-gray-50 flex items-center justify-center p-4 overflow-hidden mt-5">
                 <img
-                    src={product.image}
+                    src={product.imageUrl}
                     alt={product.name}
                     className="h-full w-full object-contain group-hover:scale-105 transition-transform duration-500"
                 />
@@ -98,51 +91,46 @@ export default function ProductCard({ product }) {
             {/* Info */}
             <div className="flex flex-col flex-1 px-3.5 pb-3.5 pt-2.5 gap-1.5">
 
-                {/* Status label */}
-                {product.label && (
-                    <span className={`self-start text-[10px] font-bold text-white px-2.5 py-0.5 rounded-full ${product.labelColor}`}>
-                        {product.label}
-                    </span>
-                )}
+                {/* Status label - Bỏ qua */}
 
                 {/* Product name */}
                 <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug min-h-[2.5rem]">
                     {product.name}
                 </h3>
 
-                {/* Stars */}
+                {/* Stars - Hiển thị an toàn nếu có */}
                 <StarRating rating={product.rating} reviews={product.reviews} />
 
-                {/* Price */}
+                {/* Price - Sửa oldPrice thành discountPrice */}
                 <div className="flex items-baseline gap-2 mt-0.5">
                     <span className="text-base font-black text-gray-900">
-                        ${product.price.toLocaleString()}
+                        ${product.price?.toLocaleString()}
                     </span>
-                    {product.oldPrice && (
+                    {product.discountPrice && (
                         <span className="text-xs text-gray-400 line-through">
-                            ${product.oldPrice.toLocaleString()}
+                            ${product.discountPrice.toLocaleString()}
                         </span>
                     )}
                 </div>
 
-                {/* Stock */}
+                {/* Stock - Sửa logic inStock thành kiểm tra isAvailable */}
                 <div className="flex items-center gap-1.5">
-                    <span className={`w-1.5 h-1.5 rounded-full ${product.inStock ? "bg-emerald-500" : "bg-red-400"}`} />
-                    <span className={`text-[11px] font-medium ${product.inStock ? "text-emerald-600" : "text-red-400"}`}>
-                        {product.inStock ? "In stock" : "Out of stock"}
+                    <span className={`w-1.5 h-1.5 rounded-full ${isAvailable ? "bg-emerald-500" : "bg-red-400"}`} />
+                    <span className={`text-[11px] font-medium ${isAvailable ? "text-emerald-600" : "text-red-400"}`}>
+                        {isAvailable ? "In stock" : "Out of stock"}
                     </span>
                 </div>
 
-                {/* Add to Cart */}
+                {/* Add to Cart - Sửa logic disable nút */}
                 <button
                     onClick={handleAddToCart}
-                    disabled={!product.inStock}
+                    disabled={!isAvailable}
                     className={`mt-1.5 w-full flex items-center justify-center gap-2 py-2 rounded-xl text-xs font-bold
             opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0
             transition-all duration-300
             ${addedToCart
                             ? "bg-emerald-500 text-white"
-                            : product.inStock
+                            : isAvailable
                                 ? "bg-blue-600 hover:bg-blue-700 text-white shadow-md hover:shadow-blue-200"
                                 : "bg-gray-100 text-gray-400 cursor-not-allowed"
                         }`}

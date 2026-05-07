@@ -244,9 +244,9 @@ const NAV_ITEMS = [
         label: "Products",
         to: "/shop",
         children: [
-            { label: "Laptops", to: "/shop?cat=Laptops", icon: "💻" },
-            { label: "Cameras", to: "/shop?cat=Cameras", icon: "📷" },
-            { label: "Accessories", to: "/shop?cat=Accessories", icon: "🎧" },
+            { label: "Laptops", to: "/shop?category=Laptop", icon: "💻" },
+            { label: "Cameras", to: "/shop?category=Điện thoại", icon: "📷" },
+            { label: "Accessories", to: "/shop?category=Phụ kiện", icon: "🎧" },
         ],
     },
     { label: "Contact", to: "/contact", children: null },

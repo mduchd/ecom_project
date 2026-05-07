@@ -22,6 +22,7 @@ public class ProductController {
     public ResponseEntity<List<Product>> getAllProducts(
             @RequestParam(required = false) String category,
             @RequestParam(required = false) String search) {
+        
         return ResponseEntity.ok(productService.getAll(category, search));
     }
 
