@@ -29,7 +29,7 @@ const HERO_SLIDES = [
     bg: "bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900",
     textColor: "text-white",
     image:
-      "https://images.unsplash.com/photo-1546435770-a3e736dc5b8b?w=420&q=80",
+      "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=420&q=80",
     badge: "1 / 3",
   },
   {

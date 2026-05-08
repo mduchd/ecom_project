@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { Toaster } from './components/Toast.jsx';
 
 import Header from './components/Header'
 import AIChatBot from './components/AIChatBot'
@@ -11,13 +12,15 @@ import Auth from './pages/Auth'
 import Checkout from './pages/Checkout'
 import ThanhToan from './pages/ThanhToan'
 import Footer from './components/Footer';
-import ChiTietSP from './pages/ChiTietSP'
+import ChiTietSP from './pages/ChiTietSP';
+import AdminDashboard from './pages/AdminDashboard';
+
 
 function App() {
   return (
     <BrowserRouter>
       <div className="min-h-screen bg-white pb-20">
-     
+        <Toaster position="top-right" />
         <Header />
         <AIChatBot />
 
@@ -30,6 +33,7 @@ function App() {
           <Route path="/login" element={<Auth />} />
           <Route path="/checkout" element={<ThanhToan />} />
           <Route path="/product/:id" element={<ChiTietSP />} />
+          <Route path="/admin/dashboard" element={<AdminDashboard />} />
         </Routes>
       </div>
       <Footer />

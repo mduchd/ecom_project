@@ -58,6 +58,11 @@ export default function ProductCard({ product }) {
         setAddedToCart(true);
         setTimeout(() => setAddedToCart(false), 1500);
     };
+
+    const handleToggleWish = (e) => {
+        e.preventDefault();
+        setWished(!wished);
+    };
 // "/chi-tiet"
 // {`/product/${product.id}`}
     return (
@@ -65,7 +70,7 @@ export default function ProductCard({ product }) {
 
             {/* Wishlist button */}
             <button
-                onClick={(e) => { e.preventDefault(); setWished(!wished); }}
+                onClick={handleToggleWish}
                 className="absolute top-2.5 right-2.5 z-20 w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
             >
                 <HeartIcon filled={wished} />

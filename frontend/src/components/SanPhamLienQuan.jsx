@@ -5,6 +5,7 @@ import { FaHeart } from "react-icons/fa";
 import { AiOutlineHeart, AiFillHeart } from "react-icons/ai";
 import { Link, useNavigate  } from "react-router-dom";
 import { ALL_PRODUCTS } from "../pages/Shop.jsx";
+import { useAuth } from "../context/AuthContext.jsx";
 
 export default function SPLienQuan({category, currentId , onSelectProduct}){
     const listsp = useMemo(() => {
@@ -25,15 +26,8 @@ export default function SPLienQuan({category, currentId , onSelectProduct}){
         {label: "Beats Pro", image: "tainghe6.png", gia: "9.690.000đ"},
         {label: "Soundcore Space Q45", image: "tainghe5.png", gia: "8.690.000đ"},
     ];*/
-    const [thongBao, setThongBao] = useState({ hien: false, tenSP: "" });
-
-    const handleYeuThich = (e, productLabel) => {
-        e.stopPropagation();
-        setThongBao({ hien: true, tenSP: productLabel });
-        setTimeout(() => {
-            setThongBao({ hien: false, tenSP: "" });
-        }, 3000);
-    };
+    const { toggleFavorite } = useAuth();
+    
     const [activeName, setActiveName] = useState(listsp[0]?.name || "");
     const [activeImg, setActiveImg] = useState(listsp[0]?.image || "");
     const [activeGia, setActiveGia] = useState(listsp[0]?.price || "");
@@ -50,17 +44,7 @@ export default function SPLienQuan({category, currentId , onSelectProduct}){
     return(
         
         <div className="relative">
-            {thongBao.hien && (
-                <div className="fixed top-24 right-5 z-[100] animate-bounce">
-                    <div className="bg-blue-600 text-white px-4 py-3 rounded-xl shadow-2xl flex items-center gap-3 border border-blue-400">
-                        <AiFillHeart className="text-white text-xl" />
-                        <div>
-                            <p className="font-bold text-sm">Đã thêm vào yêu thích!</p>
-                            <p className="text-xs opacity-90">{thongBao.tenSP}</p>
-                        </div>
-                    </div>
-                </div>
-            )}
+            {/* Đã loại bỏ thông báo cũ, sử dụng toast toàn cục */}
             
            
                 <div className="flex items-center justify-between">
@@ -94,7 +78,7 @@ export default function SPLienQuan({category, currentId , onSelectProduct}){
                             </div>
                             <div className="absolute group bottom-2 right-3 group/heart flex items-center 
                                 rounded-lg gap-2 p-1 hover:bg-gray-200 cursor-pointer hover:scale-105 transition-all duration-200"
-                                onClick={(e) => handleYeuThich(e, item.name)}>
+                                onClick={(e) => { e.stopPropagation(); toggleFavorite(item); }}>
                             <AiOutlineHeart className="absolute text-blue-500 text-2xl transition-opacity duration-200
                             group-hover/heart:opacity-0"/> 
                             <AiFillHeart className="text-blue-500 text-2xl opacity-0 scale-75 
