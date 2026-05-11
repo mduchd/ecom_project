@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link } from 'react-router-dom';
+import { useAuth } from "../context/AuthContext.jsx";
 
 // ── Icons (inline SVG helpers) ──────────────────────────────────────────────
 const PhoneIcon = () => (
@@ -220,7 +221,7 @@ function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
                         </span>
                     )}
                 </div>
-                <div className="leading-tight hidden lg:block">
+                <div id="cart-icon" className="leading-tight hidden lg:block">
                     <p className="text-[10px] text-gray-400 font-medium">Cart</p>
                     <p className="text-xs font-bold text-gray-800">${cartTotal}</p>
                 </div>
@@ -402,6 +403,10 @@ export default function Header() {
     const [currency, setCurrency] = useState("USD");
     const [language, setLanguage] = useState("English");
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+    const { cart } = useAuth();
+    
+    const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
+    const cartTotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0).toLocaleString();
 
     return (
         <>
@@ -433,7 +438,7 @@ export default function Header() {
                         <Logo />
                         <DesktopNav />
                         <SearchBar />
-                        <UserActions cartCount={3} cartTotal="1,520.00" />
+                        <UserActions cartCount={cartCount} cartTotal={cartTotal} />
                     </div>
                 </div>
             </header>

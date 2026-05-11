@@ -1,40 +1,7 @@
-// src/pages/Cart.jsx
 import { useState } from "react";
 import { Link } from 'react-router-dom';
-
-// ── Dummy Cart Data ──────────────────────────────────────────────────────────
-const INITIAL_ITEMS = [
-    {
-        id: 1,
-        name: "MacBook Air M4 Chip 13-Inch (10-Core CPU, 8 Core GPU)",
-        category: "Laptops",
-        price: 1450,
-        qty: 1,
-        image: "https://images.unsplash.com/photo-1517336714731-489689fd1ca8?w=200&q=80",
-        sku: "APL-MBA-M4-13",
-        inStock: true,
-    },
-    {
-        id: 2,
-        name: "Sony ZV-1 20.1MP Vlogging 4K Digital Camera",
-        category: "Cameras",
-        price: 1100,
-        qty: 2,
-        image: "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=200&q=80",
-        sku: "SNY-ZV1-BLK",
-        inStock: true,
-    },
-    {
-        id: 3,
-        name: "Apple AirPods Pro 2nd Gen USB-C Active Noise Cancel",
-        category: "Accessories",
-        price: 249,
-        qty: 1,
-        image: "https://images.unsplash.com/photo-1606841837239-c5a1a4a07af7?w=200&q=80",
-        sku: "APL-APP2-USBC",
-        inStock: true,
-    },
-];
+import ThanhToan from "./ThanhToan";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const VALID_COUPONS = {
     SAVE10: { type: "percent", value: 10, label: "10% off" },
@@ -155,12 +122,12 @@ function CartItem({ item, onQtyChange, onRemove }) {
                             {item.category}
                         </p>
                         <h3 className="text-sm font-bold text-gray-800 line-clamp-2 leading-snug">
-                            {item.name}
+                            {item.name} {item.variant && `- ${item.variant}`} {item.color && `(${item.color})`}
                         </h3>
-                        <p className="text-[11px] text-gray-400 mt-0.5">SKU: {item.sku}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5">Mã SP: {item.cartId}</p>
                     </div>
                     <button
-                        onClick={() => onRemove(item.id)}
+                        onClick={() => onRemove(item.cartId)}
                         className="flex-shrink-0 w-7 h-7 rounded-lg bg-red-50 hover:bg-red-100 text-red-400 hover:text-red-600 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
                     >
                         <TrashIcon />
@@ -171,12 +138,12 @@ function CartItem({ item, onQtyChange, onRemove }) {
                 <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-3">
                         <span className="text-sm text-gray-500 font-medium">
-                            ${item.price.toLocaleString()} ×
+                            ${item.price?.toLocaleString()} ×
                         </span>
-                        <QtyControl value={item.qty} onChange={(v) => onQtyChange(item.id, v)} />
+                        <QtyControl value={item.qty} onChange={(v) => onQtyChange(item.cartId, v)} />
                     </div>
                     <span className="text-base font-black text-gray-900">
-                        ${lineTotal.toLocaleString()}
+                        ${lineTotal?.toLocaleString()}
                     </span>
                 </div>
             </div>
@@ -420,15 +387,7 @@ function OrderSummary({ items }) {
 
 // ── Cart Page ────────────────────────────────────────────────────────────────
 export default function Cart() {
-    const [items, setItems] = useState(INITIAL_ITEMS);
-
-    const handleQtyChange = (id, qty) =>
-        setItems((prev) => prev.map((i) => i.id === id ? { ...i, qty } : i));
-
-    const handleRemove = (id) =>
-        setItems((prev) => prev.filter((i) => i.id !== id));
-
-    const handleClearAll = () => setItems([]);
+    const { cart: items, updateCartQty, removeFromCart, clearCart } = useAuth();
 
     return (
         <main className="min-h-screen bg-gray-50">
@@ -450,7 +409,7 @@ export default function Cart() {
                     </div>
                     {items.length > 0 && (
                         <button
-                            onClick={handleClearAll}
+                            onClick={clearCart}
                             className="text-xs text-red-400 hover:text-red-600 font-bold flex items-center gap-1.5 transition-colors"
                         >
                             <TrashIcon /> Clear All
@@ -477,13 +436,13 @@ export default function Cart() {
                             </div>
 
                             {/* Items */}
-                            <div className="divide-y divide-gray-50">
+                            <div className="divide-y divide-gray-50 max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
                                 {items.map((item) => (
                                     <CartItem
-                                        key={item.id}
+                                        key={item.cartId}
                                         item={item}
-                                        onQtyChange={handleQtyChange}
-                                        onRemove={handleRemove}
+                                        onQtyChange={updateCartQty}
+                                        onRemove={removeFromCart}
                                     />
                                 ))}
                             </div>

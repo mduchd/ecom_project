@@ -62,12 +62,16 @@ export default function ProductCard({ product }) {
     // Kiểm tra còn hàng dựa vào stockQuantity
     const isAvailable = product.stockQuantity > 0;
 
+    const handleToggleWish = (e) => {
+        e.preventDefault();
+        setWished(!wished);
+    };
     return (
         <Link to={`/product/${product.id}`} className="group relative bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col">
 
             {/* Wishlist button */}
             <button
-                onClick={(e) => { e.preventDefault(); setWished(!wished); }}
+                onClick={handleToggleWish}
                 className="absolute top-2.5 right-2.5 z-20 w-7 h-7 rounded-full bg-white shadow-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 hover:scale-110"
             >
                 <HeartIcon filled={wished} />
