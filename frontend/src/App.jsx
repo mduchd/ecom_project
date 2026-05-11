@@ -15,6 +15,9 @@ import Footer from './components/Footer';
 import AdminProductForm from './pages/AdminProductForm';
 import ChiTietSP from './pages/ChiTietSP';
 import AdminDashboard from './pages/AdminDashboard';
+import AboutUs from './pages/AboutUs'
+import FAQ from './pages/FAQ'
+import Contact from './pages/Contact'
 
 function App() {
   return (
@@ -35,6 +38,9 @@ function App() {
           <Route path="/admin/products/new" element={<AdminProductForm />} />
           <Route path="/admin/products/edit/:id" element={<AdminProductForm />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
+          <Route path="/about" element={<AboutUs />} />
+          <Route path="/faq" element={<FAQ />} />
+          <Route path="/contact" element={<Contact />} />
         </Routes>
       </div>
       <Footer />
