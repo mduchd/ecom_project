@@ -59,6 +59,7 @@ public class WebSecurityConfig {
                     .requestMatchers("/api/ai/**").permitAll()
                         .requestMatchers("/h2-console/**").permitAll()
                     .requestMatchers("/api/products/**").permitAll()
+                    .requestMatchers("/api/orders/**").permitAll()
                                 .anyRequest().authenticated()
                 );
 
