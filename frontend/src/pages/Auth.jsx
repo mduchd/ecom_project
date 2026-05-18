@@ -1,6 +1,6 @@
-// src/pages/Auth.jsx
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useGoogleLogin } from '@react-oauth/google';
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 const EyeIcon = ({ open }) => (
@@ -132,6 +132,13 @@ function SignInForm({ onSwitch }) {
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
+    const googleLogin = useGoogleLogin({
+        onSuccess: tokenResponse => {
+            console.log("Google Login Success (Token):", tokenResponse);
+        },
+        onError: () => console.log('Login Failed'),
+    });
+
     const validate = () => {
         const e = {};
         if (!email) e.email = "Email is required.";
@@ -234,6 +241,7 @@ function SignInForm({ onSwitch }) {
             {/* Google */}
             <button
                 type="button"
+                onClick={() => googleLogin()}
                 className="w-full py-2.5 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-sm font-bold text-gray-700 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98]"
             >
                 <GoogleIcon /> Sign in with Google
@@ -264,6 +272,13 @@ function SignUpForm({ onSwitch }) {
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+
+    const googleLogin = useGoogleLogin({
+        onSuccess: tokenResponse => {
+            console.log("Google Login Success (Token):", tokenResponse);
+        },
+        onError: () => console.log('Login Failed'),
+    });
 
     const validate = () => {
         const e = {};
@@ -389,6 +404,7 @@ function SignUpForm({ onSwitch }) {
             {/* Google */}
             <button
                 type="button"
+                onClick={() => googleLogin()}
                 className="w-full py-2.5 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-sm font-bold text-gray-700 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98]"
             >
                 <GoogleIcon /> Sign up with Google

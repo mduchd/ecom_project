@@ -1,5 +1,6 @@
 package com.ecommerce.backend.config;
 
+import com.ecommerce.backend.entity.ERole;
 import com.ecommerce.backend.entity.Product;
 import com.ecommerce.backend.entity.Role;
 import com.ecommerce.backend.repository.ProductRepository;
@@ -18,11 +19,11 @@ public class DataInitializer {
     CommandLineRunner initDatabase(RoleRepository roleRepository, ProductRepository productRepository) {
         return args -> {
             // Init Roles
-            if (roleRepository.findByName("ROLE_USER").isEmpty()) {
-                roleRepository.save(new Role(null, "ROLE_USER"));
+            if (roleRepository.findByName(ERole.ROLE_USER).isEmpty()) {
+                roleRepository.save(new Role(null, ERole.ROLE_USER));
             }
-            if (roleRepository.findByName("ROLE_ADMIN").isEmpty()) {
-                roleRepository.save(new Role(null, "ROLE_ADMIN"));
+            if (roleRepository.findByName(ERole.ROLE_ADMIN).isEmpty()) {
+                roleRepository.save(new Role(null, ERole.ROLE_ADMIN));
             }
 
             // Init Products (chỉ seed nếu DB chưa có sản phẩm)

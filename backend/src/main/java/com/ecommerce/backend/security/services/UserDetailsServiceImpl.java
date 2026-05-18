@@ -1,4 +1,4 @@
-package com.ecommerce.backend.security;
+package com.ecommerce.backend.security.services;
 
 import com.ecommerce.backend.entity.User;
 import com.ecommerce.backend.repository.UserRepository;

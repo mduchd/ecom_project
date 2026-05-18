@@ -19,13 +19,18 @@ public class User {
     @Column(unique = true, nullable = false)
     private String username;
 
-    @Column(nullable = false)
-    private String password;
-
     @Column(unique = true, nullable = false)
     private String email;
 
     private String fullName;
+
+    private String avatar;
+
+    @Column(nullable = true)
+    private String password;
+
+    private String provider; // "local" or "google"
+    private String providerId;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

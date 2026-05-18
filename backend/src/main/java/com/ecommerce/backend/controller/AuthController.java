@@ -1,12 +1,15 @@
 package com.ecommerce.backend.controller;
 
-import com.ecommerce.backend.dto.*;
+import com.ecommerce.backend.entity.ERole;
 import com.ecommerce.backend.entity.Role;
 import com.ecommerce.backend.entity.User;
+import com.ecommerce.backend.payload.request.LoginRequest;
+import com.ecommerce.backend.payload.request.TokenRequest;
+import com.ecommerce.backend.payload.response.JwtResponse;
 import com.ecommerce.backend.repository.RoleRepository;
 import com.ecommerce.backend.repository.UserRepository;
 import com.ecommerce.backend.security.JwtUtils;
-import com.ecommerce.backend.security.UserDetailsImpl;
+import com.ecommerce.backend.security.services.UserDetailsImpl;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,9 +19,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -61,50 +66,58 @@ public class AuthController {
                 roles));
     }
 
-    @PostMapping("/signup")
-    public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        if (userRepository.existsByUsername(signUpRequest.getUsername())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
-        }
+    @PostMapping("/google")
+    public ResponseEntity<?> googleLogin(@RequestBody TokenRequest tokenRequest) {
+        // Trong thực tế, bro nên dùng thư viện google-api-client để verify id_token
+        // Ở đây mình demo flow xử lý logic User
+        
+        // Giả sử mình đã có thông tin từ Google sau khi verify
+        // Mình sẽ gọi API Google để lấy info từ access_token hoặc id_token
+        final String uri = "https://oauth2.googleapis.com/tokeninfo?id_token=" + tokenRequest.getToken();
+        RestTemplate restTemplate = new RestTemplate();
+        Map<String, Object> payload = restTemplate.getForObject(uri, Map.class);
 
-        if (userRepository.existsByEmail(signUpRequest.getEmail())) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
-        }
+        String email = (String) payload.get("email");
+        String name = (String) payload.get("name");
+        String googleId = (String) payload.get("sub");
+        String picture = (String) payload.get("picture");
 
-        // Create new user's account
-        User user = User.builder()
-                .username(signUpRequest.getUsername())
-                .email(signUpRequest.getEmail())
-                .password(encoder.encode(signUpRequest.getPassword()))
-                .fullName(signUpRequest.getFullName())
-                .build();
-
-        Set<String> strRoles = signUpRequest.getRole();
-        Set<Role> roles = new HashSet<>();
-
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName("ROLE_USER")
+        User user;
+        if (userRepository.existsByEmail(email)) {
+            user = userRepository.findByEmail(email).get();
+        } else {
+            user = new User();
+            user.setEmail(email);
+            user.setUsername(email); // Dùng email làm username
+            user.setFullName(name);
+            user.setAvatar(picture);
+            user.setProvider("google");
+            user.setProviderId(googleId);
+            
+            Set<Role> roles = new HashSet<>();
+            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
             roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName("ROLE_ADMIN")
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName("ROLE_USER")
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
-                }
-            });
+            user.setRoles(roles);
+            userRepository.save(user);
         }
 
-        user.setRoles(roles);
-        userRepository.save(user);
+        // Tạo Authentication giả lập cho Spring Security
+        UserDetailsImpl userDetails = UserDetailsImpl.build(user);
+        Authentication authentication = new UsernamePasswordAuthenticationToken(
+                userDetails, null, userDetails.getAuthorities());
+        
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwt = jwtUtils.generateJwtToken(authentication);
 
-        return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
+        List<String> roles = userDetails.getAuthorities().stream()
+                .map(item -> item.getAuthority())
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(new JwtResponse(jwt,
+                userDetails.getId(),
+                userDetails.getUsername(),
+                userDetails.getEmail(),
+                roles));
     }
 }
