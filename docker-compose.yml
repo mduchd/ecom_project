@@ -26,5 +26,18 @@ services:
       - SPRING_DATASOURCE_PASSWORD=root
     restart: on-failure
 
+  frontend:
+    build: ./frontend
+    container_name: snapcart-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: always
+
 volumes:
   mysql_data:
+
