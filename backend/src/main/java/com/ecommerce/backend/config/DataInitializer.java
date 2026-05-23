@@ -3,20 +3,25 @@ package com.ecommerce.backend.config;
 import com.ecommerce.backend.entity.ERole;
 import com.ecommerce.backend.entity.Product;
 import com.ecommerce.backend.entity.Role;
+import com.ecommerce.backend.entity.User;
 import com.ecommerce.backend.repository.ProductRepository;
 import com.ecommerce.backend.repository.RoleRepository;
+import com.ecommerce.backend.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.math.BigDecimal;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Configuration
 public class DataInitializer {
 
     @Bean
-    CommandLineRunner initDatabase(RoleRepository roleRepository, ProductRepository productRepository) {
+    CommandLineRunner initDatabase(RoleRepository roleRepository, ProductRepository productRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
         return args -> {
             // Init Roles
             if (roleRepository.findByName(ERole.ROLE_USER).isEmpty()) {
@@ -24,6 +29,40 @@ public class DataInitializer {
             }
             if (roleRepository.findByName(ERole.ROLE_ADMIN).isEmpty()) {
                 roleRepository.save(new Role(null, ERole.ROLE_ADMIN));
+            }
+
+            if (!userRepository.existsByUsername("customer@example.com") && !userRepository.existsByEmail("customer@example.com")) {
+                Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                Set<Role> roles = new HashSet<>();
+                roles.add(userRole);
+
+                User customer = User.builder()
+                        .username("customer@example.com")
+                        .email("customer@example.com")
+                        .fullName("Demo Customer")
+                        .password(passwordEncoder.encode("password123"))
+                        .provider("local")
+                        .roles(roles)
+                        .build();
+                userRepository.save(customer);
+            }
+
+            if (!userRepository.existsByUsername("admin@luxe.com") && !userRepository.existsByEmail("admin@luxe.com")) {
+                Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
+                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                Set<Role> roles = new HashSet<>();
+                roles.add(adminRole);
+
+                User admin = User.builder()
+                        .username("admin@luxe.com")
+                        .email("admin@luxe.com")
+                        .fullName("Administrator")
+                        .password(passwordEncoder.encode("admin123"))
+                        .provider("local")
+                        .roles(roles)
+                        .build();
+                userRepository.save(admin);
             }
 
             // Init Products (chỉ seed nếu DB chưa có sản phẩm)
