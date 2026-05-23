@@ -1,6 +1,8 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useGoogleLogin } from '@react-oauth/google';
+import { toast } from "../components/Toast.jsx";
+import api from "../services/productService";
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 const EyeIcon = ({ open }) => (
@@ -124,6 +126,7 @@ function PasswordStrength({ password }) {
 
 // ── Sign In Form ─────────────────────────────────────────────────────────────
 function SignInForm({ onSwitch }) {
+    const navigate = useNavigate();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPwd, setShowPwd] = useState(false);
@@ -148,13 +151,36 @@ function SignInForm({ onSwitch }) {
         return e;
     };
 
-    const handleSubmit = (ev) => {
+    const handleSubmit = async (ev) => {
         ev.preventDefault();
         const e = validate();
         if (Object.keys(e).length) { setErrors(e); return; }
         setErrors({});
         setLoading(true);
-        setTimeout(() => { setLoading(false); setSuccess(true); }, 1200);
+        try {
+            const response = await api.post("/auth/signin", {
+                username: email,
+                password,
+            });
+            const authUser = {
+                id: response.data.id,
+                name: response.data.username,
+                email: response.data.email,
+                role: response.data.roles?.includes("ROLE_ADMIN") ? "admin" : "user",
+                roles: response.data.roles || [],
+                favorites: [],
+                orders: [],
+            };
+            localStorage.setItem("snapcart_token", response.data.token);
+            localStorage.setItem("snapcart_user", JSON.stringify(authUser));
+            setSuccess(true);
+            toast.success("Đăng nhập thành công!");
+            setTimeout(() => navigate("/"), 600);
+        } catch (error) {
+            toast.error(error.response?.data?.message || "Đăng nhập thất bại.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (

@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from 'react-router-dom';
-import ThanhToan from "./ThanhToan";
 import { useAuth } from "../context/AuthContext.jsx";
+import { calculateDiscount } from "../utils/orderPricing.js";
 
 const VALID_COUPONS = {
     SAVE10: { type: "percent", value: 10, label: "10% off" },
@@ -10,6 +10,20 @@ const VALID_COUPONS = {
 };
 
 const FREE_SHIPPING_THRESHOLD = 399;
+const SAVED_COUPON_KEY = "snapcart_coupon";
+
+function readSavedCoupon() {
+    try {
+        const saved = localStorage.getItem(SAVED_COUPON_KEY);
+        if (!saved) return null;
+        const parsed = JSON.parse(saved);
+        if (!parsed?.code || !VALID_COUPONS[parsed.code]) return null;
+        return { code: parsed.code, ...VALID_COUPONS[parsed.code] };
+    } catch {
+        localStorage.removeItem(SAVED_COUPON_KEY);
+        return null;
+    }
+}
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 const TrashIcon = () => (
@@ -253,22 +267,28 @@ function CouponInput({ applied, onApply, onRemove }) {
 
 // ── Order Summary ────────────────────────────────────────────────────────────
 function OrderSummary({ items }) {
-    const [coupon, setCoupon] = useState(null);
+    const [coupon, setCoupon] = useState(() => readSavedCoupon());
     const [checkedOut, setCheckedOut] = useState(false);
 
     const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
     const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : 29;
 
-    const discount = coupon
-        ? coupon.type === "percent"
-            ? Math.round(subtotal * coupon.value / 100)
-            : coupon.value
-        : 0;
+    const discount = coupon ? calculateDiscount(subtotal, coupon.code) : 0;
 
     const total = subtotal + shipping - discount;
 
     const shippingProgress = Math.min((subtotal / FREE_SHIPPING_THRESHOLD) * 100, 100);
     const remaining = FREE_SHIPPING_THRESHOLD - subtotal;
+
+    const applyCoupon = (nextCoupon) => {
+        setCoupon(nextCoupon);
+        localStorage.setItem(SAVED_COUPON_KEY, JSON.stringify({ code: nextCoupon.code }));
+    };
+
+    const removeCoupon = () => {
+        setCoupon(null);
+        localStorage.removeItem(SAVED_COUPON_KEY);
+    };
 
     return (
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden sticky top-24">
@@ -336,8 +356,8 @@ function OrderSummary({ items }) {
                     </p>
                     <CouponInput
                         applied={coupon}
-                        onApply={setCoupon}
-                        onRemove={() => setCoupon(null)}
+                        onApply={applyCoupon}
+                        onRemove={removeCoupon}
                     />
                 </div>
 
@@ -359,7 +379,9 @@ function OrderSummary({ items }) {
                         <CheckCircleIcon /> Order Placed!
                     </div>
                 ) : (
-                    < Link to="/checkout"
+                    <Link
+                        to="/checkout"
+                        state={{ couponCode: coupon?.code || "" }}
                         className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-blue-100 transition-all duration-150"
                     >
                         Proceed to Checkout <ChevronRight />

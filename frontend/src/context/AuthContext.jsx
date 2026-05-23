@@ -124,6 +124,7 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("snapcart_user");
+    localStorage.removeItem("snapcart_token");
     toast.success("Đã đăng xuất");
   };
 
@@ -167,6 +168,7 @@ export function AuthProvider({ children }) {
   const clearCart = (silent = false) => {
     setCart([]);
     localStorage.removeItem("snapcart_cart");
+    localStorage.removeItem("snapcart_coupon");
     if (!silent) toast.success("Đã dọn dẹp giỏ hàng");
   };
 

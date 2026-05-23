@@ -26,6 +26,15 @@ public class User {
 
     private String avatar;
 
+    private String phoneNumber;
+
+    @Column(columnDefinition = "TEXT")
+    private String address;
+
+    private String city;
+
+    private String postalCode;
+
     @Column(nullable = true)
     private String password;
 
