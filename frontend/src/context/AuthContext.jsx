@@ -140,6 +140,7 @@ export function AuthProvider({ children }) {
   const clearCart = (silent = false) => {
     setCart([]);
     localStorage.removeItem("snapcart_cart");
+    localStorage.removeItem("snapcart_coupon");
     if (!silent) toast.success("Đã dọn dẹp giỏ hàng");
   };
 
