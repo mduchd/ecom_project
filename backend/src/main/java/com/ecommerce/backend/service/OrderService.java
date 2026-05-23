@@ -15,6 +15,9 @@ import java.util.concurrent.ThreadLocalRandom;
 public class OrderService {
 
     private static final String STATUS_PENDING = "Chờ duyệt";
+    private static final String STATUS_SHIPPING = "Đang giao";
+    private static final String STATUS_DELIVERED = "Đã giao";
+    private static final String STATUS_CANCELED = "Đã hủy";
     private static final DateTimeFormatter CODE_TIME = DateTimeFormatter.ofPattern("yyMMddHHmm", Locale.ROOT);
 
     private final OrderRepository orderRepository;
@@ -48,9 +51,31 @@ public class OrderService {
         return orderRepository.save(existing);
     }
 
+    public Order markPaidByOrderCode(String orderCode) {
+        Order existing = orderRepository.findByOrderCode(orderCode)
+                .orElseThrow(() -> new RuntimeException("Order not found with code: " + orderCode));
+
+        String currentStatus = existing.getStatus();
+        if (isSameStatus(currentStatus, STATUS_DELIVERED)
+                || isSameStatus(currentStatus, STATUS_SHIPPING)
+                || isSameStatus(currentStatus, STATUS_CANCELED)) {
+            return existing;
+        }
+
+        existing.setStatus(STATUS_SHIPPING);
+        return orderRepository.save(existing);
+    }
+
     private String generateOrderCode() {
         String timePart = LocalDateTime.now().format(CODE_TIME);
         int randomPart = ThreadLocalRandom.current().nextInt(100, 1000);
         return "SPC" + timePart + randomPart;
+    }
+
+    private boolean isSameStatus(String left, String right) {
+        if (left == null || right == null) {
+            return false;
+        }
+        return left.trim().equalsIgnoreCase(right.trim());
     }
 }

@@ -11,6 +11,7 @@ export default function ThanhToan() {
   const navigate = useNavigate();
   const [selectedMethod, setSelectedMethod] = useState("momo");
   const [showQR, setShowQR] = useState(false);
+  const [pendingPaymentOrderCode, setPendingPaymentOrderCode] = useState("");
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
   
@@ -19,7 +20,8 @@ export default function ThanhToan() {
   const shipping = subtotal >= 399000 || subtotal === 0 ? 0 : 30000;
   const tax = 0;
   const grandTotal = subtotal + shipping + tax;
-  const qrUrl = `https://qr.sepay.vn/img?bank=Vietcombank&acc=9339582134&template=compact&amount=${Math.round(grandTotal)}&des=ThanhToanCart`;
+  const transferContent = pendingPaymentOrderCode || "ThanhToanCart";
+  const qrUrl = `https://qr.sepay.vn/img?bank=Vietcombank&acc=9339582134&template=compact&amount=${Math.round(grandTotal)}&des=${encodeURIComponent(transferContent)}`;
 
   const handlePlaceOrder = () => {
     if (cart.length === 0) {
@@ -66,6 +68,7 @@ export default function ThanhToan() {
       });
 
       if (selectedMethod === "momo" || selectedMethod === "bank") {
+        setPendingPaymentOrderCode(savedOrder?.orderCode || "ThanhToanCart");
         setShowQR(true);
       } else {
         toast.success("Dat hang thanh cong! Don hang se duoc thanh toan khi nhan hang.");
@@ -254,7 +257,10 @@ export default function ThanhToan() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-fadeIn relative">
              <button 
-               onClick={() => setShowQR(false)}
+               onClick={() => {
+                 setShowQR(false);
+                 setPendingPaymentOrderCode("");
+               }}
                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 bg-gray-100 hover:bg-red-50 p-2 rounded-full transition-colors"
              >
                <FaTimes />
@@ -276,6 +282,7 @@ export default function ThanhToan() {
                 <button 
                   onClick={() => {
                     setShowQR(false);
+                    setPendingPaymentOrderCode("");
                     toast.success("Đặt hàng thành công! Cảm ơn bạn đã mua hàng.");
                     clearCart(true);
                     setTimeout(() => navigate("/"), 2000);
@@ -285,7 +292,10 @@ export default function ThanhToan() {
                   Đã hoàn tất thanh toán
                 </button>
                 <button 
-                  onClick={() => setShowQR(false)}
+                  onClick={() => {
+                    setShowQR(false);
+                    setPendingPaymentOrderCode("");
+                  }}
                   className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors"
                 >
                   Hủy thanh toán
@@ -372,4 +382,3 @@ export default function ThanhToan() {
     </div>
   );
 }
-
