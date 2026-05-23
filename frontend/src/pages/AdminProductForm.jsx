@@ -2,18 +2,11 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getProductById, createProduct, updateProduct } from "../services/productService";
+import { FaArrowLeft, FaSave, FaSpinner } from "react-icons/fa";
 
 // ── Icons ────────────────────────────────────────────────────────────────────
-const ArrowLeftIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-    </svg>
-);
-const SaveIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-    </svg>
-);
+const ArrowLeftIcon = () => <FaArrowLeft className="w-4 h-4" />;
+const SaveIcon = () => <FaSave className="w-4 h-4" />;
 
 const CATEGORIES = ["Laptop", "Điện thoại", "Máy tính bảng", "Phụ kiện", "Âm thanh"];
 
@@ -223,10 +216,7 @@ export default function AdminProductForm() {
                         >
                             {saving ? (
                                 <>
-                                    <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                                    </svg>
+                                    <FaSpinner className="w-4 h-4 animate-spin" />
                                     Saving...
                                 </>
                             ) : (

@@ -2,54 +2,18 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getProductById } from "../services/productService";
+import { FaHome, FaShoppingCart, FaHeart, FaRegHeart, FaCheck, FaStar, FaArrowLeft, FaSync, FaShieldAlt, FaTruck, FaExclamationTriangle } from "react-icons/fa";
 
 // ── Icons ────────────────────────────────────────────────────────────────────
-const HomeIcon = () => (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m-4 0h4" />
-    </svg>
-);
-const CartIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-    </svg>
-);
-const HeartIcon = ({ filled }) => (
-    <svg className={`w-5 h-5 transition-colors ${filled ? "text-red-500" : "text-gray-500"}`}
-        fill={filled ? "currentColor" : "none"} stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-    </svg>
-);
-const CheckIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-    </svg>
-);
-const StarIcon = ({ filled }) => (
-    <svg className={`w-4 h-4 ${filled ? "text-yellow-400" : "text-gray-200"}`} fill="currentColor" viewBox="0 0 20 20">
-        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-    </svg>
-);
-const ArrowLeftIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-    </svg>
-);
-const RefreshIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-    </svg>
-);
-const ShieldIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-    </svg>
-);
-const TruckIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
-    </svg>
-);
+const HomeIcon = () => <FaHome className="w-3.5 h-3.5" />;
+const CartIcon = () => <FaShoppingCart className="w-5 h-5" />;
+const HeartIcon = ({ filled }) => filled ? <FaHeart className="w-5 h-5 text-red-500 transition-colors" /> : <FaRegHeart className="w-5 h-5 text-gray-500 transition-colors" />;
+const CheckIcon = () => <FaCheck className="w-4 h-4" />;
+const StarIcon = ({ filled }) => <FaStar className={`w-4 h-4 ${filled ? "text-yellow-400" : "text-gray-200"}`} />;
+const ArrowLeftIcon = () => <FaArrowLeft className="w-4 h-4" />;
+const RefreshIcon = () => <FaSync className="w-4 h-4" />;
+const ShieldIcon = () => <FaShieldAlt className="w-5 h-5" />;
+const TruckIcon = () => <FaTruck className="w-5 h-5" />;
 
 // ── Breadcrumb ───────────────────────────────────────────────────────────────
 function Breadcrumb({ productName, category }) {
@@ -247,9 +211,7 @@ function ErrorState({ message, onRetry }) {
     return (
         <div className="flex flex-col items-center justify-center py-24 text-center">
             <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+                <FaExclamationTriangle className="w-8 h-8 text-red-400" />
             </div>
             <h3 className="text-base font-black text-gray-700 mb-1">Product not found</h3>
             <p className="text-sm text-gray-400 mb-6 max-w-xs">{message}</p>

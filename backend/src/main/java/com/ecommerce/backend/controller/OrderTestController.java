@@ -43,4 +43,16 @@ public class OrderTestController {
 
         return ResponseEntity.ok(Map.of("message", "Đã gửi Email hóa đơn đặt hàng mẫu thành công tới " + email + "!"));
     }
+
+    @PostMapping("/confirm")
+    public ResponseEntity<?> confirmOrder(@RequestBody com.ecommerce.backend.dto.OrderConfirmationRequest request) {
+        emailService.sendOrderConfirmationEmail(
+                request.getEmail(),
+                request.getFullName(),
+                request.getOrderId(),
+                request.getTotalAmount(),
+                request.getItems()
+        );
+        return ResponseEntity.ok(Map.of("message", "Order confirmation email sent successfully!"));
+    }
 }

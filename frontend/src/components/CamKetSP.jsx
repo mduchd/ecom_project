@@ -1,14 +1,13 @@
 import { MdMobileFriendly } from "react-icons/md";
 import { BiCheckShield } from "react-icons/bi";
-import { FaMicrochip } from "react-icons/fa";
-import { FaTags } from "react-icons/fa";
+import { FaMicrochip, FaTags } from "react-icons/fa";
 
 export default function Camket(){
     const camket = [
         {ic: MdMobileFriendly, vl: "Mới, đầy đủ phụ kiện từ NSX"},
         {ic: BiCheckShield, vl: "Bảo hành 12 tháng chính hãng 1 đổi 1 trong 12 ngày nếu có lỗi phần cứng từ NSX"},
         {ic: FaMicrochip, vl: "Tai nghe\nTài liệu hướng dẫn\nCáp sạc "},
-        {ic: FaTags, vl: "Giá sản phẩn đã bao gồm thuế VAT"},
+        {ic: FaTags, vl: "Giá sản phẩm đã bao gồm thuế VAT"},
     ]
     return(
         <div className="w-full  p-1 ">

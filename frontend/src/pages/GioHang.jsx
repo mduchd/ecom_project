@@ -3,6 +3,7 @@ import { FaTrash } from "react-icons/fa";
 import {useState} from "react";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { toast } from "../components/Toast.jsx";
 
 export default function GioHang(spMoiThem) {
   const navigate = useNavigate();
@@ -42,7 +43,7 @@ export default function GioHang(spMoiThem) {
 
   const thanhToan = () =>{
     if(listcarts.length === 0){
-      alert("Giỏ hàng đang trống, vui lòng thêm sản phẩm");
+      toast.warning("Giỏ hàng đang trống, vui lòng thêm sản phẩm!");
       return;
     }
     navigate("/checkout")

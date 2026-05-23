@@ -2,49 +2,17 @@
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import { getProducts, deleteProduct } from "../services/productService";
+import { FaPlus, FaEdit, FaTrash, FaSearch, FaSync, FaSort, FaHome, FaEye, FaSpinner, FaCheck, FaTimes, FaExclamationTriangle, FaInbox, FaBoxOpen, FaCheckCircle, FaTimesCircle, FaTag } from "react-icons/fa";
 
 // ── Icons ────────────────────────────────────────────────────────────────────
-const PlusIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-    </svg>
-);
-const EditIcon = () => (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-    </svg>
-);
-const TrashIcon = () => (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-    </svg>
-);
-const SearchIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8" /><path strokeLinecap="round" d="M21 21l-4.35-4.35" />
-    </svg>
-);
-const RefreshIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-    </svg>
-);
-const ChevronUpDownIcon = () => (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M8 9l4-4 4 4m0 6l-4 4-4-4" />
-    </svg>
-);
-const HomeIcon = () => (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m-4 0h4" />
-    </svg>
-);
-const EyeIcon = () => (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-    </svg>
-);
+const PlusIcon = () => <FaPlus className="w-4 h-4" />;
+const EditIcon = () => <FaEdit className="w-3.5 h-3.5" />;
+const TrashIcon = () => <FaTrash className="w-3.5 h-3.5" />;
+const SearchIcon = () => <FaSearch className="w-4 h-4" />;
+const RefreshIcon = () => <FaSync className="w-4 h-4" />;
+const ChevronUpDownIcon = () => <FaSort className="w-3.5 h-3.5" />;
+const HomeIcon = () => <FaHome className="w-3.5 h-3.5" />;
+const EyeIcon = () => <FaEye className="w-3.5 h-3.5" />;
 
 // ── Stat Card ────────────────────────────────────────────────────────────────
 function StatCard({ label, value, icon, color, bg }) {
@@ -113,10 +81,7 @@ function DeleteModal({ product, onConfirm, onCancel, loading }) {
                         className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white text-sm font-bold transition-colors shadow-md shadow-red-100 flex items-center justify-center gap-2"
                     >
                         {loading ? (
-                            <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                            </svg>
+                            <FaSpinner className="w-4 h-4 animate-spin" />
                         ) : <TrashIcon />}
                         {loading ? "Deleting..." : "Yes, Delete"}
                     </button>
@@ -134,13 +99,9 @@ function Toast({ toast }) {
       ${toast.type === "success" ? "bg-emerald-500" : "bg-red-500"}`}
         >
             {toast.type === "success" ? (
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                </svg>
+                <FaCheck className="w-4 h-4 flex-shrink-0" />
             ) : (
-                <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <FaTimes className="w-4 h-4 flex-shrink-0" />
             )}
             {toast.message}
         </div>
@@ -298,10 +259,10 @@ export default function AdminProducts() {
                     {/* ── Stat cards ── */}
                     {!loading && !error && (
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <StatCard label="Total Products" value={products.length} icon="📦" color="text-blue-600" bg="bg-blue-50" />
-                            <StatCard label="In Stock" value={inStockCount} icon="✅" color="text-emerald-600" bg="bg-emerald-50" />
-                            <StatCard label="Out of Stock" value={outStockCount} icon="❌" color="text-red-500" bg="bg-red-50" />
-                            <StatCard label="Categories" value={categoryCount} icon="🏷️" color="text-purple-600" bg="bg-purple-50" />
+                            <StatCard label="Total Products" value={products.length} icon={<FaBoxOpen />} color="text-blue-600" bg="bg-blue-50" />
+                            <StatCard label="In Stock" value={inStockCount} icon={<FaCheckCircle />} color="text-emerald-600" bg="bg-emerald-50" />
+                            <StatCard label="Out of Stock" value={outStockCount} icon={<FaTimesCircle />} color="text-red-500" bg="bg-red-50" />
+                            <StatCard label="Categories" value={categoryCount} icon={<FaTag />} color="text-purple-600" bg="bg-purple-50" />
                         </div>
                     )}
 
@@ -361,12 +322,10 @@ export default function AdminProducts() {
                         </div>
 
                         {/* ── Error state ── */}
-                        {error && (
+                         {error && (
                             <div className="flex flex-col items-center justify-center py-20 text-center px-4">
                                 <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                                    <svg className="w-7 h-7 text-red-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                    </svg>
+                                    <FaExclamationTriangle className="w-7 h-7 text-red-400" />
                                 </div>
                                 <p className="text-sm font-black text-gray-700 mb-1">Failed to load products</p>
                                 <p className="text-xs text-gray-400 mb-5 max-w-sm">{error}</p>
@@ -404,9 +363,7 @@ export default function AdminProducts() {
                                             <tr>
                                                 <td colSpan={7}>
                                                     <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-                                                        <svg className="w-12 h-12 opacity-20 mb-3" fill="none" stroke="currentColor" strokeWidth={1.2} viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0H4" />
-                                                        </svg>
+                                                        <FaInbox className="w-12 h-12 opacity-20 mb-3" />
                                                         <p className="font-bold text-gray-500 mb-1">No products found</p>
                                                         <p className="text-xs">Try a different search or category filter.</p>
                                                     </div>

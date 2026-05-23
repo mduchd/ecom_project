@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
+import { FaCheckCircle, FaExclamationTriangle, FaTimesCircle } from 'react-icons/fa';
 
 export const toast = {
   success: (msg) => window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'success', msg } })),
   error: (msg) => window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'error', msg } })),
+  warning: (msg) => window.dispatchEvent(new CustomEvent('toast', { detail: { type: 'warning', msg } })),
 };
 
 export function Toaster() {
@@ -26,14 +28,16 @@ export function Toaster() {
           animate-toast-in transition-all
           ${m.type === 'success' 
             ? 'bg-blue-600 border-blue-400 text-white' 
-            : 'bg-red-600 border-red-400 text-white'}
+            : m.type === 'warning'
+              ? 'bg-amber-500 border-amber-400 text-white'
+              : 'bg-red-600 border-red-400 text-white'}
         `}>
-          <div className="flex-shrink-0 bg-white/20 w-10 h-10 rounded-xl flex items-center justify-center text-xl shadow-inner">
-             {m.type === 'success' ? '🎉' : '❌'}
+          <div className="flex-shrink-0 bg-white/20 w-10 h-10 rounded-xl flex items-center justify-center shadow-inner">
+             {m.type === 'success' ? <FaCheckCircle className="text-xl" /> : m.type === 'warning' ? <FaExclamationTriangle className="text-xl" /> : <FaTimesCircle className="text-xl" />}
           </div>
           <div className="flex flex-col">
             <span className="font-black text-[11px] uppercase tracking-[0.15em] opacity-70 mb-0.5">
-               {m.type === 'success' ? 'Notification' : 'Warning'}
+               {m.type === 'success' ? 'Notification' : m.type === 'warning' ? 'Attention' : 'Warning'}
             </span>
             <span className="text-sm font-bold leading-tight">{m.msg}</span>
           </div>

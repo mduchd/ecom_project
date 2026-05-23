@@ -1,30 +1,13 @@
 import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 
+import { FaRobot, FaPaperPlane, FaTimes, FaStar } from "react-icons/fa";
+
 // ── Icons ───────────────────────────────────────────────────────────────────
-const RobotIcon = () => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h.01M15 9h.01M10 15h4" />
-    </svg>
-);
-
-const SendIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-    </svg>
-);
-
-const CloseIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-    </svg>
-);
-
-const SparklesIcon = () => (
-    <svg className="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-    </svg>
-);
+const RobotIcon = () => <FaRobot className="w-6 h-6" />;
+const SendIcon = () => <FaPaperPlane className="w-5 h-5" />;
+const CloseIcon = () => <FaTimes className="w-5 h-5" />;
+const SparklesIcon = () => <FaStar className="w-4 h-4 text-yellow-400" />;
 
 // ── Main Component ──────────────────────────────────────────────────────────
 export default function AIChatBot() {

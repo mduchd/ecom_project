@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link } from 'react-router-dom';
 import ThanhToan from "./ThanhToan";
 import { useAuth } from "../context/AuthContext.jsx";
+import { FaTrash, FaTag, FaShoppingCart, FaLock, FaChevronRight, FaHome, FaCheckCircle, FaTimes, FaGift, FaSpinner, FaCheck, FaArrowLeft, FaTruck } from "react-icons/fa";
 
 const VALID_COUPONS = {
     SAVE10: { type: "percent", value: 10, label: "10% off" },
@@ -12,51 +13,15 @@ const VALID_COUPONS = {
 const FREE_SHIPPING_THRESHOLD = 399;
 
 // ── Icons ────────────────────────────────────────────────────────────────────
-const TrashIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-    </svg>
-);
-const TagIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
-    </svg>
-);
-const CartIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-    </svg>
-);
-const LockIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-    </svg>
-);
-const ChevronRight = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-    </svg>
-);
-const HomeIcon = () => (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m-4 0h4" />
-    </svg>
-);
-const CheckCircleIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-    </svg>
-);
-const XIcon = () => (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-    </svg>
-);
-const GiftIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v13m0-13V6a4 4 0 00-4-4 2 2 0 000 4h4zm0 0V6a4 4 0 014-4 2 2 0 010 4h-4zm-7 4h14M5 12a2 2 0 00-2 2v5a2 2 0 002 2h14a2 2 0 002-2v-5a2 2 0 00-2-2H5z" />
-    </svg>
-);
+const TrashIcon = () => <FaTrash className="w-4 h-4" />;
+const TagIcon = () => <FaTag className="w-4 h-4" />;
+const CartIcon = () => <FaShoppingCart className="w-5 h-5" />;
+const LockIcon = () => <FaLock className="w-4 h-4" />;
+const ChevronRight = () => <FaChevronRight className="w-4 h-4" />;
+const HomeIcon = () => <FaHome className="w-3.5 h-3.5" />;
+const CheckCircleIcon = () => <FaCheckCircle className="w-4 h-4" />;
+const XIcon = () => <FaTimes className="w-3.5 h-3.5" />;
+const GiftIcon = () => <FaGift className="w-4 h-4" />;
 
 // ── Breadcrumb ───────────────────────────────────────────────────────────────
 function Breadcrumb() {
@@ -156,9 +121,7 @@ function EmptyCart() {
     return (
         <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
-                <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
+                <FaShoppingCart className="w-10 h-10 text-gray-300" />
             </div>
             <h3 className="text-lg font-black text-gray-700 mb-2">Your cart is empty</h3>
             <p className="text-sm text-gray-400 mb-6">Looks like you haven't added anything yet.</p>
@@ -233,12 +196,7 @@ function CouponInput({ applied, onApply, onRemove }) {
                     disabled={!code.trim() || loading}
                     className="px-4 py-2.5 bg-gray-800 hover:bg-gray-900 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-colors flex-shrink-0"
                 >
-                    {loading ? (
-                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                        </svg>
-                    ) : "Apply"}
+                    {loading ? <FaSpinner className="w-4 h-4 animate-spin" /> : "Apply"}
                 </button>
             </div>
             {error && (
@@ -284,8 +242,8 @@ function OrderSummary({ items }) {
                 {/* Free shipping progress */}
                 {subtotal < FREE_SHIPPING_THRESHOLD && (
                     <div className="bg-blue-50 rounded-xl p-3.5 space-y-2">
-                        <p className="text-xs font-bold text-blue-700">
-                            Add <span className="text-blue-900">${remaining.toLocaleString()}</span> more for FREE shipping! 🚚
+                        <p className="text-xs font-bold text-blue-700 flex items-center gap-1">
+                            Add <span className="text-blue-900">${remaining.toLocaleString()}</span> more for FREE shipping! <FaTruck className="text-blue-700" />
                         </p>
                         <div className="w-full bg-blue-100 rounded-full h-1.5 overflow-hidden">
                             <div
@@ -450,9 +408,7 @@ export default function Cart() {
                             {/* Footer */}
                             <div className="px-5 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between gap-3 flex-wrap">
                                 <Link to="/shop" className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                    </svg>
+                                    <FaArrowLeft className="w-4 h-4" />
                                     Continue Shopping
                                 </Link>
                                 <div className="text-sm text-gray-500">

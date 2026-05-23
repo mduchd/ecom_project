@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { FaPhoneAlt, FaEnvelope, FaMapMarkerAlt, FaCheckCircle } from 'react-icons/fa';
 
 const Contact = () => {
   const [showToast, setShowToast] = useState(false);
@@ -14,7 +15,7 @@ const Contact = () => {
     <div className="container mx-auto py-16 px-4 relative">
       {showToast && (
         <div className="fixed top-24 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 animate-bounce">
-          <span>✅</span> Gửi tin nhắn thành công! Chúng tôi sẽ phản hồi sớm nhất.
+          <FaCheckCircle className="text-white text-lg flex-shrink-0" /> Gửi tin nhắn thành công! Chúng tôi sẽ phản hồi sớm nhất.
         </div>
       )}
       
@@ -43,15 +44,15 @@ const Contact = () => {
             <h3 className="text-xl font-bold mb-6 text-blue-900">Thông tin liên hệ</h3>
             <div className="space-y-4 text-blue-800">
               <p className="flex items-center gap-3">
-                <span className="text-xl">📞</span> 
+                <FaPhoneAlt className="text-blue-600 text-lg flex-shrink-0" /> 
                 <span><strong>Hotline:</strong> 088-24586945</span>
               </p>
               <p className="flex items-center gap-3">
-                <span className="text-xl">📧</span> 
+                <FaEnvelope className="text-blue-600 text-lg flex-shrink-0" /> 
                 <span><strong>Email:</strong> support@snapcart.com</span>
               </p>
               <p className="flex items-center gap-3">
-                <span className="text-xl">📍</span> 
+                <FaMapMarkerAlt className="text-blue-600 text-lg flex-shrink-0" /> 
                 <span><strong>Địa chỉ:</strong> Hà Nội, Việt Nam</span>
               </p>
             </div>

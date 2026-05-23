@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import { getProducts } from "../services/productService";
 import ProductCard from "../components/ProductCard";
 import { Link, useSearchParams } from "react-router-dom";
+import { FaHome, FaChevronDown, FaSearch, FaSync, FaExclamationTriangle, FaInbox, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
 // ── Constants ────────────────────────────────────────────────────────────────
 const CATEGORIES = ["All", "Laptop", "Điện thoại", "Máy tính bảng", "Phụ kiện", "Âm thanh"];
@@ -177,27 +178,10 @@ const sortProducts = (list, sort) => {
 };
 
 // ── Icons ────────────────────────────────────────────────────────────────────
-const HomeIcon = () => (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M3 12l2-2m0 0l7-7 7 7m-9 2v8m4-8v8m-4 0h4" />
-    </svg>
-);
-const ChevronDownIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-    </svg>
-);
-const SearchIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8" />
-        <path strokeLinecap="round" d="M21 21l-4.35-4.35" />
-    </svg>
-);
-const RefreshIcon = () => (
-    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-    </svg>
-);
+const HomeIcon = () => <FaHome className="w-3.5 h-3.5" />;
+const ChevronDownIcon = () => <FaChevronDown className="w-4 h-4" />;
+const SearchIcon = () => <FaSearch className="w-4 h-4" />;
+const RefreshIcon = () => <FaSync className="w-4 h-4" />;
 
 // ── Breadcrumb ───────────────────────────────────────────────────────────────
 function Breadcrumb({ category }) {
@@ -302,9 +286,7 @@ function ErrorState({ message, onRetry }) {
     return (
         <div className="flex flex-col items-center justify-center py-20 text-center">
             <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
-                <svg className="w-8 h-8 text-red-400" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
+                <FaExclamationTriangle className="w-8 h-8 text-red-400" />
             </div>
             <h3 className="text-base font-black text-gray-700 mb-1">Failed to load products</h3>
             <p className="text-sm text-gray-400 mb-5 max-w-xs">{message}</p>
@@ -322,9 +304,7 @@ function ErrorState({ message, onRetry }) {
 function EmptyState({ onReset }) {
     return (
         <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-400">
-            <svg className="w-14 h-14 opacity-20 mb-3" fill="none" stroke="currentColor" strokeWidth={1.2} viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 115 11a6 6 0 0112 0z" />
-            </svg>
+            <FaInbox className="w-14 h-14 opacity-20 mb-3" />
             <p className="font-bold text-gray-500 mb-1">No products found</p>
             <p className="text-sm mb-5">Try adjusting your filters or search term.</p>
             <button
@@ -348,9 +328,7 @@ function Pagination({ current, total, onChange }) {
                 disabled={current === 1}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
+                <FaChevronLeft className="w-4 h-4" />
                 Prev
             </button>
 
@@ -374,9 +352,7 @@ function Pagination({ current, total, onChange }) {
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
             >
                 Next
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
+                <FaChevronRight className="w-4 h-4" />
             </button>
         </div>
     );

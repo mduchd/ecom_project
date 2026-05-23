@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "../components/Toast.jsx";
+import api from "../services/productService.js";
 
 const AuthContext = createContext();
 
@@ -48,27 +49,39 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const login = (email, password) => {
-    // Fake login: cứ nhập là thành công
-    const role = email.toLowerCase() === "admin@luxe.com" ? "admin" : "user";
-    const fakeUser = {
-      name: role === "admin" ? "Administrator" : (email.split("@")[0] || "Khách hàng"),
-      email: email,
-      role: role,
-      avatar: role === "admin" 
-        ? "https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" 
-        : "https://i.pravatar.cc/150?u=" + email,
-      points: role === "admin" ? 0 : Math.floor(Math.random() * 500) + 100,
-      favorites: [],
-      orders: role === "admin" ? [] : [
-        { id: "ORD-1234", date: "07/05/2026", status: "Đang giao hàng", total: "15.000.000đ", items: "Apple Watch Series 9" },
-        { id: "ORD-5678", date: "12/04/2026", status: "Đã giao", total: "5.690.000đ", items: "JBL Live 660NC" },
-      ]
-    };
-    setUser(fakeUser);
-    localStorage.setItem("snapcart_user", JSON.stringify(fakeUser));
-    setIsAuthModalOpen(false);
-    toast.success("Đăng nhập thành công!");
+  const login = async (email, password) => {
+    try {
+      const response = await api.post("/auth/signin", { username: email, password });
+      const { accessToken, id, username, email: resEmail, roles } = response.data;
+      
+      const role = roles.includes("ROLE_ADMIN") ? "admin" : "user";
+      const loggedInUser = {
+        id,
+        name: username,
+        email: resEmail,
+        role: role,
+        avatar: role === "admin" 
+          ? "https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" 
+          : "https://i.pravatar.cc/150?u=" + resEmail,
+        points: role === "admin" ? 0 : Math.floor(Math.random() * 500) + 100,
+        favorites: [],
+        orders: role === "admin" ? [] : [
+          { id: "ORD-1234", date: "07/05/2026", status: "Đang giao hàng", total: "15.000.000đ", items: "Apple Watch Series 9" },
+          { id: "ORD-5678", date: "12/04/2026", status: "Đã giao", total: "5.690.000đ", items: "JBL Live 660NC" },
+        ]
+      };
+      
+      setUser(loggedInUser);
+      localStorage.setItem("snapcart_user", JSON.stringify(loggedInUser));
+      localStorage.setItem("snapcart_token", accessToken);
+      setIsAuthModalOpen(false);
+      toast.success("Đăng nhập thành công!");
+      return true;
+    } catch (error) {
+      const msg = error.response?.data?.message || "Đăng nhập thất bại! Vui lòng kiểm tra lại tài khoản.";
+      toast.error(msg);
+      throw error;
+    }
   };
 
   const addOrder = (order) => {
@@ -124,6 +137,7 @@ export function AuthProvider({ children }) {
   const logout = () => {
     setUser(null);
     localStorage.removeItem("snapcart_user");
+    localStorage.removeItem("snapcart_token");
     toast.success("Đã đăng xuất");
   };
 

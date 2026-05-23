@@ -2,59 +2,16 @@ import { useState } from "react";
 import { Link } from 'react-router-dom';
 import { useAuth } from "../context/AuthContext.jsx";
 
-// ── Icons (inline SVG helpers) ──────────────────────────────────────────────
-const PhoneIcon = () => (
-    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M6.6 10.8c1.4 2.8 3.8 5.1 6.6 6.6l2.2-2.2c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.6.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1-9.4 0-17-7.6-17-17 0-.6.4-1 1-1h3.5c.6 0 1 .4 1 1 0 1.3.2 2.5.6 3.6.1.3 0 .7-.2 1L6.6 10.8z" />
-    </svg>
-);
+import { FaPhoneAlt, FaChevronDown, FaSearch, FaUser, FaShoppingCart, FaBars, FaTimes, FaGlobe, FaInfoCircle, FaQuestionCircle, FaEnvelope, FaLaptop, FaCamera, FaHeadphones } from "react-icons/fa";
 
-const ChevronDown = ({ className = "w-3 h-3" }) => (
-    <svg className={className} fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-    </svg>
-);
-
-const SearchIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2.2} viewBox="0 0 24 24">
-        <circle cx="11" cy="11" r="8" />
-        <path strokeLinecap="round" d="M21 21l-4.35-4.35" />
-    </svg>
-);
-
-const UserIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-        <circle cx="12" cy="7" r="4" />
-    </svg>
-);
-
-const CartIcon = () => (
-    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z" />
-        <line x1="3" y1="6" x2="21" y2="6" strokeLinecap="round" />
-        <path strokeLinecap="round" strokeLinejoin="round" d="M16 10a4 4 0 01-8 0" />
-    </svg>
-);
-
-const MenuIcon = () => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-    </svg>
-);
-
-const CloseIcon = () => (
-    <svg className="w-6 h-6" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-    </svg>
-);
-
-const GlobeIcon = () => (
-    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="10" />
-        <path strokeLinecap="round" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" />
-    </svg>
-);
+const PhoneIcon = () => <FaPhoneAlt className="w-3.5 h-3.5" />;
+const ChevronDown = ({ className = "w-3 h-3" }) => <FaChevronDown className={className} />;
+const SearchIcon = () => <FaSearch className="w-5 h-5" />;
+const UserIcon = () => <FaUser className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />;
+const CartIcon = () => <FaShoppingCart className="w-5 h-5" />;
+const MenuIcon = () => <FaBars className="w-6 h-6" />;
+const CloseIcon = () => <FaTimes className="w-6 h-6" />;
+const GlobeIcon = () => <FaGlobe className="w-3.5 h-3.5" />;
 
 // ── Data ────────────────────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -236,18 +193,18 @@ const NAV_ITEMS = [
         label: "Pages",
         to: "#",
         children: [
-            { label: "About Us", to: "/about", icon: "👋" },
-            { label: "FAQ", to: "/faq", icon: "❓" },
-            { label: "Contact", to: "/contact", icon: "✉️" },
+            { label: "About Us", to: "/about", icon: <FaInfoCircle className="text-blue-500 text-sm" /> },
+            { label: "FAQ", to: "/faq", icon: <FaQuestionCircle className="text-blue-500 text-sm" /> },
+            { label: "Contact", to: "/contact", icon: <FaEnvelope className="text-blue-500 text-sm" /> },
         ],
     },
     {
         label: "Products",
         to: "/shop",
         children: [
-            { label: "Laptops", to: "/shop?category=Laptop", icon: "💻" },
-            { label: "Cameras", to: "/shop?category=Điện thoại", icon: "📷" },
-            { label: "Accessories", to: "/shop?category=Phụ kiện", icon: "🎧" },
+            { label: "Laptops", to: "/shop?category=Laptop", icon: <FaLaptop className="text-blue-500 text-sm" /> },
+            { label: "Cameras", to: "/shop?category=Điện thoại", icon: <FaCamera className="text-blue-500 text-sm" /> },
+            { label: "Accessories", to: "/shop?category=Phụ kiện", icon: <FaHeadphones className="text-blue-500 text-sm" /> },
         ],
     },
     { label: "Contact", to: "/contact", children: null },
@@ -295,12 +252,7 @@ function NavDropdown({ item }) {
                     }`}
             >
                 {item.label}
-                <svg
-                    className={`w-3 h-3 transition-transform duration-200 ${open ? "rotate-180 text-blue-500" : "text-gray-400"}`}
-                    fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-                </svg>
+                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${open ? "rotate-180 text-blue-500" : "text-gray-400"}`} />
             </button>
 
             {/* Dropdown panel */}

@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { FaChevronDown } from "react-icons/fa";
 
 export default function ThongSo({ product }){
     const [expanded, setExpanded] = useState(false);
@@ -50,7 +51,7 @@ export default function ThongSo({ product }){
                     className="w-full py-3 mt-2 text-blue-600 font-bold text-sm bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors flex justify-center items-center gap-2"
                 >
                     {expanded ? "Thu gọn cấu hình" : "Xem cấu hình chi tiết"}
-                    <svg className={`w-4 h-4 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" /></svg>
+                    <FaChevronDown className={`w-4 h-4 transition-transform duration-300 ${expanded ? "rotate-180" : ""}`} />
                 </button>
             )}
         </div>

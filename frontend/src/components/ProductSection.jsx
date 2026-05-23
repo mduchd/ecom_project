@@ -1,5 +1,6 @@
 import { useState } from "react";
 import ProductCard from "./ProductCard";
+import { FaInbox } from "react-icons/fa";
 
 // ── Dummy Data ───────────────────────────────────────────────────────────────
 const TABS = [
@@ -237,9 +238,7 @@ export default function ProductSection({
                     </div>
                 ) : (
                     <div className="flex flex-col items-center justify-center py-16 text-gray-400">
-                        <svg className="w-12 h-12 mb-3 opacity-30" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0H4" />
-                        </svg>
+                        <FaInbox className="w-12 h-12 mb-3 opacity-30" />
                         <p className="text-sm font-semibold">No products in this category yet.</p>
                     </div>
                 )

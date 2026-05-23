@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
+import { FaArrowRight } from "react-icons/fa";
 
 // ── Data ────────────────────────────────────────────────────────────────────
 const HERO_SLIDES = [
@@ -10,12 +12,14 @@ const HERO_SLIDES = [
     description:
       "Feature-Packed Wireless Headset Engineered For Professional Gamers And Audiophiles.",
     btnText: "Buy Now",
-    btnColor: "bg-blue-600 hover:bg-blue-700",
-    bg: "bg-gradient-to-br from-slate-700 via-slate-600 to-slate-800",
-    textColor: "text-white",
+    btnColor: "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20",
+    bg: "bg-gradient-to-br from-[#eae3d2] via-[#f7f4eb] to-[#dcd5c0]",
+    textColor: "text-slate-800",
+    tagColor: "text-blue-700 bg-blue-50 border border-blue-200/50",
     image:
       "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=420&q=80",
     badge: "2 / 3",
+    link: "/product/5", // Điều hướng đến chi tiết sản phẩm tai nghe (id = 5)
   },
   {
     id: 2,
@@ -25,12 +29,14 @@ const HERO_SLIDES = [
     description:
       "Industry-leading noise cancellation with up to 30 hours battery life.",
     btnText: "Shop Now",
-    btnColor: "bg-yellow-400 hover:bg-yellow-500 text-gray-900",
-    bg: "bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900",
-    textColor: "text-white",
+    btnColor: "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20",
+    bg: "bg-gradient-to-br from-[#f5efe6] via-[#faf7f2] to-[#eaddca]",
+    textColor: "text-slate-800",
+    tagColor: "text-amber-700 bg-amber-50 border border-amber-200/50",
     image:
       "https://images.unsplash.com/photo-1618366712010-f4ae9c647dcb?w=420&q=80",
     badge: "1 / 3",
+    link: "/product/5", // Điều hướng đến chi tiết tai nghe chống ồn Sony (id = 5)
   },
   {
     id: 3,
@@ -40,12 +46,14 @@ const HERO_SLIDES = [
     description:
       "Experience mixed reality with breakthrough Meta Reality technology.",
     btnText: "Discover",
-    btnColor: "bg-purple-500 hover:bg-purple-600",
-    bg: "bg-gradient-to-br from-gray-900 via-purple-950 to-gray-900",
+    btnColor: "bg-purple-500 hover:bg-purple-600 text-white shadow-lg shadow-purple-500/20",
+    bg: "bg-gradient-to-br from-gray-950 via-purple-950 to-gray-950",
     textColor: "text-white",
+    tagColor: "text-purple-300 bg-purple-950/40 border border-purple-800/40",
     image:
       "https://images.unsplash.com/photo-1622979135225-d2ba269cf1ac?w=420&q=80",
     badge: "3 / 3",
+    link: "/shop",
   },
 ];
 
@@ -55,49 +63,53 @@ const SMALL_BANNERS = [
     brand: "Oraimo",
     title: "Watch 5\nSmart Watch",
     btnText: "Buy Now",
-    bg: "bg-gradient-to-br from-slate-100 to-blue-50",
+    bg: "bg-gradient-to-br from-slate-50 to-blue-50/50 border border-slate-100",
     textColor: "text-slate-800",
-    btnColor: "bg-blue-600 hover:bg-blue-700 text-white",
+    btnColor: "bg-blue-600 hover:bg-blue-700 text-white shadow-sm",
     image:
       "https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=200&q=80",
     tag: "Watch",
+    link: "/shop",
   },
   {
     id: 2,
     brand: "IPS",
     title: "NPTE 200VA\nSine Wave IPS",
     btnText: "Shop Now",
-    bg: "bg-gradient-to-br from-gray-800 to-gray-900",
+    bg: "bg-gradient-to-br from-gray-900 to-zinc-900 border border-zinc-800",
     textColor: "text-white",
     btnColor: "bg-white hover:bg-gray-100 text-gray-900",
     image:
       "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&q=80",
     tag: "Power",
     discount: "40% OFF",
+    link: "/shop",
   },
   {
     id: 3,
     brand: "Bruker",
     title: "TP-Link Archer\nAX53 Router",
     btnText: "Discover",
-    bg: "bg-gradient-to-br from-indigo-50 to-slate-100",
+    bg: "bg-gradient-to-br from-[#f0f4f8] to-slate-100 border border-slate-200/50",
     textColor: "text-slate-800",
     btnColor: "bg-slate-700 hover:bg-slate-800 text-white",
     image:
       "https://images.unsplash.com/photo-1606904825846-647eb07f5be2?w=200&q=80",
     tag: "Networking",
+    link: "/shop",
   },
   {
     id: 4,
     brand: "Canon",
     title: "EOS R50\nMirrorless Camera",
     btnText: "From $995",
-    bg: "bg-gradient-to-br from-gray-900 to-zinc-800",
+    bg: "bg-gradient-to-br from-zinc-900 to-black border border-zinc-800",
     textColor: "text-white",
     btnColor: "bg-yellow-400 hover:bg-yellow-500 text-gray-900",
     image:
       "https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=200&q=80",
     tag: "Camera",
+    link: "/shop",
   },
 ];
 
@@ -105,8 +117,9 @@ const SMALL_BANNERS = [
 function HeroSlide({ slide, isActive }) {
   return (
     <div
-      className={`absolute inset-0 transition-all duration-700 ease-in-out ${isActive ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8 pointer-events-none"
-        } ${slide.bg} rounded-2xl overflow-hidden flex items-center px-8 md:px-10`}
+      className={`absolute inset-0 transition-all duration-700 ease-in-out group ${
+        isActive ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8 pointer-events-none"
+      } ${slide.bg} rounded-2xl overflow-hidden flex items-center px-8 md:px-10`}
     >
       {/* Decorative circles */}
       <div className="absolute -right-10 -top-10 w-56 h-56 rounded-full bg-white/5" />
@@ -114,7 +127,9 @@ function HeroSlide({ slide, isActive }) {
 
       {/* Content */}
       <div className="relative z-10 flex-1 max-w-[55%]">
-        <span className="inline-block text-[11px] font-bold uppercase tracking-widest text-blue-300 mb-3">
+        <span className={`inline-block text-[11px] font-bold uppercase tracking-widest mb-3 px-2.5 py-0.5 rounded-full ${
+          slide.tagColor || "text-blue-300 bg-blue-900/40 border border-blue-800/40"
+        }`}>
           {slide.tag}
         </span>
         <h2 className={`text-3xl md:text-4xl font-black leading-tight ${slide.textColor} mb-1`}>
@@ -126,27 +141,29 @@ function HeroSlide({ slide, isActive }) {
         <p className={`text-xs md:text-sm ${slide.textColor} opacity-60 mb-6 leading-relaxed`}>
           {slide.description}
         </p>
-        <button
-          className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold shadow-lg transition-all duration-200 active:scale-95 ${slide.btnColor} text-white`}
+        <Link
+          to={slide.link}
+          className={`inline-flex items-center gap-2 px-6 py-2.5 rounded-full text-sm font-bold shadow-lg transition-all duration-200 hover:scale-105 active:scale-95 ${slide.btnColor}`}
         >
           {slide.btnText}
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-          </svg>
-        </button>
+          <FaArrowRight className="w-4 h-4 animate-pulse" />
+        </Link>
       </div>
 
       {/* Product image */}
-      <div className="absolute right-6 bottom-0 h-[88%] flex items-end">
+      <Link
+        to={slide.link}
+        className="absolute right-6 bottom-0 h-[88%] flex items-end cursor-pointer group-hover:scale-105 group-hover:-translate-y-2 transition-all duration-300"
+      >
         <img
           src={slide.image}
           alt={slide.title}
-          className="h-full w-auto object-contain drop-shadow-2xl select-none"
+          className="h-full w-auto object-contain drop-shadow-2xl select-none mix-blend-multiply"
         />
-      </div>
+      </Link>
 
       {/* Slide badge */}
-      <span className="absolute bottom-4 right-4 text-[11px] font-bold text-white/50">
+      <span className="absolute bottom-4 right-4 text-[11px] font-bold text-slate-400">
         {slide.badge}
       </span>
     </div>
@@ -156,8 +173,9 @@ function HeroSlide({ slide, isActive }) {
 // ── Small Banner Card ────────────────────────────────────────────────────────
 function SmallBanner({ banner }) {
   return (
-    <div
-      className={`relative rounded-xl overflow-hidden cursor-pointer group
+    <Link
+      to={banner.link}
+      className={`relative rounded-xl overflow-hidden cursor-pointer group block
         transition-all duration-300 hover:scale-[1.03] hover:shadow-xl
         ${banner.bg} p-4 flex items-center gap-3 min-h-[90px]`}
     >
@@ -177,7 +195,7 @@ function SmallBanner({ banner }) {
           {banner.title}
         </h4>
         <button
-          className={`text-[11px] font-bold px-3 py-1 rounded-full transition-colors duration-150 ${banner.btnColor}`}
+          className={`text-[11px] font-bold px-3 py-1 rounded-full transition-all duration-150 group-hover:scale-105 ${banner.btnColor}`}
         >
           {banner.btnText}
         </button>
@@ -188,10 +206,10 @@ function SmallBanner({ banner }) {
         <img
           src={banner.image}
           alt={banner.title}
-          className="w-full h-full object-cover rounded-lg opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300"
+          className="w-full h-full object-cover rounded-lg opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-all duration-300 mix-blend-multiply"
         />
       </div>
-    </div>
+    </Link>
   );
 }
 
@@ -203,10 +221,9 @@ function SlideDots({ total, current, onChange }) {
         <button
           key={i}
           onClick={() => onChange(i)}
-          className={`transition-all duration-300 rounded-full ${i === current
-            ? "w-5 h-2 bg-white"
-            : "w-2 h-2 bg-white/40 hover:bg-white/70"
-            }`}
+          className={`transition-all duration-300 rounded-full h-2 ${
+            i === current ? "w-5 bg-blue-600" : "w-2 bg-slate-400 hover:bg-slate-600"
+          }`}
         />
       ))}
     </div>
@@ -221,7 +238,7 @@ export default function HeroBanner() {
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrent((prev) => (prev + 1) % HERO_SLIDES.length);
-    }, 4000);
+    }, 4500);
     return () => clearInterval(timer);
   }, []);
 
@@ -230,7 +247,7 @@ export default function HeroBanner() {
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] xl:grid-cols-[1fr_320px] gap-4">
 
         {/* ── Left: Main Hero Slider ── */}
-        <div className="relative h-[320px] md:h-[360px] lg:h-full rounded-2xl overflow-hidden shadow-lg">
+        <div className="relative h-[320px] md:h-[360px] lg:h-full rounded-2xl overflow-hidden shadow-lg border border-slate-100">
           {HERO_SLIDES.map((slide, i) => (
             <HeroSlide key={slide.id} slide={slide} isActive={i === current} />
           ))}
@@ -251,8 +268,8 @@ export default function HeroBanner() {
                 setCurrent((prev) => (prev + dir + HERO_SLIDES.length) % HERO_SLIDES.length)
               }
               className={`absolute top-1/2 -translate-y-1/2 ${pos} z-20
-                w-8 h-8 rounded-full bg-white/20 hover:bg-white/40 backdrop-blur-sm
-                text-white text-xl font-bold flex items-center justify-center
+                w-8 h-8 rounded-full bg-slate-800/10 hover:bg-slate-800/30 backdrop-blur-sm
+                text-slate-800 hover:text-slate-900 text-xl font-bold flex items-center justify-center
                 transition-all duration-150 hover:scale-110`}
             >
               {label}
