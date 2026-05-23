@@ -26,4 +26,5 @@ public class SignupRequest {
     private String password;
 
     private String fullName;
+    private String adminSignupCode;
 }

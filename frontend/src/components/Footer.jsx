@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+﻿import { Link } from 'react-router-dom';
 import { FaCcVisa, FaCcMastercard, FaCcPaypal, FaTwitter, FaInstagram } from 'react-icons/fa';
 
 const Footer = () => {
@@ -29,43 +29,43 @@ const Footer = () => {
                         </div>
                     </div>
 
-                    {/* Quick Links */}
+                    {/* Liên kết nhanh */}
                     <div>
-                        <h3 className="text-white font-bold mb-4 uppercase text-sm tracking-wider">Quick Links</h3>
+                        <h3 className="text-white font-bold mb-4 uppercase text-sm tracking-wider">Liên kết nhanh</h3>
                         <ul className="space-y-2.5">
-                            <li><Link to="/shop" className="text-sm hover:text-blue-400 transition-colors">All Products</Link></li>
-                            <li><Link to="/cart" className="text-sm hover:text-blue-400 transition-colors">Shopping Cart</Link></li>
-                            <li><Link to="/login" className="text-sm hover:text-blue-400 transition-colors">My Account</Link></li>
-                            <li><Link to="/checkout" className="text-sm hover:text-blue-400 transition-colors">Checkout</Link></li>
+                            <li><Link to="/shop" className="text-sm hover:text-blue-400 transition-colors">Tất cả sản phẩm</Link></li>
+                            <li><Link to="/cart" className="text-sm hover:text-blue-400 transition-colors">Giỏ hàng</Link></li>
+                            <li><Link to="/login" className="text-sm hover:text-blue-400 transition-colors">Tài khoản của tôi</Link></li>
+                            <li><Link to="/checkout" className="text-sm hover:text-blue-400 transition-colors">Thanh toán</Link></li>
                         </ul>
                     </div>
 
-                    {/* Customer Service */}
+                    {/* Hỗ trợ khách hàng */}
                     <div>
-                        <h3 className="text-white font-bold mb-4 uppercase text-sm tracking-wider">Customer Service</h3>
+                        <h3 className="text-white font-bold mb-4 uppercase text-sm tracking-wider">Hỗ trợ khách hàng</h3>
                         <ul className="space-y-2.5">
-                            <li><Link to="/faq" className="text-sm hover:text-blue-400 transition-colors">Help Center / FAQ</Link></li>
-                            <li><Link to="/contact" className="text-sm hover:text-blue-400 transition-colors">Contact Us</Link></li>
-                            <li><a href="#" className="text-sm hover:text-blue-400 transition-colors">Returns & Exchanges</a></li>
-                            <li><a href="#" className="text-sm hover:text-blue-400 transition-colors">Shipping Info</a></li>
+                            <li><Link to="/faq" className="text-sm hover:text-blue-400 transition-colors">Trung tâm trợ giúp / FAQ</Link></li>
+                            <li><Link to="/contact" className="text-sm hover:text-blue-400 transition-colors">Liên hệ</Link></li>
+                            <li><a href="#" className="text-sm hover:text-blue-400 transition-colors">Đổi trả</a></li>
+                            <li><a href="#" className="text-sm hover:text-blue-400 transition-colors">Thông tin giao hàng</a></li>
                         </ul>
                     </div>
 
-                    {/* Newsletter */}
+                    {/* Bản tin */}
                     <div>
-                        <h3 className="text-white font-bold mb-4 uppercase text-sm tracking-wider">Newsletter</h3>
+                        <h3 className="text-white font-bold mb-4 uppercase text-sm tracking-wider">Bản tin</h3>
                         <p className="text-sm text-gray-400 mb-4 leading-relaxed">Đăng ký để nhận thông báo về các ưu đãi mới nhất và giảm giá độc quyền.</p>
                         <form className="flex">
                             <input
                                 type="email"
-                                placeholder="Your email address"
+                                placeholder="Email của bạn"
                                 className="w-full px-4 py-2.5 bg-gray-800 border border-gray-700 rounded-l-lg outline-none focus:border-blue-500 text-sm text-white placeholder-gray-500 transition-colors"
                             />
                             <button
                                 type="button"
                                 className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-r-lg transition-colors"
                             >
-                                Subscribe
+                                Đăng ký
                             </button>
                         </form>
                     </div>
@@ -75,7 +75,7 @@ const Footer = () => {
                 {/* Bottom section */}
                 <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-xs text-gray-500">
-                        &copy; 2026 Snapcart. All rights reserved.
+                        &copy; 2026 Snapcart. Bảo lưu mọi quyền.
                     </p>
                     <div className="flex gap-4 text-3xl text-gray-500">
                         <FaCcVisa className="hover:text-blue-500 opacity-60 hover:opacity-100 transition-all cursor-pointer" title="Visa" />

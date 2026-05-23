@@ -1,0 +1,54 @@
+package com.ecommerce.backend.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Entity
+@Table(name = "orders")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class Order {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(nullable = false, unique = true, length = 32)
+    private String orderCode;
+
+    @Column(nullable = false)
+    private String customerName;
+
+    @Column(nullable = false)
+    private String customerEmail;
+
+    @Column(nullable = false)
+    private String productSummary;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    private BigDecimal totalAmount;
+
+    @Column(nullable = false, length = 64)
+    private String paymentMethod;
+
+    @Column(nullable = false, length = 32)
+    private String status;
+
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        if (createdAt == null) {
+            createdAt = LocalDateTime.now();
+        }
+    }
+}

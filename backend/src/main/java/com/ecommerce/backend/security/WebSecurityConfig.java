@@ -4,6 +4,7 @@ import com.ecommerce.backend.security.services.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -12,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -55,12 +57,21 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth ->
-                        auth.requestMatchers("/api/auth/**").permitAll()
-                    .requestMatchers("/api/ai/**").permitAll()
-                        .requestMatchers("/h2-console/**").permitAll()
-                    .requestMatchers("/api/products/**").permitAll()
-                    .requestMatchers("/api/orders/**").permitAll()
-                                .anyRequest().authenticated()
+                        auth.requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.OPTIONS, "/**")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher("/api/auth/**")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher("/api/ai/**")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher("/error")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/products/**")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/products/**")).hasRole("ADMIN")
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/api/products/**")).hasRole("ADMIN")
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE, "/api/products/**")).hasRole("ADMIN")
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/orders")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/orders/confirm")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/orders/test-email")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/orders/**")).hasRole("ADMIN")
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PATCH, "/api/orders/**")).hasRole("ADMIN")
+                    .anyRequest().authenticated()
                 );
 
         http.authenticationProvider(authenticationProvider());

@@ -18,7 +18,10 @@ import com.ecommerce.backend.service.EmailService;
 import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -40,6 +43,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
     @Autowired
     AuthenticationManager authenticationManager;
 
@@ -60,6 +65,12 @@ public class AuthController {
 
     @Autowired
     EmailService emailService;
+
+    @Value("${app.auth.fail-on-email-error:false}")
+    private boolean failOnEmailError;
+
+    @Value("${app.auth.expose-otp-on-email-failure:true}")
+    private boolean exposeOtpOnEmailFailure;
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
@@ -144,7 +155,7 @@ public class AuthController {
             if (existingUserOpt.isPresent()) {
                 User existingUser = existingUserOpt.get();
                 if (existingUser.isEnabled()) {
-                    return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
+                    return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Tên đăng nhập đã tồn tại!"));
                 } else {
                     otpVerificationRepository.deleteByEmailAndType(existingUser.getEmail(), "SIGNUP");
                     userRepository.delete(existingUser);
@@ -157,7 +168,7 @@ public class AuthController {
             if (existingUserOpt.isPresent()) {
                 User existingUser = existingUserOpt.get();
                 if (existingUser.isEnabled()) {
-                    return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is already in use!"));
+                    return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Email đã được sử dụng!"));
                 } else {
                     otpVerificationRepository.deleteByEmailAndType(existingUser.getEmail(), "SIGNUP");
                     userRepository.delete(existingUser);
@@ -177,26 +188,12 @@ public class AuthController {
 
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
-
-        if (strRoles == null) {
-            Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-            roles.add(userRole);
-        } else {
-            strRoles.forEach(role -> {
-                switch (role) {
-                    case "admin":
-                        Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(adminRole);
-                        break;
-                    default:
-                        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
-                        roles.add(userRole);
-                }
-            });
+        if (strRoles != null && strRoles.stream().anyMatch(r -> "admin".equalsIgnoreCase(r))) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Không thể tự đăng ký quyền quản trị."));
         }
+        Role userRole = roleRepository.findByName(ERole.ROLE_USER)
+                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+        roles.add(userRole);
 
         user.setRoles(roles);
         userRepository.save(user);
@@ -214,10 +211,20 @@ public class AuthController {
         
         otpVerificationRepository.save(otpVerification);
 
-        // Send OTP Email
-        emailService.sendOtpEmail(user.getEmail(), otp, "SIGNUP");
-
-        return ResponseEntity.ok(new MessageResponse("User registered successfully! Please check your email for the OTP verification code."));
+        // Send OTP Email with dev fallback
+        try {
+            emailService.sendOtpEmail(user.getEmail(), otp, "SIGNUP");
+            return ResponseEntity.ok(new MessageResponse("Đăng ký thành công! Vui lòng kiểm tra email để lấy mã OTP."));
+        } catch (RuntimeException ex) {
+            if (failOnEmailError) {
+                throw ex;
+            }
+            logger.warn("OTP email send failed for signup: {}", user.getEmail(), ex);
+            String message = exposeOtpOnEmailFailure
+                    ? "Đăng ký thành công. Dịch vụ email tạm thời lỗi, OTP của bạn là: " + otp
+                    : "Đăng ký thành công. Dịch vụ email tạm thời lỗi, vui lòng liên hệ hỗ trợ để lấy OTP.";
+            return ResponseEntity.ok(new MessageResponse(message));
+        }
     }
 
     @PostMapping("/verify-otp")
@@ -226,19 +233,19 @@ public class AuthController {
         Optional<OtpVerification> otpOpt = otpVerificationRepository.findByEmailAndOtpAndType(email, otp, type);
         
         if (otpOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Invalid OTP or Email!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: OTP hoặc email không đúng!"));
         }
 
         OtpVerification otpVerification = otpOpt.get();
         if (otpVerification.getExpiryTime().isBefore(LocalDateTime.now())) {
             otpVerificationRepository.delete(otpVerification);
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: OTP has expired! Please request a new one."));
+            return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: OTP đã hết hạn! Vui lòng yêu cầu mã mới."));
         }
 
         // Activate user
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: User not found!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Không tìm thấy người dùng!"));
         }
 
         User user = userOpt.get();
@@ -248,7 +255,7 @@ public class AuthController {
         // Delete OTP
         otpVerificationRepository.delete(otpVerification);
 
-        return ResponseEntity.ok(new MessageResponse("Account activated successfully! You can now log in."));
+        return ResponseEntity.ok(new MessageResponse("Kích hoạt tài khoản thành công! Bạn có thể đăng nhập ngay."));
     }
 
     @PostMapping("/resend-otp")
@@ -256,12 +263,12 @@ public class AuthController {
     public ResponseEntity<?> resendOtp(@RequestParam String email, @RequestParam(defaultValue = "SIGNUP") String type) {
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Email is not registered!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Email chưa được đăng ký!"));
         }
 
         User user = userOpt.get();
         if (user.isEnabled()) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Error: Account is already verified and active!"));
+            return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Tài khoản đã được xác thực và đang hoạt động!"));
         }
 
         // Delete old OTPs for this email and type
@@ -280,9 +287,19 @@ public class AuthController {
 
         otpVerificationRepository.save(otpVerification);
 
-        // Send Email
-        emailService.sendOtpEmail(email, otp, type);
-
-        return ResponseEntity.ok(new MessageResponse("A new OTP verification code has been sent to your email."));
+        // Send Email with dev fallback
+        try {
+            emailService.sendOtpEmail(email, otp, type);
+            return ResponseEntity.ok(new MessageResponse("Đã gửi mã OTP mới đến email của bạn."));
+        } catch (RuntimeException ex) {
+            if (failOnEmailError) {
+                throw ex;
+            }
+            logger.warn("OTP email resend failed for {}", email, ex);
+            String message = exposeOtpOnEmailFailure
+                    ? "Dịch vụ email tạm thời lỗi, OTP mới của bạn là: " + otp
+                    : "Dịch vụ email tạm thời lỗi, vui lòng liên hệ hỗ trợ để lấy OTP.";
+            return ResponseEntity.ok(new MessageResponse(message));
+        }
     }
 }

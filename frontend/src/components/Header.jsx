@@ -1,33 +1,50 @@
-import { useState } from "react";
-import { Link } from 'react-router-dom';
+﻿import { useState } from "react";
+import { Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import {
+    FaPhoneAlt,
+    FaChevronDown,
+    FaSearch,
+    FaUser,
+    FaShoppingCart,
+    FaBars,
+    FaTimes,
+    FaGlobe,
+    FaInfoCircle,
+    FaQuestionCircle,
+    FaEnvelope,
+    FaLaptop,
+    FaCamera,
+    FaHeadphones,
+    FaTabletAlt,
+} from "react-icons/fa";
 
-import { FaPhoneAlt, FaChevronDown, FaSearch, FaUser, FaShoppingCart, FaBars, FaTimes, FaGlobe, FaInfoCircle, FaQuestionCircle, FaEnvelope, FaLaptop, FaCamera, FaHeadphones } from "react-icons/fa";
-
-const PhoneIcon = () => <FaPhoneAlt className="w-3.5 h-3.5" />;
-const ChevronDown = ({ className = "w-3 h-3" }) => <FaChevronDown className={className} />;
-const SearchIcon = () => <FaSearch className="w-5 h-5" />;
-const UserIcon = () => <FaUser className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />;
-const CartIcon = () => <FaShoppingCart className="w-5 h-5" />;
-const MenuIcon = () => <FaBars className="w-6 h-6" />;
-const CloseIcon = () => <FaTimes className="w-6 h-6" />;
-const GlobeIcon = () => <FaGlobe className="w-3.5 h-3.5" />;
-
-// ── Data ────────────────────────────────────────────────────────────────────
 const CATEGORIES = [
-    "All Categories", "Laptops", "PC & Computers", "Accessories",
-    "Gaming & VR", "Networking", "Cameras", "Cell Phones", "Tablets",
-    "Storage & USB", "Sounds", "Office",
+    { label: "Tất cả danh mục", icon: <FaChevronDown className="inline-block mr-1 text-gray-400" /> },
+    { label: "Laptop", icon: <FaLaptop className="inline-block mr-1 text-blue-500" /> },
+    { label: "PC & Máy tính", icon: <FaLaptop className="inline-block mr-1 text-blue-400" /> },
+    { label: "Phụ kiện", icon: <FaHeadphones className="inline-block mr-1 text-yellow-500" /> },
+    { label: "Gaming & VR", icon: <FaCamera className="inline-block mr-1 text-purple-500" /> },
+    { label: "Mạng", icon: <FaGlobe className="inline-block mr-1 text-green-500" /> },
+    { label: "Máy ảnh", icon: <FaCamera className="inline-block mr-1 text-pink-500" /> },
+    { label: "Điện thoại", icon: <FaPhoneAlt className="inline-block mr-1 text-emerald-500" /> },
+    { label: "Máy tính bảng", icon: <FaTabletAlt className="inline-block mr-1 text-indigo-500" /> },
+    { label: "Lưu trữ & USB", icon: <FaHeadphones className="inline-block mr-1 text-orange-500" /> },
+    { label: "Âm thanh", icon: <FaHeadphones className="inline-block mr-1 text-red-500" /> },
+    { label: "Văn phòng", icon: <FaEnvelope className="inline-block mr-1 text-gray-500" /> },
 ];
 
 const CURRENCIES = ["USD", "EUR", "GBP", "JPY", "AUD"];
-const LANGUAGES = ["English", "Spanish", "French", "German", "Vietnamese"];
-const NAV_LINKS = ["Home", "Pages", "Products", "Contact"];
+const LANGUAGES = ["Tiếng Việt", "Tiếng Anh"];
+const NAV_LINKS = [
+    { label: "Trang chủ", to: "/" },
+    { label: "Sản phẩm", to: "/shop" },
+    { label: "Liên hệ", to: "/contact" },
+];
 
-// ── Sub-components ──────────────────────────────────────────────────────────
-
-function Dropdown({ label, options, selected, onChange, icon }) {
+function Dropdown({ options, selected, onChange, icon }) {
     const [open, setOpen] = useState(false);
+
     return (
         <div className="relative">
             <button
@@ -35,16 +52,21 @@ function Dropdown({ label, options, selected, onChange, icon }) {
                 className="flex items-center gap-1 text-gray-600 hover:text-blue-700 text-xs font-medium transition-colors duration-150 py-0.5"
             >
                 {icon && <span className="text-gray-500">{icon}</span>}
-                {label ?? selected}
-                <ChevronDown className={`w-2.5 h-2.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+                {selected}
+                <FaChevronDown className={`w-2.5 h-2.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
             </button>
             {open && (
                 <div className="absolute top-full right-0 mt-1 bg-white border border-gray-100 rounded-lg shadow-lg z-50 min-w-[110px] overflow-hidden animate-fadeIn">
                     {options.map((opt) => (
                         <button
                             key={opt}
-                            onClick={() => { onChange(opt); setOpen(false); }}
-                            className={`block w-full text-left px-3 py-1.5 text-xs hover:bg-blue-50 hover:text-blue-700 transition-colors ${selected === opt ? "bg-blue-50 text-blue-700 font-semibold" : "text-gray-600"}`}
+                            onClick={() => {
+                                onChange(opt);
+                                setOpen(false);
+                            }}
+                            className={`block w-full text-left px-3 py-1.5 text-xs hover:bg-blue-50 hover:text-blue-700 transition-colors ${
+                                selected === opt ? "bg-blue-50 text-blue-700 font-semibold" : "text-gray-600"
+                            }`}
                         >
                             {opt}
                         </button>
@@ -60,7 +82,7 @@ function TopBar({ currency, setCurrency, language, setLanguage }) {
         <div className="bg-gray-50 border-b border-gray-200">
             <div className="max-w-[1280px] mx-auto px-4 sm:px-6 h-9 flex items-center justify-between">
                 <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                    <PhoneIcon />
+                    <FaPhoneAlt className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline font-medium text-gray-600">Hotline 24/7:</span>
                     <a href="tel:08824586945" className="font-semibold text-gray-700 hover:text-blue-600 transition-colors">
                         088-24586945
@@ -73,69 +95,12 @@ function TopBar({ currency, setCurrency, language, setLanguage }) {
                         className="hidden sm:inline-flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-semibold px-3 py-1 rounded-full transition-colors duration-150"
                     >
                         <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse inline-block" />
-                        Track Order
+                        Theo dõi đơn
                     </a>
-
                     <Dropdown selected={currency} options={CURRENCIES} onChange={setCurrency} />
-
                     <div className="w-px h-3.5 bg-gray-300" />
-
-                    <Dropdown
-                        selected={language}
-                        options={LANGUAGES}
-                        onChange={setLanguage}
-                        icon={<GlobeIcon />}
-                    />
+                    <Dropdown selected={language} options={LANGUAGES} onChange={setLanguage} icon={<FaGlobe className="w-3.5 h-3.5" />} />
                 </div>
-            </div>
-        </div>
-    );
-}
-
-function SearchBar() {
-    const [category, setCategory] = useState("All Categories");
-    const [catOpen, setCatOpen] = useState(false);
-    const [query, setQuery] = useState("");
-
-    return (
-        <div className="flex-1 max-w-2xl mx-4 lg:mx-8">
-            <div className="flex h-11 rounded-xl overflow-hidden border-2 border-blue-600 shadow-sm focus-within:shadow-md focus-within:border-blue-700 transition-all duration-200 bg-white">
-
-                <div className="relative hidden sm:flex">
-                    <button
-                        onClick={() => setCatOpen(!catOpen)}
-                        className="flex items-center gap-1.5 px-3 lg:px-4 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-semibold border-r border-gray-200 whitespace-nowrap transition-colors h-full"
-                    >
-                        <span className="max-w-[100px] truncate">{category}</span>
-                        <ChevronDown className={`w-3 h-3 transition-transform duration-200 flex-shrink-0 ${catOpen ? "rotate-180" : ""}`} />
-                    </button>
-
-                    {catOpen && (
-                        <div className="absolute top-full left-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-xl z-50 w-52 max-h-72 overflow-y-auto">
-                            {CATEGORIES.map((cat) => (
-                                <button
-                                    key={cat}
-                                    onClick={() => { setCategory(cat); setCatOpen(false); }}
-                                    className={`block w-full text-left px-4 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition-colors ${category === cat ? "bg-blue-50 text-blue-700 font-semibold" : "text-gray-600"}`}
-                                >
-                                    {cat}
-                                </button>
-                            ))}
-                        </div>
-                    )}
-                </div>
-
-                <input
-                    type="text"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search anything..."
-                    className="flex-1 px-4 text-sm text-gray-700 placeholder-gray-400 outline-none bg-white"
-                />
-
-                <button className="px-4 lg:px-5 bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-colors duration-150 flex-shrink-0">
-                    <SearchIcon />
-                </button>
             </div>
         </div>
     );
@@ -152,16 +117,73 @@ function Logo() {
     );
 }
 
-function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
+function SearchBar() {
+    const [category, setCategory] = useState(CATEGORIES[0].label);
+    const [catOpen, setCatOpen] = useState(false);
+    const [query, setQuery] = useState("");
+    const selectedCatObj = CATEGORIES.find((cat) => cat.label === category) || CATEGORIES[0];
+
+    return (
+        <div className="flex-1 max-w-2xl mx-4 lg:mx-8">
+            <div className="flex h-11 rounded-xl overflow-hidden border-2 border-blue-600 shadow-sm focus-within:shadow-md focus-within:border-blue-700 transition-all duration-200 bg-white">
+                <div className="relative hidden sm:flex">
+                    <button
+                        onClick={() => setCatOpen(!catOpen)}
+                        className="flex items-center gap-1.5 px-3 lg:px-4 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-semibold border-r border-gray-200 whitespace-nowrap transition-colors h-full"
+                        type="button"
+                    >
+                        <span className="flex items-center max-w-[120px] truncate">
+                            {selectedCatObj.icon}
+                            <span className="ml-1 truncate">{selectedCatObj.label}</span>
+                        </span>
+                        <FaChevronDown className={`w-3 h-3 transition-transform duration-200 flex-shrink-0 ${catOpen ? "rotate-180" : ""}`} />
+                    </button>
+                    {catOpen && (
+                        <ul className="absolute top-full left-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-xl z-50 w-52 max-h-72 overflow-y-auto">
+                            {CATEGORIES.map((cat) => (
+                                <li key={cat.label}>
+                                    <button
+                                        onClick={() => {
+                                            setCategory(cat.label);
+                                            setCatOpen(false);
+                                        }}
+                                        className={`flex items-center w-full text-left px-4 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition-colors ${
+                                            category === cat.label ? "bg-blue-50 text-blue-700 font-semibold" : "text-gray-600"
+                                        }`}
+                                    >
+                                        {cat.icon}
+                                        <span className="ml-1 truncate">{cat.label}</span>
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+                <input
+                    type="text"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder="Tìm kiếm sản phẩm..."
+                    className="flex-1 px-4 text-sm text-gray-700 placeholder-gray-400 outline-none bg-white"
+                />
+                <button className="px-4 lg:px-5 bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-colors duration-150 flex-shrink-0">
+                    <FaSearch className="w-5 h-5" />
+                </button>
+            </div>
+        </div>
+    );
+}
+
+function UserActions({ cartCount, cartTotal }) {
     return (
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <Link to="/login" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors group">
                 <span className="w-8 h-8 rounded-full border-2 border-gray-200 group-hover:border-blue-400 flex items-center justify-center transition-colors">
-                    <UserIcon />
+                    <FaUser className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
                 </span>
                 <div className="leading-tight hidden lg:block">
-                    <p className="text-[10px] text-gray-400 font-medium">Welcome</p>
-                    <p className="text-xs font-bold">Log In / Sign Up</p>
+                    <p className="text-[10px] text-gray-400 font-medium">Xin chào</p>
+                    <p className="text-xs font-bold">Đăng nhập / Đăng ký</p>
                 </div>
             </Link>
 
@@ -170,7 +192,7 @@ function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
             <Link to="/cart" className="flex items-center gap-2 group">
                 <div className="relative">
                     <span className="w-9 h-9 rounded-full bg-yellow-400 group-hover:bg-yellow-500 flex items-center justify-center text-gray-800 transition-colors shadow-sm">
-                        <CartIcon />
+                        <FaShoppingCart className="w-5 h-5" />
                     </span>
                     {cartCount > 0 && (
                         <span className="absolute -top-1 -right-1 w-4 h-4 bg-blue-600 text-white text-[9px] font-black rounded-full flex items-center justify-center shadow">
@@ -179,7 +201,7 @@ function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
                     )}
                 </div>
                 <div id="cart-icon" className="leading-tight hidden lg:block">
-                    <p className="text-[10px] text-gray-400 font-medium">Cart</p>
+                    <p className="text-[10px] text-gray-400 font-medium">Giỏ hàng</p>
                     <p className="text-xs font-bold text-gray-800">${cartTotal}</p>
                 </div>
             </Link>
@@ -187,108 +209,39 @@ function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
     );
 }
 
-const NAV_ITEMS = [
-    { label: "Home", to: "/", children: null },
-    {
-        label: "Pages",
-        to: "#",
-        children: [
-            { label: "About Us", to: "/about", icon: <FaInfoCircle className="text-blue-500 text-sm" /> },
-            { label: "FAQ", to: "/faq", icon: <FaQuestionCircle className="text-blue-500 text-sm" /> },
-            { label: "Contact", to: "/contact", icon: <FaEnvelope className="text-blue-500 text-sm" /> },
-        ],
-    },
-    {
-        label: "Products",
-        to: "/shop",
-        children: [
-            { label: "Laptops", to: "/shop?category=Laptop", icon: <FaLaptop className="text-blue-500 text-sm" /> },
-            { label: "Cameras", to: "/shop?category=Điện thoại", icon: <FaCamera className="text-blue-500 text-sm" /> },
-            { label: "Accessories", to: "/shop?category=Phụ kiện", icon: <FaHeadphones className="text-blue-500 text-sm" /> },
-        ],
-    },
-    { label: "Contact", to: "/contact", children: null },
-];
-
-// ── Nav Dropdown Item ────────────────────────────────────────────────────────
-function NavDropdown({ item }) {
-    const [open, setOpen] = useState(false);
-    let closeTimer = null;
-
-    const handleMouseEnter = () => {
-        clearTimeout(closeTimer);
-        setOpen(true);
-    };
-
-    const handleMouseLeave = () => {
-        // small delay so cursor can move into dropdown
-        closeTimer = setTimeout(() => setOpen(false), 120);
-    };
-
-    // No children → plain link
-    if (!item.children) {
-        return (
-            <Link
-                to={item.to}
-                className="flex items-center gap-0.5 text-sm font-semibold text-gray-700 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all duration-150"
-            >
-                {item.label}
-            </Link>
-        );
-    }
-
-    return (
-        <div
-            className="relative"
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-        >
-            {/* Trigger */}
-            <button
-                className={`flex items-center gap-1 text-sm font-semibold px-3 py-1.5 rounded-lg transition-all duration-150
-          ${open
-                        ? "text-blue-600 bg-blue-50"
-                        : "text-gray-700 hover:text-blue-600 hover:bg-blue-50"
-                    }`}
-            >
-                {item.label}
-                <ChevronDown className={`w-3 h-3 transition-transform duration-200 ${open ? "rotate-180 text-blue-500" : "text-gray-400"}`} />
-            </button>
-
-            {/* Dropdown panel */}
-            {open && (
-                <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden animate-fadeIn">
-                    {/* Arrow tip */}
-                    <div className="absolute -top-1.5 left-5 w-3 h-3 bg-white border-l border-t border-gray-100 rotate-45" />
-
-                    <div className="py-2 relative">
-                        {item.children.map((child, i) => (
-                            <Link
-                                key={child.to}
-                                to={child.to}
-                                onClick={() => setOpen(false)}
-                                className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 font-medium hover:bg-blue-50 hover:text-blue-600 transition-colors duration-100 group"
-                            >
-                                <span className="text-base flex-shrink-0">{child.icon}</span>
-                                <span className="group-hover:translate-x-0.5 transition-transform duration-150">
-                                    {child.label}
-                                </span>
-                            </Link>
-                        ))}
-                    </div>
-                </div>
-            )}
-        </div>
-    );
-}
-
-// ── DesktopNav ───────────────────────────────────────────────────────────────
 function DesktopNav() {
     return (
         <nav className="hidden lg:flex items-center gap-1">
-            {NAV_ITEMS.map((item) => (
-                <NavDropdown key={item.label} item={item} />
-            ))}
+            <Link to="/" className="flex items-center gap-0.5 text-sm font-semibold text-gray-700 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all duration-150">
+                Trang chủ
+            </Link>
+
+            <div className="relative group">
+                <button className="flex items-center gap-1 text-sm font-semibold px-3 py-1.5 rounded-lg transition-all duration-150 text-gray-700 hover:text-blue-600 hover:bg-blue-50">
+                    Trang
+                    <FaChevronDown className="w-3 h-3 text-gray-400" />
+                </button>
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 overflow-hidden hidden group-hover:block">
+                    <div className="py-2">
+                        <Link to="/about" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 font-medium hover:bg-blue-50 hover:text-blue-600">
+                            <FaInfoCircle className="text-blue-500 text-sm" /> Về chúng tôi
+                        </Link>
+                        <Link to="/faq" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 font-medium hover:bg-blue-50 hover:text-blue-600">
+                            <FaQuestionCircle className="text-blue-500 text-sm" /> Câu hỏi thường gặp
+                        </Link>
+                        <Link to="/contact" className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 font-medium hover:bg-blue-50 hover:text-blue-600">
+                            <FaEnvelope className="text-blue-500 text-sm" /> Liên hệ
+                        </Link>
+                    </div>
+                </div>
+            </div>
+
+            <Link to="/shop" className="flex items-center gap-0.5 text-sm font-semibold text-gray-700 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all duration-150">
+                Sản phẩm
+            </Link>
+            <Link to="/contact" className="flex items-center gap-0.5 text-sm font-semibold text-gray-700 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all duration-150">
+                Liên hệ
+            </Link>
         </nav>
     );
 }
@@ -296,95 +249,68 @@ function DesktopNav() {
 function MobileMenu({ open, onClose }) {
     return (
         <>
-            <div
-                onClick={onClose}
-                className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 lg:hidden ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`}
-            />
-            <div
-                className={`fixed top-0 left-0 h-full w-72 bg-white z-50 shadow-2xl transition-transform duration-300 lg:hidden flex flex-col ${open ? "translate-x-0" : "-translate-x-full"}`}
-            >
+            <div onClick={onClose} className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 lg:hidden ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`} />
+            <div className={`fixed top-0 left-0 h-full w-72 bg-white z-50 shadow-2xl transition-transform duration-300 lg:hidden flex flex-col ${open ? "translate-x-0" : "-translate-x-full"}`}>
                 <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
                     <Logo />
                     <button onClick={onClose} className="text-gray-500 hover:text-gray-800 transition-colors">
-                        <CloseIcon />
+                        <FaTimes className="w-6 h-6" />
                     </button>
                 </div>
 
                 <nav className="flex-1 overflow-y-auto py-4">
-
                     {NAV_LINKS.map((link) => (
                         <Link
-                            key={link}
-                            to={link === "Home" ? "/" : link === "Products" ? "/shop" : `/${link.toLowerCase()}`}
+                            key={link.label}
+                            to={link.to}
                             onClick={onClose}
                             className="flex items-center justify-between px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
                         >
-                            {link}
-                            <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-gray-400" />
+                            {link.label}
+                            <FaChevronDown className="w-3.5 h-3.5 -rotate-90 text-gray-400" />
                         </Link>
                     ))}
 
-                    <div className="border-t border-gray-100 mt-4 pt-4 px-5 space-y-3">
-                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Categories</p>
-                        {CATEGORIES.slice(1).map((cat) => (
-                            <a
-                                key={cat}
-                                href="#"
-                                onClick={onClose}
-                                className="block text-sm text-gray-600 hover:text-blue-600 py-1 transition-colors"
-                            >
-                                {cat}
-                            </a>
+                    <div className="border-t border-gray-100 mt-4 pt-4 px-5 space-y-1">
+                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Danh mục</p>
+                        {CATEGORIES.map((cat) => (
+                            <button key={cat.label} onClick={onClose} className="flex items-center w-full text-left px-0 py-2 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors">
+                                {cat.icon}
+                                <span className="ml-1 truncate">{cat.label}</span>
+                            </button>
                         ))}
                     </div>
                 </nav>
 
                 <div className="px-5 py-4 border-t border-gray-100 bg-gray-50">
-                    <a href="#" className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
-                        <UserIcon />
-                        <span className="text-sm font-bold">Log In / Sign Up</span>
-                    </a>
+                    <Link to="/login" onClick={onClose} className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
+                        <FaUser className="w-5 h-5" />
+                        <span className="text-sm font-bold">Đăng nhập / Đăng ký</span>
+                    </Link>
                 </div>
             </div>
         </>
     );
 }
 
-// ── Main Header Component ───────────────────────────────────────────────────
 export default function Header() {
     const [currency, setCurrency] = useState("USD");
-    const [language, setLanguage] = useState("English");
+    const [language, setLanguage] = useState("Tiếng Việt");
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { cart } = useAuth();
-    
+
     const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
     const cartTotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0).toLocaleString();
 
     return (
         <>
-            <style>{`
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(-6px); }
-          to   { opacity: 1; transform: translateY(0); }
-        }
-        .animate-fadeIn { animation: fadeIn 0.15s ease-out; }
-      `}</style>
-
             <header className="sticky top-0 z-30 w-full shadow-sm">
-                {/* Row 1 */}
-                <TopBar
-                    currency={currency} setCurrency={setCurrency}
-                    language={language} setLanguage={setLanguage}
-                />
+                <TopBar currency={currency} setCurrency={setCurrency} language={language} setLanguage={setLanguage} />
 
-                {/* Row 2 */}
                 <div className="bg-white border-b border-gray-100">
                     <div className="max-w-[1280px] mx-auto px-4 sm:px-6 h-16 flex items-center gap-3">
-                        <button
-                            className="lg:hidden text-gray-600 hover:text-blue-600 transition-colors flex-shrink-0"
-                            onClick={() => setMobileMenuOpen(true)}
-                        >
-                            <MenuIcon />
+                        <button className="lg:hidden text-gray-600 hover:text-blue-600 transition-colors flex-shrink-0" onClick={() => setMobileMenuOpen(true)}>
+                            <FaBars className="w-6 h-6" />
                         </button>
 
                         <Logo />

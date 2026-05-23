@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import { getProductById } from "../services/productService";
+import { useAuth } from "../context/AuthContext.jsx";
 import { FaHome, FaShoppingCart, FaHeart, FaRegHeart, FaCheck, FaStar, FaArrowLeft, FaSync, FaShieldAlt, FaTruck, FaExclamationTriangle } from "react-icons/fa";
 
 // ── Icons ────────────────────────────────────────────────────────────────────
@@ -290,7 +291,7 @@ function ImageGallery({ imageUrl, name }) {
 }
 
 // ── Product Info ─────────────────────────────────────────────────────────────
-function ProductInfo({ product }) {
+function ProductInfo({ product, onAddToCart }) {
     const [qty, setQty] = useState(1);
     const [wished, setWished] = useState(false);
     const [addedToCart, setAdded] = useState(false);
@@ -316,9 +317,16 @@ function ProductInfo({ product }) {
         : null;
 
     const handleAddToCart = () => {
-        if (!inStock) return;
-        setAdded(true);
-        setTimeout(() => setAdded(false), 2000);
+      if (!inStock) return;
+      onAddToCart(
+        {
+          ...product,
+          image: product.imageUrl || product.image || "",
+        },
+        qty
+      );
+      setAdded(true);
+      setTimeout(() => setAdded(false), 2000);
     };
 
     return (
@@ -505,6 +513,7 @@ function DetailTabs({ product }) {
 // ── Main ProductDetail Page ───────────────────────────────────────────────────
 export default function ProductDetail() {
     const { id } = useParams();
+    const { addToCart } = useAuth();
 
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -566,7 +575,7 @@ export default function ProductDetail() {
                         {/* 2-column grid */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
                             <ImageGallery imageUrl={product.imageUrl} name={product.name} />
-                            <ProductInfo product={product} />
+                            <ProductInfo product={product} onAddToCart={addToCart} />
                         </div>
 
                         {/* Detail tabs */}

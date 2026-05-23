@@ -8,7 +8,7 @@ export default function Home() {
         <main className="min-h-screen bg-gray-50">
             <HeroBanner />
             <ServiceBanner />
-            <ProductSection title="Best Seller" />
+            <ProductSection title="Bán chạy" />
         </main>
     );
 }

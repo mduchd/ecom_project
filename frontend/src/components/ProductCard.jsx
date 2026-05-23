@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from 'react-router-dom';
 import { FaStar, FaShoppingCart, FaHeart, FaRegHeart, FaCheck } from "react-icons/fa";
+import { useAuth } from "../context/AuthContext.jsx";
 
 // ── Star Rating ──────────────────────────────────────────────────────────────
 function StarRating({ rating, reviews }) {
@@ -31,9 +32,15 @@ const HeartIcon = ({ filled }) => filled ? <FaHeart className="w-4 h-4 text-red-
 export default function ProductCard({ product }) {
     const [wished, setWished] = useState(false);
     const [addedToCart, setAddedToCart] = useState(false);
+    const { addToCart } = useAuth();
 
     const handleAddToCart = (e) => {
         e.preventDefault();
+        if (!isAvailable) return;
+        addToCart({
+            ...product,
+            image: product.imageUrl || product.image || "",
+        }, 1);
         setAddedToCart(true);
         setTimeout(() => setAddedToCart(false), 1500);
     };
@@ -100,7 +107,7 @@ export default function ProductCard({ product }) {
                 <div className="flex items-center gap-1.5">
                     <span className={`w-1.5 h-1.5 rounded-full ${isAvailable ? "bg-emerald-500" : "bg-red-400"}`} />
                     <span className={`text-[11px] font-medium ${isAvailable ? "text-emerald-600" : "text-red-400"}`}>
-                        {isAvailable ? "In stock" : "Out of stock"}
+                        {isAvailable ? "Còn hàng" : "Hết hàng"}
                     </span>
                 </div>
 
@@ -121,12 +128,12 @@ export default function ProductCard({ product }) {
                     {addedToCart ? (
                         <>
                             <FaCheck className="w-4 h-4" />
-                            Added!
+                            Đã thêm!
                         </>
                     ) : (
                         <>
                             <CartIcon />
-                            Add to Cart
+                            Thêm vào giỏ
                         </>
                     )}
                 </button>
