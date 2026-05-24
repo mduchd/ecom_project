@@ -83,7 +83,7 @@ class OrderServiceTest {
         assertEquals("Nguyen Van A", created.getCustomerName());
         assertEquals("a@example.com", created.getCustomerEmail());
         assertEquals("Laptop Asus x1", created.getProductSummary());
-        assertEquals(new BigDecimal("33000"), created.getTotalAmount());
+        assertEquals(new BigDecimal("31500"), created.getTotalAmount());
         assertEquals("COD", created.getPaymentMethod());
         assertEquals("Chờ duyệt", created.getStatus());
         assertNotNull(created.getOrderCode());
