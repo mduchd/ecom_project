@@ -70,7 +70,7 @@ function StatCard({ label, value, icon, colorClass, trend }) {
         <div className={`p-4 rounded-2xl text-white ${colorClass} shadow-lg shadow-gray-200`}>{icon}</div>
         <span className="text-emerald-600 font-black text-sm bg-emerald-50 px-2 py-1 rounded-lg">{trend}</span>
       </div>
-      <p className="text-gray-400 font-bold text-sm uppercase tracking-wider">{label}</p>
+      <p className="text-gray-400 font-bold text-sm text-vi">{label}</p>
       <h3 className="text-2xl font-black text-gray-900 mt-1">{value}</h3>
     </div>
   );
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
       <div className="flex-1 flex overflow-hidden">
         <aside className="w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-6 gap-8">
           <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Chính</p>
+            <p className="text-xs font-bold text-gray-400 tracking-widest mb-4 text-vi">Chính</p>
             <nav className="flex flex-col gap-2">
               <button
                 onClick={() => setActiveTab("revenue")}
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
           </div>
 
           <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Theo dõi</p>
+            <p className="text-xs font-bold text-gray-400 tracking-widest mb-4 text-vi">Theo dõi</p>
             <nav className="flex flex-col gap-2">
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-gray-500 bg-gray-50">
                 <FaDolly /> Sản phẩm: {productsLoading ? "..." : productsCount}
@@ -277,7 +277,7 @@ export default function AdminDashboard() {
         <main className="flex-1 p-8 overflow-y-auto">
           <div className="flex justify-between items-center mb-10">
             <div>
-              <h1 className="text-4xl font-black text-gray-900 uppercase tracking-tight">Admin Dashboard</h1>
+              <h1 className="text-4xl font-black text-gray-900 text-vi">Bảng quản trị</h1>
               <p className="text-gray-500 font-medium">Dữ liệu được tổng hợp từ đơn hàng và sản phẩm thực tế.</p>
             </div>
             <div className="flex gap-4">
@@ -288,7 +288,7 @@ export default function AdminDashboard() {
                 <img src={user?.avatar || "https://ui-avatars.com/api/?name=Admin"} className="w-10 h-10 rounded-xl" alt="Admin" />
                 <div>
                   <p className="text-sm font-bold text-gray-900">{user?.name || user?.email || "Admin"}</p>
-                  <p className="text-[10px] font-bold text-emerald-600 uppercase">Online</p>
+                  <p className="text-[10px] font-bold text-emerald-600 text-vi">Đang trực tuyến</p>
                 </div>
               </div>
             </div>
@@ -300,7 +300,7 @@ export default function AdminDashboard() {
                 <StatCard label="Doanh thu (Đã giao)" value={formatVND(totalRevenue)} icon={<FaChartLine size={24} />} colorClass="bg-blue-600" trend={trends.revenue} />
                 <StatCard label="Tổng đơn hàng" value={ordersLoading ? "..." : String(normalizedOrders.length)} icon={<FaBox size={24} />} colorClass="bg-purple-600" trend={trends.orders} />
                 <StatCard label="Đơn chờ duyệt" value={ordersLoading ? "..." : String(pendingOrders.length)} icon={<FaBell size={24} />} colorClass="bg-orange-600" trend={trends.pending} />
-                <StatCard label="Sản phẩm" value={productsLoading ? "..." : String(productsCount)} icon={productsLoading ? <FaSpinner className="animate-spin" size={24} /> : <FaDolly size={24} />} colorClass="bg-emerald-600" trend="Live" />
+                <StatCard label="Sản phẩm" value={productsLoading ? "..." : String(productsCount)} icon={productsLoading ? <FaSpinner className="animate-spin" size={24} /> : <FaDolly size={24} />} colorClass="bg-emerald-600" trend="Trực tiếp" />
               </div>
 
               <div className="bg-white p-8 rounded-3xl shadow-sm border border-gray-100">
@@ -332,7 +332,7 @@ export default function AdminDashboard() {
                               </div>
                             )}
                           </div>
-                          <span className="text-[10px] font-black text-gray-400 uppercase mt-4 mb-[-25px]">T{i + 1}</span>
+                          <span className="text-[10px] font-black text-gray-400 mt-4 mb-[-25px] text-vi">T{i + 1}</span>
                         </div>
                       );
                     })}
@@ -370,7 +370,7 @@ export default function AdminDashboard() {
 
               <div className="overflow-x-auto">
                 <table className="w-full text-left">
-                  <thead className="bg-gray-50 text-gray-400 text-xs font-bold uppercase tracking-widest">
+                  <thead className="bg-gray-50 text-gray-400 text-xs font-bold text-vi">
                     <tr>
                       <th className="px-8 py-4">Mã đơn</th>
                       <th className="px-4 py-4">Khách hàng</th>
@@ -394,12 +394,12 @@ export default function AdminDashboard() {
                         <td className="px-8 py-6 font-black text-blue-600">{order.code || `ORD-${index + 1}`}</td>
                         <td className="px-4 py-6">
                           <p className="font-bold text-gray-900">{order.customer || "Khách ẩn danh"}</p>
-                          <p className="text-[10px] text-gray-400 font-bold uppercase">{order.method || "N/A"}</p>
+                          <p className="text-[10px] text-gray-400 font-bold text-vi">{order.method || "Không rõ"}</p>
                         </td>
                         <td className="px-4 py-6 font-medium text-gray-600">{order.product || "-"}</td>
                         <td className="px-4 py-6 text-right font-black text-gray-900">{formatVND(order.numericTotal)}</td>
                         <td className="px-4 py-6 text-center">
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter ${statusBadgeClass(order.normalizedStatus)}`}>
+                          <span className={`px-3 py-1 rounded-full text-[10px] font-black text-vi ${statusBadgeClass(order.normalizedStatus)}`}>
                             {order.normalizedStatus}
                           </span>
                         </td>

@@ -12,24 +12,29 @@ export default function ThanhToan() {
   const [selectedMethod, setSelectedMethod] = useState("momo");
   const [showQR, setShowQR] = useState(false);
   const [pendingPaymentOrderCode, setPendingPaymentOrderCode] = useState("");
+  const [pendingPaymentEmail, setPendingPaymentEmail] = useState("");
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
 
   // Tự động kiểm tra trạng thái thanh toán qua Webhook SePay (Polling mỗi 3 giây)
   useEffect(() => {
     let intervalId;
-    if (showQR && pendingPaymentOrderCode) {
+    if (showQR && pendingPaymentOrderCode && pendingPaymentEmail) {
       intervalId = setInterval(async () => {
         try {
-          const response = await api.get(`/orders/code/${pendingPaymentOrderCode}`);
-          // Khi SePay webhook nhận thanh toán thành công, status chuyển thành "Đang giao" (STATUS_SHIPPING)
-          if (response.data && response.data.status === "Đang giao") {
+          const response = await api.get("/orders/track", {
+            params: { code: pendingPaymentOrderCode, email: pendingPaymentEmail },
+          });
+          if (response.data && (response.data.status === "SHIPPING" || response.data.status === "PAID")) {
             clearInterval(intervalId);
             setShowQR(false);
+            const orderCode = pendingPaymentOrderCode;
+            const orderEmail = pendingPaymentEmail;
             setPendingPaymentOrderCode("");
+            setPendingPaymentEmail("");
             toast.success("Thanh toán thành công! Cảm ơn bạn đã mua hàng tại Snapcart.");
             clearCart(true);
-            navigate("/");
+            navigate(`/track-order?code=${encodeURIComponent(orderCode)}&email=${encodeURIComponent(orderEmail)}`);
           }
         } catch (err) {
           console.error("Lỗi khi kiểm tra trạng thái thanh toán:", err);
@@ -40,7 +45,7 @@ export default function ThanhToan() {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [showQR, pendingPaymentOrderCode, navigate, clearCart]);
+  }, [showQR, pendingPaymentOrderCode, pendingPaymentEmail, navigate, clearCart]);
   
   const formatVND = (value) => value.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -52,7 +57,7 @@ export default function ThanhToan() {
 
   const handlePlaceOrder = () => {
     if (cart.length === 0) {
-      toast.warning("GiềEhàng của bạn đang trống!");
+      toast.warning("Giỏ hàng của bạn đang trống!");
       return;
     }
     
@@ -62,7 +67,7 @@ export default function ThanhToan() {
       return;
     }
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      toast.warning("Vui lòng nhập địa chềEEmail hợp lềE");
+      toast.warning("Vui lòng nhập email hợp lệ");
       setShowEmailModal(true);
       return;
     }
@@ -73,7 +78,7 @@ export default function ThanhToan() {
   const submitOrder = async (email) => {
     try {
       const savedOrder = await createOrder({
-        customerName: user?.name || "Khach hang moi",
+        customerName: user?.name || "Khách hàng mới",
         customerEmail: email,
         productSummary: cart.map(item => item.name).join(", "),
         totalAmount: Math.round(grandTotal),
@@ -82,7 +87,7 @@ export default function ThanhToan() {
 
       api.post("/orders/confirm", {
         email: email,
-        fullName: user?.name || "Khach hang Snapcart",
+        fullName: user?.name || "Khách hàng Snapcart",
         orderId: savedOrder?.orderCode || String(savedOrder?.id || ""),
         totalAmount: Math.round(grandTotal),
         items: cart.map(item => ({
@@ -91,30 +96,31 @@ export default function ThanhToan() {
           price: item.price
         }))
       }).catch(err => {
-        console.error("Gui email xac nhan that bai:", err);
+        console.error("Gửi email xác nhận thất bại:", err);
       });
 
       if (selectedMethod === "momo" || selectedMethod === "bank") {
         setPendingPaymentOrderCode(savedOrder?.orderCode || "ThanhToanCart");
+        setPendingPaymentEmail(email);
         setShowQR(true);
       } else {
-        toast.success("Dat hang thanh cong! Don hang se duoc thanh toan khi nhan hang.");
+        toast.success("Đặt hàng thành công! Bạn có thể theo dõi trạng thái đơn hàng.");
         clearCart(true);
-        setTimeout(() => navigate("/"), 2000);
+        navigate(`/track-order?code=${encodeURIComponent(savedOrder?.orderCode || "")}&email=${encodeURIComponent(email)}`);
       }
     } catch (error) {
-      const msg = error.response?.data?.message || "Tao don hang that bai. Vui long thu lai.";
+      const msg = error.response?.data?.message || "Tạo đơn hàng thất bại. Vui lòng thử lại.";
       toast.error(msg);
     }
   };
  
   const info_ct = [
-    {label: "Full Name", place: "Nhập tên của bạn..."},
-    {label: "Phone Number", place: "Nhập sềEđiện thoại..."},
+    {label: "Họ và tên", place: "Nhập tên của bạn..."},
+    {label: "Số điện thoại", place: "Nhập số điện thoại..."},
   ];
   const info_ar = [
-    {label: "City", name: "city", type: "select", options: ["Hà Nội", "TP.HCM", "Đà Nẵng"]},
-    {label: "Postal Code", name: "postalCode", type: "input", placeholder: "Nhập mã bưu chính..."},
+    {label: "Thành phố", name: "city", type: "select", options: ["Hà Nội", "TP.HCM", "Đà Nẵng"]},
+    {label: "Mã bưu chính", name: "postalCode", type: "input", placeholder: "Nhập mã bưu chính..."},
   ];
   const pay_method = [
     {id: "momo", icon: FaWallet, label: "Ví MoMo"},
@@ -123,21 +129,21 @@ export default function ThanhToan() {
   ];
   return (
     <div className="bg-gray-50 min-h-screen">
-      <main className={"max-w-7xl mx-auto px-10 py-5 grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-12 bg-white shadow-sm border border-gray-100 flex"}>
+      <main lang="vi" className={"max-w-7xl mx-auto px-10 py-5 grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-12 bg-white shadow-sm border border-gray-100 flex"}>
         
         <div className="flex flex-col gap-3">
-          <h1 className="text-3xl font-semibold">Secure Checkout</h1>
-          {/**Delivery Infomation */}
+          <h1 className="text-3xl font-semibold text-vi">Thanh toán an toàn</h1>
+          {/**Thông tin giao hàng */}
           <div className ="bg-white p-4 rounded-lg flex flex-col gap-3 border border-gray-200">
             <div className="flex items-center gap-4">
               <FaShippingFast className="text-xl text-blue-600" />
-              <h2 className="text-2xl ">Delivery Infomation</h2>
+              <h2 className="text-2xl text-vi">Thông tin giao hàng</h2>
             </div>
 
             <div className="flex justify-between gap-5">
-              {info_ct.map((item, index) => (
+              {info_ct.map((item) => (
                 <div key={item.label} className="flex flex-col w-1/2 gap-2">
-                <span className="font-bold">{item.label}</span>
+                <span className="font-bold text-vi">{item.label}</span>
                 <input placeholder={item.place}
                  className="h-10 w-full border border-gray-200 rounded-lg p-1">
                 </input>
@@ -146,9 +152,9 @@ export default function ThanhToan() {
             </div>
             
             <div className="flex flex-col gap-2">
-              <span className="font-bold">Shipping Address</span>
+              <span className="font-bold text-vi">Địa chỉ giao hàng</span>
               <input 
-              placeholder={"Nhập địa chềEnhận hàng..."}
+              placeholder="Nhập địa chỉ nhận hàng..."
               className="h-10 w-full border border-gray-200 p-1 rounded-lg">
               </input>
             </div>
@@ -156,7 +162,7 @@ export default function ThanhToan() {
             <div className ="flex justify-between gap-4">
               {info_ar.map((item) => (
                 <div key={item.name} className="flex flex-col gap-2 w-full">
-                  <span className="font-bold">{item.label}</span>
+                  <span className="font-bold text-vi">{item.label}</span>
                   {item.type ==="select" ? (
                     <select className = "h-10 w-full border border-gray-200 rounded-lg p-1">
                       <option value ="">Chọn</option>
@@ -174,11 +180,11 @@ export default function ThanhToan() {
               ))}
             </div>
           </div>
-          {/**Payment Method */}
+          {/**Phương thức thanh toán */}
           <div className="bg-white flex flex-col gap-3 p-4 rounded-lg border border-gray-200">
               <div className="flex items-center gap-4">
                 <FaWallet className="text-xl text-blue-600" />
-                <h2 className="text-2xl">Payment Method</h2>
+                <h2 className="text-2xl text-vi">Phương thức thanh toán</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
                 {pay_method.map((item)=>(
@@ -199,14 +205,14 @@ export default function ThanhToan() {
               <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-lg">
                 {selectedMethod === "momo" && (
                   <div className="flex flex-col items-center gap-2 text-center text-gray-600">
-                    <p className="font-bold text-pink-600 text-lg">MềEứng dụng MoMo đềEquét mã QR</p>
-                    <p className="text-sm">Mã QR thanh toán sẽ hiển thềEsau khi bạn nhấn nút PLACE ORDER bên cạnh.</p>
+                    <p className="font-bold text-pink-600 text-lg text-vi">Mở ứng dụng MoMo và quét mã QR</p>
+                    <p className="text-sm text-vi">Mã QR thanh toán sẽ hiển thị sau khi bạn nhấn nút đặt hàng bên cạnh.</p>
                   </div>
                 )}
                 {selectedMethod === "bank" && (
                   <div className="flex flex-col items-center gap-2 text-center text-gray-600">
                     <p className="font-bold text-blue-600 text-lg">Chuyển khoản ngân hàng (Vietcombank)</p>
-                    <p className="text-sm">Quét mã QR chuyển khoản hoặc sao chép STK sẽ được cung cấp ềEbước tiếp theo.</p>
+                    <p className="text-sm text-vi">Quét mã QR chuyển khoản hoặc sao chép STK sẽ được cung cấp ở bước tiếp theo.</p>
                   </div>
                 )}
                 {selectedMethod === "cod" && (
@@ -220,7 +226,7 @@ export default function ThanhToan() {
         </div>
         {/**Thẻ phải */}
         <div className="w-full flex flex-col p-5 bg-white rounded-lg gap-3 border border-gray-200">
-          <span className="font-semibold text-2xl">Order Summary</span>
+          <span className="font-semibold text-2xl text-vi">Tóm tắt đơn hàng</span>
           
           <div className="flex flex-col gap-4 max-h-[350px] overflow-y-auto pr-2">
             {cart.map((item) => (
@@ -228,8 +234,8 @@ export default function ThanhToan() {
                  <img src={item.image} alt={item.name} className ="w-20 h-20 object-cover bg-gray-100 rounded-lg" />
                 <div className="ml-5 flex flex-col justify-center gap-1">
                     <span className="font-bold text-gray-800 text-[15px]">{item.name}</span>
-                      <p className="text-gray-500 text-[12px] font-medium">
-                        Qty: {item.qty} {item.variant && `| ${item.variant}`} {item.color && `| ${item.color}`}
+                      <p className="text-gray-500 text-[12px] font-medium text-vi">
+                        SL: {item.qty} {item.variant && `| ${item.variant}`} {item.color && `| ${item.color}`}
                       </p>
                       <span className="font-semibold text-[15px]">{formatVND(item.price * item.qty)}</span>
                 </div>
@@ -240,20 +246,20 @@ export default function ThanhToan() {
           <div className="h-0 w-full border-t border-gray-300 my-2"></div>
           
           <div className="flex justify-between">
-            <span className="font-semibold text-gray-600">Subtotal</span>
+            <span className="font-semibold text-gray-600 text-vi">Tạm tính</span>
             <span className="font-semibold">{formatVND(subtotal)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold text-gray-600">Shipping</span>
-            <span className="font-semibold">{shipping === 0 ? "Mien phi" : formatVND(shipping)}</span>
+            <span className="font-semibold text-gray-600 text-vi">Phí vận chuyển</span>
+            <span className="font-semibold">{shipping === 0 ? "Miễn phí" : formatVND(shipping)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold text-gray-600">Thue</span>
+            <span className="font-semibold text-gray-600 text-vi">Thuế</span>
             <span className="font-semibold">{formatVND(tax)}</span>
           </div>
 
           <div className="flex justify-between items-center mt-2 border-t border-gray-200 pt-3">
-            <span className="text-gray-500 font-semibold">Total</span>
+            <span className="text-gray-500 font-semibold text-vi">Tổng cộng</span>
             <span className="font-black text-2xl text-blue-600">{formatVND(grandTotal)}</span>
           </div>
 
@@ -263,7 +269,7 @@ export default function ThanhToan() {
               className="w-full flex items-center justify-center gap-2 border 
              p-3 bg-blue-600 rounded-xl hover:scale-[1.02] hover:bg-blue-700 shadow-lg 
              active:scale-95 transition-all hover:shadow-gray-700 duration-300 cursor-pointer mt-2">
-               <span className="text-white font-bold text-xl tracking-widest">PLACE ORDER & PAY</span>
+               <span className="text-white font-bold text-xl text-vi">Đặt hàng và thanh toán</span>
                <FaArrowRight className="text-white"/>
              </button>
            ) : (
@@ -272,7 +278,7 @@ export default function ThanhToan() {
               className="w-full flex items-center justify-center gap-2 border 
              p-3 bg-emerald-600 rounded-xl hover:scale-[1.02] hover:bg-emerald-700 shadow-lg 
              active:scale-95 transition-all hover:shadow-gray-700 duration-300 cursor-pointer mt-2">
-               <span className="text-white font-bold text-xl tracking-widest">PLACE ORDER</span>
+               <span className="text-white font-bold text-xl text-vi">Đặt hàng</span>
                <FaArrowRight className="text-white"/>
              </button>
           )}
@@ -287,6 +293,7 @@ export default function ThanhToan() {
                onClick={() => {
                  setShowQR(false);
                  setPendingPaymentOrderCode("");
+                 setPendingPaymentEmail("");
                }}
                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 bg-gray-100 hover:bg-red-50 p-2 rounded-full transition-colors"
              >
@@ -298,21 +305,28 @@ export default function ThanhToan() {
                    {selectedMethod === 'momo' ? <FaWallet className="text-3xl" /> : <FaMoneyCheckAlt className="text-3xl" />}
                  </div>
                </div>
-              <h3 className="text-xl font-black text-gray-900 mb-1">Quét mã QR đềEthanh toán</h3>
-              <p className="text-sm text-gray-500 mb-6">MềEứng dụng {selectedMethod === 'momo' ? 'MoMo' : 'Ngân hàng'} đềEquét mã bên dưới</p>
+              <h3 className="text-xl font-black text-gray-900 mb-1 text-vi">Quét mã QR để thanh toán</h3>
+              <p className="text-sm text-gray-500 mb-6 text-vi">Mở ứng dụng {selectedMethod === 'momo' ? 'MoMo' : 'Ngân hàng'} và quét mã bên dưới</p>
               
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex justify-center mb-6">
-                <img src={qrUrl} alt="QR Code" className="w-56 h-auto mix-blend-multiply" />
+                <img src={qrUrl} alt="Mã QR thanh toán" className="w-56 h-auto mix-blend-multiply" />
               </div>
 
               <div className="flex flex-col gap-2">
                 <button 
                   onClick={() => {
                     setShowQR(false);
+                    const orderCode = pendingPaymentOrderCode;
+                    const orderEmail = pendingPaymentEmail;
                     setPendingPaymentOrderCode("");
+                    setPendingPaymentEmail("");
                     toast.success("Đặt hàng thành công! Cảm ơn bạn đã mua hàng.");
                     clearCart(true);
-                    setTimeout(() => navigate("/"), 2000);
+                    if (orderCode && orderEmail) {
+                      navigate(`/track-order?code=${encodeURIComponent(orderCode)}&email=${encodeURIComponent(orderEmail)}`);
+                    } else {
+                      navigate("/");
+                    }
                   }}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors"
                 >
@@ -322,6 +336,7 @@ export default function ThanhToan() {
                   onClick={() => {
                     setShowQR(false);
                     setPendingPaymentOrderCode("");
+                    setPendingPaymentEmail("");
                   }}
                   className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors"
                 >
@@ -348,12 +363,12 @@ export default function ThanhToan() {
                  <FaEnvelope className="w-6 h-6" />
                </div>
               <h3 className="text-lg font-black text-gray-900">Nhận hóa đơn điện tử</h3>
-              <p className="text-xs text-gray-500 mt-1">Vui lòng cung cấp email của bạn đềEchúng tôi tự động gửi hóa đơn xác nhận đơn hàng.</p>
+              <p className="text-xs text-gray-500 mt-1 text-vi">Vui lòng cung cấp email của bạn để chúng tôi tự động gửi hóa đơn xác nhận đơn hàng.</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Địa chềEEmail</label>
+                <label className="block text-xs font-bold text-gray-700 mb-2 text-vi">Email</label>
                 <input 
                   type="email"
                   placeholder="email@example.com"
@@ -364,11 +379,11 @@ export default function ThanhToan() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       if (!guestEmail.trim()) {
-                        toast.warning("Vui lòng nhập địa chềEEmail!");
+                        toast.warning("Vui lòng nhập email!");
                         return;
                       }
                       if (!guestEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                        toast.warning("Vui lòng nhập Email hợp lềE");
+                        toast.warning("Vui lòng nhập email hợp lệ");
                         return;
                       }
                       setShowEmailModal(false);
@@ -383,15 +398,16 @@ export default function ThanhToan() {
                   onClick={() => setShowEmailModal(false)}
                   className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors text-sm"
                 >
-                  Hủy bềE                </button>
+                  Hủy bỏ
+                </button>
                 <button 
                   onClick={() => {
                     if (!guestEmail.trim()) {
-                      toast.warning("Vui lòng nhập địa chềEEmail!");
+                      toast.warning("Vui lòng nhập email!");
                       return;
                     }
                     if (!guestEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                      toast.warning("Vui lòng nhập Email hợp lềE");
+                      toast.warning("Vui lòng nhập email hợp lệ");
                       return;
                     }
                     setShowEmailModal(false);

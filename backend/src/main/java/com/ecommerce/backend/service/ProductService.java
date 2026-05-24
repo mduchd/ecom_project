@@ -37,7 +37,7 @@ public class ProductService {
     // ── GET BY ID ─────────────────────────────────────────────────────────
     public Product getById(Long id) {
         return productRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Product not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với id: " + id));
     }
 
     // ── CREATE ────────────────────────────────────────────────────────────

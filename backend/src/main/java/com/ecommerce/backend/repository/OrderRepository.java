@@ -11,4 +11,5 @@ import java.util.Optional;
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByOrderByCreatedAtDesc();
     Optional<Order> findByOrderCode(String orderCode);
+    Optional<Order> findByOrderCodeIgnoreCaseAndCustomerEmailIgnoreCase(String orderCode, String customerEmail);
 }

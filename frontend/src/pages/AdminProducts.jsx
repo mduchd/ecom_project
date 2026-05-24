@@ -22,7 +22,7 @@ function StatCard({ label, value, icon, color, bg }) {
                 <span className={`${color} text-lg`}>{icon}</span>
             </div>
             <div>
-                <p className="text-xs text-gray-400 font-medium">{label}</p>
+                <p className="text-xs text-gray-400 font-medium text-vi">{label}</p>
                 <p className="text-xl font-black text-gray-800">{value}</p>
             </div>
         </div>
@@ -60,30 +60,30 @@ function DeleteModal({ product, onConfirm, onCancel, loading }) {
                     <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center">
                         <TrashIcon />
                     </div>
-                    <h3 className="text-lg font-black text-gray-800">Delete Product?</h3>
-                    <p className="text-sm text-gray-500">
-                        Are you sure you want to delete{" "}
+                    <h3 className="text-lg font-black text-gray-800 text-vi">Xóa sản phẩm?</h3>
+                    <p className="text-sm text-gray-500 text-vi">
+                        Bạn có chắc muốn xóa{" "}
                         <span className="font-bold text-gray-800">"{product.name}"</span>?
-                        This action <span className="text-red-500 font-bold">cannot be undone</span>.
+                        Thao tác này <span className="text-red-500 font-bold">không thể hoàn tác</span>.
                     </p>
                 </div>
                 <div className="flex gap-3 mt-6">
                     <button
                         onClick={onCancel}
                         disabled={loading}
-                        className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+                        className="flex-1 py-2.5 rounded-xl border border-gray-200 text-sm font-bold text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors text-vi"
                     >
-                        Cancel
+                        Hủy
                     </button>
                     <button
                         onClick={onConfirm}
                         disabled={loading}
-                        className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white text-sm font-bold transition-colors shadow-md shadow-red-100 flex items-center justify-center gap-2"
+                        className="flex-1 py-2.5 rounded-xl bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white text-sm font-bold transition-colors shadow-md shadow-red-100 flex items-center justify-center gap-2 text-vi"
                     >
                         {loading ? (
                             <FaSpinner className="w-4 h-4 animate-spin" />
                         ) : <TrashIcon />}
-                        {loading ? "Deleting..." : "Yes, Delete"}
+                        {loading ? "Đang xóa..." : "Xóa"}
                     </button>
                 </div>
             </div>
@@ -134,8 +134,8 @@ export default function AdminProducts() {
         } catch (err) {
             setError(
                 err.response?.status === 503 || !err.response
-                    ? "Cannot connect to server. Make sure the backend is running on port 8080."
-                    : err.message || "Failed to load products."
+                    ? "Không kết nối được máy chủ. Hãy đảm bảo backend đang chạy trên cổng 8080."
+                    : err.message || "Không tải được sản phẩm."
             );
         } finally {
             setLoading(false);
@@ -157,12 +157,12 @@ export default function AdminProducts() {
         try {
             await deleteProduct(deleteTarget.id);
             setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
-            showToast(`"${deleteTarget.name}" has been deleted.`, "success");
+            showToast(`Đã xóa "${deleteTarget.name}".`, "success");
         } catch (err) {
             showToast(
                 err.response?.status === 404
-                    ? "Product not found — it may have already been deleted."
-                    : "Failed to delete product. Please try again.",
+                    ? "Không tìm thấy sản phẩm — có thể đã bị xóa trước đó."
+                    : "Không thể xóa sản phẩm. Vui lòng thử lại.",
                 "error"
             );
         } finally {
@@ -210,7 +210,7 @@ export default function AdminProducts() {
     const SortHeader = ({ field, label }) => (
         <th
             onClick={() => handleSort(field)}
-            className="px-4 py-3 text-left text-xs font-black text-gray-500 uppercase tracking-wider cursor-pointer select-none hover:text-blue-600 hover:bg-blue-50 transition-colors group"
+            className="px-4 py-3 text-left text-xs font-black text-gray-500 text-vi cursor-pointer select-none hover:text-blue-600 hover:bg-blue-50 transition-colors group"
         >
             <div className="flex items-center gap-1.5">
                 {label}
@@ -229,40 +229,40 @@ export default function AdminProducts() {
                     {/* ── Breadcrumb ── */}
                     <nav className="flex items-center gap-1.5 text-xs text-gray-500">
                         <Link to="/" className="flex items-center gap-1 hover:text-blue-600 transition-colors font-medium">
-                            <HomeIcon /> Home
+                            <HomeIcon /> Trang chủ
                         </Link>
                         <span className="text-gray-300">/</span>
-                        <span className="text-blue-600 font-semibold">Admin / Products</span>
+                        <span className="text-blue-600 font-semibold text-vi">Quản trị / Sản phẩm</span>
                     </nav>
 
                     {/* ── Page header ── */}
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                         <div>
-                            <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-1">
-                                Admin Dashboard
+                            <p className="text-xs font-bold text-blue-500 mb-1 text-vi">
+                                Bảng quản trị
                             </p>
-                            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
-                                Product Management
+                            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight text-vi">
+                                Quản lý sản phẩm
                             </h1>
-                            <p className="text-sm text-gray-400 mt-1">
-                                Manage your store's product catalogue from one place.
+                            <p className="text-sm text-gray-400 mt-1 text-vi">
+                                Quản lý danh mục sản phẩm cửa hàng tại một nơi.
                             </p>
                         </div>
                         <Link
                             to="/admin/products/new"
-                            className="inline-flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-200 transition-all self-start sm:self-auto flex-shrink-0"
+                            className="inline-flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-sm font-bold rounded-xl shadow-lg shadow-blue-200 transition-all self-start sm:self-auto flex-shrink-0 text-vi"
                         >
-                            <PlusIcon /> Add New Product
+                            <PlusIcon /> Thêm sản phẩm
                         </Link>
                     </div>
 
                     {/* ── Stat cards ── */}
                     {!loading && !error && (
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <StatCard label="Total Products" value={products.length} icon={<FaBoxOpen />} color="text-blue-600" bg="bg-blue-50" />
-                            <StatCard label="In Stock" value={inStockCount} icon={<FaCheckCircle />} color="text-emerald-600" bg="bg-emerald-50" />
-                            <StatCard label="Out of Stock" value={outStockCount} icon={<FaTimesCircle />} color="text-red-500" bg="bg-red-50" />
-                            <StatCard label="Categories" value={categoryCount} icon={<FaTag />} color="text-purple-600" bg="bg-purple-50" />
+                            <StatCard label="Tổng sản phẩm" value={products.length} icon={<FaBoxOpen />} color="text-blue-600" bg="bg-blue-50" />
+                            <StatCard label="Còn hàng" value={inStockCount} icon={<FaCheckCircle />} color="text-emerald-600" bg="bg-emerald-50" />
+                            <StatCard label="Hết hàng" value={outStockCount} icon={<FaTimesCircle />} color="text-red-500" bg="bg-red-50" />
+                            <StatCard label="Danh mục" value={categoryCount} icon={<FaTag />} color="text-purple-600" bg="bg-purple-50" />
                         </div>
                     )}
 
@@ -272,8 +272,8 @@ export default function AdminProducts() {
                         {/* Table toolbar */}
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-5 py-4 border-b border-gray-100">
                             <div className="flex items-center gap-2 flex-wrap">
-                                <h2 className="text-sm font-black text-gray-800">
-                                    All Products
+                                <h2 className="text-sm font-black text-gray-800 text-vi">
+                                    Tất cả sản phẩm
                                     <span className="ml-2 text-xs font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
                                         {displayed.length}
                                     </span>
@@ -290,7 +290,7 @@ export default function AdminProducts() {
                                                     : "border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600 bg-white"
                                                 }`}
                                         >
-                                            {cat}
+                                            {cat === "All" ? "Tất cả" : cat}
                                         </button>
                                     ))}
                                 </div>
@@ -306,7 +306,7 @@ export default function AdminProducts() {
                                         type="text"
                                         value={search}
                                         onChange={(e) => setSearch(e.target.value)}
-                                        placeholder="Search name, category..."
+                                        placeholder="Tìm tên, danh mục..."
                                         className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl w-52 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
                                     />
                                 </div>
@@ -314,7 +314,7 @@ export default function AdminProducts() {
                                 <button
                                     onClick={fetchProducts}
                                     className="p-2 rounded-xl border border-gray-200 text-gray-500 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 transition-all"
-                                    title="Refresh"
+                                    title="Làm mới"
                                 >
                                     <RefreshIcon />
                                 </button>
@@ -327,13 +327,13 @@ export default function AdminProducts() {
                                 <div className="w-14 h-14 rounded-full bg-red-50 flex items-center justify-center mb-4">
                                     <FaExclamationTriangle className="w-7 h-7 text-red-400" />
                                 </div>
-                                <p className="text-sm font-black text-gray-700 mb-1">Failed to load products</p>
+                                <p className="text-sm font-black text-gray-700 mb-1 text-vi">Không tải được sản phẩm</p>
                                 <p className="text-xs text-gray-400 mb-5 max-w-sm">{error}</p>
                                 <button
                                     onClick={fetchProducts}
-                                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors"
+                                    className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors text-vi"
                                 >
-                                    <RefreshIcon /> Retry
+                                    <RefreshIcon /> Thử lại
                                 </button>
                             </div>
                         )}
@@ -344,13 +344,13 @@ export default function AdminProducts() {
                                 <table className="w-full text-sm">
                                     <thead>
                                         <tr className="bg-gray-50 border-b border-gray-100">
-                                            <th className="px-4 py-3 text-left text-xs font-black text-gray-500 uppercase tracking-wider w-16">ID</th>
-                                            <th className="px-4 py-3 text-left text-xs font-black text-gray-500 uppercase tracking-wider w-14">Image</th>
-                                            <SortHeader field="name" label="Product Name" />
-                                            <SortHeader field="category" label="Category" />
-                                            <SortHeader field="price" label="Price" />
-                                            <SortHeader field="stockQuantity" label="Stock" />
-                                            <th className="px-4 py-3 text-left text-xs font-black text-gray-500 uppercase tracking-wider">Actions</th>
+                                            <th className="px-4 py-3 text-left text-xs font-black text-gray-500 text-vi w-16">ID</th>
+                                            <th className="px-4 py-3 text-left text-xs font-black text-gray-500 text-vi w-14">Ảnh</th>
+                                            <SortHeader field="name" label="Tên sản phẩm" />
+                                            <SortHeader field="category" label="Danh mục" />
+                                            <SortHeader field="price" label="Giá" />
+                                            <SortHeader field="stockQuantity" label="Tồn kho" />
+                                            <th className="px-4 py-3 text-left text-xs font-black text-gray-500 text-vi">Thao tác</th>
                                         </tr>
                                     </thead>
                                     <tbody className="divide-y divide-gray-50">
@@ -364,8 +364,8 @@ export default function AdminProducts() {
                                                 <td colSpan={7}>
                                                     <div className="flex flex-col items-center justify-center py-16 text-gray-400">
                                                         <FaInbox className="w-12 h-12 opacity-20 mb-3" />
-                                                        <p className="font-bold text-gray-500 mb-1">No products found</p>
-                                                        <p className="text-xs">Try a different search or category filter.</p>
+                                                        <p className="font-bold text-gray-500 mb-1 text-vi">Không tìm thấy sản phẩm</p>
+                                                        <p className="text-xs text-vi">Thử từ khóa hoặc bộ lọc danh mục khác.</p>
                                                     </div>
                                                 </td>
                                             </tr>
@@ -414,11 +414,11 @@ export default function AdminProducts() {
                                                 {/* Price */}
                                                 <td className="px-4 py-3">
                                                     <p className="font-black text-gray-900">
-                                                        ${Number(product.price ?? 0).toLocaleString()}
+                                                        {Number(product.price ?? 0).toLocaleString()}đ
                                                     </p>
                                                     {product.discountPrice && product.discountPrice > product.price && (
                                                         <p className="text-xs text-gray-400 line-through">
-                                                            ${Number(product.discountPrice).toLocaleString()}
+                                                            {Number(product.discountPrice).toLocaleString()}đ
                                                         </p>
                                                     )}
                                                 </td>
@@ -428,12 +428,12 @@ export default function AdminProducts() {
                                                     {product.stockQuantity > 0 ? (
                                                         <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-600">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                                                            {product.stockQuantity} left
+                                                            {product.stockQuantity} còn
                                                         </span>
                                                     ) : (
-                                                        <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-red-50 text-red-500">
+                                                        <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-full bg-red-50 text-red-500 text-vi">
                                                             <span className="w-1.5 h-1.5 rounded-full bg-red-400" />
-                                                            Out of Stock
+                                                            Hết hàng
                                                         </span>
                                                     )}
                                                 </td>
@@ -445,7 +445,7 @@ export default function AdminProducts() {
                                                         <Link
                                                             to={`/product/${product.id}`}
                                                             className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-gray-50 hover:bg-gray-100 text-gray-500 text-xs font-bold transition-colors"
-                                                            title="View product page"
+                                                            title="Xem trang sản phẩm"
                                                         >
                                                             <EyeIcon />
                                                         </Link>
@@ -453,17 +453,17 @@ export default function AdminProducts() {
                                                         {/* Edit */}
                                                         <Link
                                                             to={`/admin/products/edit/${product.id}`}
-                                                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 text-xs font-bold transition-colors"
+                                                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-600 text-xs font-bold transition-colors text-vi"
                                                         >
-                                                            <EditIcon /> Edit
+                                                            <EditIcon /> Sửa
                                                         </Link>
 
                                                         {/* Delete */}
                                                         <button
                                                             onClick={() => setDeleteTarget(product)}
-                                                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-xs font-bold transition-colors"
+                                                            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-red-50 hover:bg-red-100 text-red-500 text-xs font-bold transition-colors text-vi"
                                                         >
-                                                            <TrashIcon /> Delete
+                                                            <TrashIcon /> Xóa
                                                         </button>
                                                     </div>
                                                 </td>
@@ -476,11 +476,11 @@ export default function AdminProducts() {
 
                         {/* Table footer */}
                         {!loading && !error && displayed.length > 0 && (
-                            <div className="px-5 py-3 border-t border-gray-100 bg-gray-50 text-xs text-gray-400 font-medium">
-                                Showing <span className="font-bold text-gray-600">{displayed.length}</span> of{" "}
-                                <span className="font-bold text-gray-600">{products.length}</span> products
+                            <div className="px-5 py-3 border-t border-gray-100 bg-gray-50 text-xs text-gray-400 font-medium text-vi">
+                                Hiển thị <span className="font-bold text-gray-600">{displayed.length}</span> /{" "}
+                                <span className="font-bold text-gray-600">{products.length}</span> sản phẩm
                                 {search && (
-                                    <span> · filtered by "<span className="text-blue-600 font-bold">{search}</span>"</span>
+                                    <span> · lọc theo "<span className="text-blue-600 font-bold">{search}</span>"</span>
                                 )}
                             </div>
                         )}

@@ -14,3 +14,12 @@ export const updateOrderStatus = async (id, status) => {
   const response = await api.patch(`/orders/${id}/status`, { status });
   return response.data;
 };
+
+export const trackOrder = async (code, email) => {
+  const response = await api.get("/orders/track", {
+    params: { code: code.trim(), email: email.trim() },
+  });
+  return response.data;
+};
+
+export const getAllOrders = getOrders;

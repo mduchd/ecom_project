@@ -36,10 +36,10 @@ export function Toaster() {
              {m.type === 'success' ? <FaCheckCircle className="text-xl" /> : m.type === 'warning' ? <FaExclamationTriangle className="text-xl" /> : <FaTimesCircle className="text-xl" />}
           </div>
           <div className="flex flex-col">
-            <span className="font-black text-[11px] uppercase tracking-[0.15em] opacity-70 mb-0.5">
-               {m.type === 'success' ? 'Notification' : m.type === 'warning' ? 'Attention' : 'Warning'}
+            <span className="font-black text-[11px] opacity-70 mb-0.5 text-vi">
+               {m.type === 'success' ? 'Thông báo' : m.type === 'warning' ? 'Cảnh báo' : 'Lỗi'}
             </span>
-            <span className="text-sm font-bold leading-tight">{m.msg}</span>
+            <span className="text-sm font-bold leading-tight text-vi">{m.msg}</span>
           </div>
         </div>
       ))}

@@ -25,11 +25,11 @@ function Breadcrumb({ productName, category }) {
     return (
         <nav className="flex items-center gap-1.5 text-xs text-gray-500 flex-wrap">
             <Link to="/" className="flex items-center gap-1 hover:text-blue-600 transition-colors font-medium">
-                <HomeIcon /> Home
+                <HomeIcon /> Trang chủ
             </Link>
             <span className="text-gray-300">/</span>
-            <Link to="/shop" className="hover:text-blue-600 transition-colors font-medium">
-                Shop
+            <Link to="/shop" className="hover:text-blue-600 transition-colors font-medium text-vi">
+                Cửa hàng
             </Link>
             {category && (
                 <>
@@ -62,7 +62,7 @@ function StarRating({ rating = 0, reviews = 0 }) {
             </div>
             <span className="text-sm font-bold text-yellow-500">{safeRating.toFixed(1)}</span>
             {reviews > 0 && (
-                <span className="text-sm text-gray-400">({reviews.toLocaleString()} reviews)</span>
+                <span className="text-sm text-gray-400 text-vi">({reviews.toLocaleString()} đánh giá)</span>
             )}
         </div>
     );
@@ -106,14 +106,14 @@ function TrustBadges() {
     return (
         <div className="grid grid-cols-2 gap-2.5">
             {[
-                { icon: <TruckIcon />, label: "Free Shipping", sub: "Orders over $399", color: "text-blue-600", bg: "bg-blue-50" },
-                { icon: <ShieldIcon />, label: "2-Year Warranty", sub: "Manufacturer covered", color: "text-emerald-600", bg: "bg-emerald-50" },
+                { icon: <TruckIcon />, label: "Miễn phí vận chuyển", sub: "Đơn từ 399.000đ", color: "text-blue-600", bg: "bg-blue-50" },
+                { icon: <ShieldIcon />, label: "Bảo hành 2 năm", sub: "Chính hãng", color: "text-emerald-600", bg: "bg-emerald-50" },
             ].map(({ icon, label, sub, color, bg }) => (
                 <div key={label} className={`flex items-center gap-2.5 p-3 rounded-xl ${bg}`}>
                     <span className={color}>{icon}</span>
                     <div>
-                        <p className={`text-xs font-black ${color}`}>{label}</p>
-                        <p className="text-[10px] text-gray-400">{sub}</p>
+                        <p className={`text-xs font-black ${color} text-vi`}>{label}</p>
+                        <p className="text-[10px] text-gray-400 text-vi">{sub}</p>
                     </div>
                 </div>
             ))}
@@ -124,7 +124,7 @@ function TrustBadges() {
 // ── Specifications Parser ────────────────────────────────────────────────────
 // specifications có thể là String dài, hoặc đã là Array từ backend
 function SpecificationsTable({ specs }) {
-    if (!specs) return <p className="text-sm text-gray-400 italic">No specifications available for this product.</p>;
+    if (!specs) return <p className="text-sm text-gray-400 italic text-vi">Sản phẩm chưa có thông số kỹ thuật.</p>;
 
     let parsedSpecs = [];
 
@@ -160,7 +160,7 @@ function SpecificationsTable({ specs }) {
                     {parsedSpecs.length > 0 ? (
                         parsedSpecs.map(({ label, value }, i) => (
                             <tr key={i} className={`border-b border-gray-100 last:border-0 ${i % 2 === 0 ? "bg-gray-50/50" : "bg-white"}`}>
-                                <td className="px-5 py-3.5 font-bold text-gray-700 w-1/3 bg-gray-50/80 border-r border-gray-100 uppercase tracking-wider text-[11px]">
+                                <td className="px-5 py-3.5 font-bold text-gray-700 w-1/3 bg-gray-50/80 border-r border-gray-100 text-[11px] text-vi">
                                     {label}
                                 </td>
                                 <td className="px-5 py-3.5 text-gray-800 font-medium leading-relaxed">
@@ -170,7 +170,7 @@ function SpecificationsTable({ specs }) {
                         ))
                     ) : (
                         <tr>
-                            <td className="px-5 py-4 text-gray-500 italic text-center">Invalid specification format.</td>
+                            <td className="px-5 py-4 text-gray-500 italic text-center text-vi">Định dạng thông số không hợp lệ.</td>
                         </tr>
                     )}
                 </tbody>
@@ -216,20 +216,20 @@ function ErrorState({ message, onRetry }) {
             <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
                 <FaExclamationTriangle className="w-8 h-8 text-red-400" />
             </div>
-            <h3 className="text-base font-black text-gray-700 mb-1">Product not found</h3>
-            <p className="text-sm text-gray-400 mb-6 max-w-xs">{message}</p>
+            <h3 className="text-base font-black text-gray-700 mb-1 text-vi">Không tìm thấy sản phẩm</h3>
+            <p className="text-sm text-gray-400 mb-6 max-w-xs text-vi">{message}</p>
             <div className="flex items-center gap-3">
                 <Link
                     to="/shop"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 bg-white text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 transition-colors"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-gray-200 bg-white text-sm font-bold text-gray-700 rounded-xl hover:bg-gray-50 transition-colors text-vi"
                 >
-                    <ArrowLeftIcon /> Back to Shop
+                    <ArrowLeftIcon /> Quay lại cửa hàng
                 </Link>
                 <button
                     onClick={onRetry}
-                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors shadow-md shadow-blue-100"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors shadow-md shadow-blue-100 text-vi"
                 >
-                    <RefreshIcon /> Try Again
+                    <RefreshIcon /> Thử lại
                 </button>
             </div>
         </div>
@@ -270,7 +270,7 @@ function ImageGallery({ imageUrl, subImages, name }) {
                     onError={(e) => { e.target.src = "https://via.placeholder.com/600x600?text=No+Image"; }}
                 />
                 <span className="absolute bottom-3 right-3 bg-black/25 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full">
-                    {zoomed ? "Click to zoom out" : "Click to zoom in"}
+                    {zoomed ? "Nhấn để thu nhỏ" : "Nhấn để phóng to"}
                 </span>
             </div>
 
@@ -345,7 +345,7 @@ function ProductInfo({ product, onAddToCart }) {
             {/* Brand + Category badges */}
             <div className="flex items-center gap-2 flex-wrap">
                 {brand && (
-                    <span className="text-xs font-black uppercase tracking-widest text-gray-400">
+                    <span className="text-xs font-black text-gray-400 text-vi">
                         {brand}
                     </span>
                 )}
@@ -406,11 +406,11 @@ function ProductInfo({ product, onAddToCart }) {
             <div className="flex items-center gap-2">
                 <span className={`w-2 h-2 rounded-full flex-shrink-0 ${inStock ? "bg-emerald-500" : "bg-red-400"}`} />
                 <span className={`text-sm font-bold ${inStock ? "text-emerald-600" : "text-red-500"}`}>
-                    {inStock ? "In Stock" : "Out of Stock"}
+                    {inStock ? "Còn hàng" : "Hết hàng"}
                 </span>
                 {inStock && (
-                    <span className="text-xs text-gray-400">
-                        ({stockQuantity} units available)
+                    <span className="text-xs text-gray-400 text-vi">
+                        (Còn {stockQuantity} sản phẩm)
                     </span>
                 )}
             </div>
@@ -420,8 +420,8 @@ function ProductInfo({ product, onAddToCart }) {
                 {inStock && (
                     <div className="flex items-center gap-3 flex-wrap">
                         <QuantityCounter value={qty} onChange={setQty} max={maxQty} />
-                        <span className="text-sm text-gray-500 font-medium">
-                            Total:{" "}
+                        <span className="text-sm text-gray-500 font-medium text-vi">
+                            Tổng:{" "}
                             <span className="font-black text-gray-900">
                                 {(Number(price) * qty).toLocaleString()}đ
                             </span>
@@ -445,9 +445,9 @@ function ProductInfo({ product, onAddToCart }) {
                             }`}
                     >
                         {addedToCart ? (
-                            <><CheckIcon /> Added to Cart!</>
+                            <><CheckIcon /> Đã thêm vào giỏ!</>
                         ) : (
-                            <><CartIcon /> {inStock ? "Add to Cart" : "Out of Stock"}</>
+                            <><CartIcon /> {inStock ? "Thêm vào giỏ" : "Hết hàng"}</>
                         )}
                     </button>
 
@@ -473,7 +473,7 @@ function ProductInfo({ product, onAddToCart }) {
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <FiGift className="text-red-500 w-5 h-5 animate-bounce"/>
-                        <p className="font-black text-sm text-gray-800 uppercase tracking-wider">Khuyến mãi đi kèm</p>
+                        <p className="font-black text-sm text-gray-800 text-vi">Khuyến mãi đi kèm</p>
                     </div>
                 </div>
                 {[
@@ -497,15 +497,18 @@ function ProductInfo({ product, onAddToCart }) {
 
             {/* Meta info */}
             <div className="flex flex-col gap-1.5 text-xs text-gray-500 pt-1">
-                {brand && <span>Brand: <strong className="text-gray-700">{brand}</strong></span>}
-                {category && <span>Category: <strong className="text-gray-700">{category}</strong></span>}
+                {brand && <span className="text-vi">Thương hiệu: <strong className="text-gray-700">{brand}</strong></span>}
+                {category && <span className="text-vi">Danh mục: <strong className="text-gray-700">{category}</strong></span>}
             </div>
         </div>
     );
 }
 
 // ── Detail Tabs ───────────────────────────────────────────────────────────────
-const TABS = ["Description", "Specifications"];
+const TABS = [
+    { id: "Description", label: "Mô tả" },
+    { id: "Specifications", label: "Thông số kỹ thuật" },
+];
 
 function DetailTabs({ product }) {
     const [active, setActive] = useState("Description");
@@ -516,15 +519,15 @@ function DetailTabs({ product }) {
             <div className="flex border-b border-gray-100">
                 {TABS.map((tab) => (
                     <button
-                        key={tab}
-                        onClick={() => setActive(tab)}
-                        className={`px-6 py-4 text-sm font-bold transition-all duration-150 border-b-2
-              ${active === tab
+                        key={tab.id}
+                        onClick={() => setActive(tab.id)}
+                        className={`px-6 py-4 text-sm font-bold transition-all duration-150 border-b-2 text-vi
+              ${active === tab.id
                                 ? "border-blue-600 text-blue-600 bg-blue-50/50"
                                 : "border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                             }`}
                     >
-                        {tab}
+                        {tab.label}
                     </button>
                 ))}
             </div>
@@ -532,9 +535,9 @@ function DetailTabs({ product }) {
             {/* Tab content */}
             <div className="p-6 sm:p-8">
                 {active === "Description" && (
-                    <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed whitespace-pre-line">
+                    <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed whitespace-pre-line text-vi">
                         {product.description || (
-                            <p className="text-gray-400 italic">No description available.</p>
+                            <p className="text-gray-400 italic">Chưa có mô tả sản phẩm.</p>
                         )}
                     </div>
                 )}
@@ -566,10 +569,10 @@ export default function ProductDetail() {
             const status = err.response?.status;
             setError(
                 status === 404
-                    ? `Product with ID "${id}" does not exist.`
+                    ? `Không tìm thấy sản phẩm với mã "${id}".`
                     : status === 503 || !err.response
-                        ? "Cannot connect to server. Make sure the backend is running on port 8080."
-                        : err.message || "Something went wrong."
+                        ? "Không thể kết nối máy chủ. Vui lòng đảm bảo backend đang chạy ở cổng 8080."
+                        : err.message || "Đã xảy ra lỗi."
             );
         } finally {
             setLoading(false);
@@ -581,20 +584,20 @@ export default function ProductDetail() {
     }, [id]);
 
     return (
-        <main className="min-h-screen bg-gray-50">
+        <main lang="vi" className="min-h-screen bg-gray-50">
             <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 space-y-6">
 
                 {/* Breadcrumb — luôn hiển thị */}
                 <div className="flex items-center justify-between gap-4">
                     <Breadcrumb
-                        productName={product?.name ?? "Loading..."}
+                        productName={product?.name ?? "Đang tải..."}
                         category={product?.category}
                     />
                     <Link
                         to="/shop"
                         className="hidden sm:inline-flex items-center gap-1.5 text-xs font-bold text-gray-500 hover:text-blue-600 transition-colors flex-shrink-0"
                     >
-                        <ArrowLeftIcon /> Back to Shop
+                        <ArrowLeftIcon /> Quay lại cửa hàng
                     </Link>
                 </div>
 

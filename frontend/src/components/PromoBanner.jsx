@@ -19,13 +19,13 @@ export default function PromoBanner() {
                     {/* Content Section */}
                     <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
                         {/* Sale Badge */}
-                        <span className="bg-yellow-400 text-blue-950 text-[11px] font-black uppercase tracking-wider px-3.5 py-1.5 rounded-full shadow-sm whitespace-nowrap">
+                        <span className="bg-yellow-400 text-blue-950 text-[11px] font-black px-3.5 py-1.5 rounded-full shadow-sm whitespace-nowrap text-vi">
                             Đặc quyền Smember
                         </span>
                         
                         <div>
-                            <h3 className="text-white text-base md:text-lg font-black uppercase tracking-tight">
-                                Đại Tiệc Công Nghệ - Lên Đời Siêu Phẩm
+                            <h3 className="text-white text-base md:text-lg font-black text-vi">
+                                Đại tiệc công nghệ — Lên đời siêu phẩm
                             </h3>
                             <p className="text-white/80 text-xs mt-0.5 max-w-xl font-medium">
                                 Nhập mã <span className="text-yellow-300 font-bold">SMEMBER5</span> giảm thêm <span className="text-yellow-300 font-bold">5% tối đa 500.000đ</span> khi thanh toán qua thẻ tín dụng.

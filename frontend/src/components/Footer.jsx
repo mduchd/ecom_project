@@ -31,7 +31,7 @@ const Footer = () => {
 
                     {/* Liên kết nhanh */}
                     <div>
-                        <h3 className="text-white font-bold mb-4 uppercase text-sm tracking-wider">Liên kết nhanh</h3>
+                        <h3 className="text-white font-bold mb-4 text-sm tracking-wider text-vi">Liên kết nhanh</h3>
                         <ul className="space-y-2.5">
                             <li><Link to="/shop" className="text-sm hover:text-blue-400 transition-colors">Tất cả sản phẩm</Link></li>
                             <li><Link to="/cart" className="text-sm hover:text-blue-400 transition-colors">Giỏ hàng</Link></li>
@@ -42,7 +42,7 @@ const Footer = () => {
 
                     {/* Hỗ trợ khách hàng */}
                     <div>
-                        <h3 className="text-white font-bold mb-4 uppercase text-sm tracking-wider">Hỗ trợ khách hàng</h3>
+                        <h3 className="text-white font-bold mb-4 text-sm tracking-wider text-vi">Hỗ trợ khách hàng</h3>
                         <ul className="space-y-2.5">
                             <li><Link to="/faq" className="text-sm hover:text-blue-400 transition-colors">Trung tâm trợ giúp / FAQ</Link></li>
                             <li><Link to="/contact" className="text-sm hover:text-blue-400 transition-colors">Liên hệ</Link></li>
@@ -53,7 +53,7 @@ const Footer = () => {
 
                     {/* Bản tin */}
                     <div>
-                        <h3 className="text-white font-bold mb-4 uppercase text-sm tracking-wider">Bản tin</h3>
+                        <h3 className="text-white font-bold mb-4 text-sm tracking-wider text-vi">Bản tin</h3>
                         <p className="text-sm text-gray-400 mb-4 leading-relaxed">Đăng ký để nhận thông báo về các ưu đãi mới nhất và giảm giá độc quyền.</p>
                         <form className="flex">
                             <input

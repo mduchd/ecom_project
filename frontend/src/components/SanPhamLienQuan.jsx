@@ -42,7 +42,7 @@ export default function SPLienQuan({ category, currentId, onSelectProduct }) {
     if (loading) {
         return (
             <div className="mt-12 space-y-4">
-                <h2 className="text-xl font-bold text-gray-800">Sản Phẩm Tương Tự</h2>
+                <h2 className="text-xl font-bold text-gray-800 text-vi">Sản phẩm tương tự</h2>
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 animate-pulse">
                     {Array.from({ length: 5 }).map((_, i) => (
                         <div key={i} className="h-64 bg-gray-100 rounded-2xl" />
@@ -61,7 +61,7 @@ export default function SPLienQuan({ category, currentId, onSelectProduct }) {
             <div className="flex items-center justify-between border-b border-gray-100 pb-3 mb-6">
                 <div className="flex items-center gap-3">
                     <div className="w-1.5 h-6 bg-blue-600 rounded-full"></div>
-                    <h2 className="text-xl font-black text-gray-900 uppercase tracking-tight">Sản Phẩm Tương Tự</h2>
+                    <h2 className="text-xl font-black text-gray-900 text-vi">Sản phẩm tương tự</h2>
                 </div>
             </div>
 
@@ -84,7 +84,7 @@ export default function SPLienQuan({ category, currentId, onSelectProduct }) {
                                 />
                                 {!isAvailable && (
                                     <div className="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[1px]">
-                                        <span className="bg-red-500 text-white text-[10px] font-black px-2.5 py-1 rounded-md uppercase">Hết hàng</span>
+                                        <span className="bg-red-500 text-white text-[10px] font-black px-2.5 py-1 rounded-md text-vi">Hết hàng</span>
                                     </div>
                                 )}
                             </div>

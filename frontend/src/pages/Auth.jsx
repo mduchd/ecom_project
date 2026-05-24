@@ -429,7 +429,7 @@ function OtpVerificationForm({ email, initialMessage, onVerifySuccess, onCancel 
     return (
         <form onSubmit={handleVerify} className="space-y-5">
             <div className="text-center space-y-2 animate-fadeIn">
-                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">Xác thực tài khoản</p>
+                <p className="text-xs text-gray-500 font-bold tracking-wider text-vi">Xác thực tài khoản</p>
                 <p className="text-sm text-gray-600 font-medium">Mã OTP 6 số đã được gửi tới:</p>
                 <p className="text-sm font-bold text-gray-800 bg-gray-50 py-1.5 px-3 rounded-xl inline-block border border-gray-100">{email}</p>
             </div>
@@ -441,7 +441,7 @@ function OtpVerificationForm({ email, initialMessage, onVerifySuccess, onCancel 
             )}
 
             <div className="space-y-1.5">
-                <label className="block text-xs font-bold text-gray-600 text-center uppercase tracking-wider">Nhập mã OTP 6 số</label>
+                <label className="block text-xs font-bold text-gray-600 text-center tracking-wider text-vi">Nhập mã OTP 6 số</label>
                 <input
                     type="text"
                     maxLength={6}

@@ -28,10 +28,10 @@ function Breadcrumb() {
     return (
         <nav className="flex items-center gap-1.5 text-xs text-gray-500">
             <a href="/" className="flex items-center gap-1 hover:text-blue-600 transition-colors font-medium">
-                <HomeIcon /> Home
+                <HomeIcon /> Trang chủ
             </a>
             <span className="text-gray-300">/</span>
-            <span className="text-blue-600 font-semibold">Shopping Cart</span>
+            <span className="text-blue-600 font-semibold text-vi">Giỏ hàng</span>
         </nav>
     );
 }
@@ -83,7 +83,7 @@ function CartItem({ item, onQtyChange, onRemove }) {
                 {/* Name + remove */}
                 <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                        <p className="text-xs text-blue-500 font-bold uppercase tracking-wide mb-0.5">
+                        <p className="text-xs text-blue-500 font-bold mb-0.5 text-vi">
                             {item.category}
                         </p>
                         <h3 className="text-sm font-bold text-gray-800 line-clamp-2 leading-snug">
@@ -123,13 +123,13 @@ function EmptyCart() {
             <div className="w-20 h-20 rounded-full bg-gray-100 flex items-center justify-center mb-4">
                 <FaShoppingCart className="w-10 h-10 text-gray-300" />
             </div>
-            <h3 className="text-lg font-black text-gray-700 mb-2">Your cart is empty</h3>
-            <p className="text-sm text-gray-400 mb-6">Looks like you haven't added anything yet.</p>
+            <h3 className="text-lg font-black text-gray-700 mb-2 text-vi">Giỏ hàng trống</h3>
+            <p className="text-sm text-gray-400 mb-6 text-vi">Bạn chưa thêm sản phẩm nào.</p>
             <Link
                 to="/shop"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-md shadow-blue-100 transition-all active:scale-95"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-md shadow-blue-100 transition-all active:scale-95 text-vi"
             >
-                <CartIcon /> Start Shopping
+                <CartIcon /> Mua sắm ngay
             </Link>
         </div>
     );
@@ -151,7 +151,7 @@ function CouponInput({ applied, onApply, onRemove }) {
                 onApply({ code: code.trim().toUpperCase(), ...coupon });
                 setCode("");
             } else {
-                setError("Invalid coupon code. Try SAVE10, FLAT50 or TECH20.");
+                setError("Mã giảm giá không hợp lệ. Thử SAVE10, FLAT50 hoặc TECH20.");
             }
             setLoading(false);
         }, 600);
@@ -187,7 +187,7 @@ function CouponInput({ applied, onApply, onRemove }) {
                         value={code}
                         onChange={(e) => { setCode(e.target.value.toUpperCase()); setError(""); }}
                         onKeyDown={(e) => e.key === "Enter" && handleApply()}
-                        placeholder="Enter coupon code"
+                        placeholder="Nhập mã giảm giá"
                         className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all placeholder-gray-400 font-medium tracking-wide"
                     />
                 </div>
@@ -196,7 +196,7 @@ function CouponInput({ applied, onApply, onRemove }) {
                     disabled={!code.trim() || loading}
                     className="px-4 py-2.5 bg-gray-800 hover:bg-gray-900 disabled:bg-gray-300 disabled:cursor-not-allowed text-white text-sm font-bold rounded-xl transition-colors flex-shrink-0"
                 >
-                    {loading ? <FaSpinner className="w-4 h-4 animate-spin" /> : "Apply"}
+                    {loading ? <FaSpinner className="w-4 h-4 animate-spin" /> : "Áp dụng"}
                 </button>
             </div>
             {error && (
@@ -204,7 +204,7 @@ function CouponInput({ applied, onApply, onRemove }) {
                     <XIcon /> {error}
                 </p>
             )}
-            <p className="text-[11px] text-gray-400">Try: <span className="font-mono font-bold">SAVE10</span>, <span className="font-mono font-bold">FLAT50</span>, <span className="font-mono font-bold">TECH20</span></p>
+            <p className="text-[11px] text-gray-400 text-vi">Gợi ý: <span className="font-mono font-bold">SAVE10</span>, <span className="font-mono font-bold">FLAT50</span>, <span className="font-mono font-bold">TECH20</span></p>
         </div>
     );
 }
@@ -233,8 +233,8 @@ function OrderSummary({ items }) {
 
             {/* Header */}
             <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
-                <h2 className="text-base font-black text-gray-800">Order Summary</h2>
-                <p className="text-xs text-gray-400 mt-0.5">{items.length} item{items.length !== 1 ? "s" : ""}</p>
+                <h2 className="text-base font-black text-gray-800 text-vi">Tóm tắt đơn hàng</h2>
+                <p className="text-xs text-gray-400 mt-0.5 text-vi">{items.length} sản phẩm</p>
             </div>
 
             <div className="px-5 py-5 space-y-4">
@@ -290,7 +290,7 @@ function OrderSummary({ items }) {
                 {/* Coupon */}
                 <div>
                     <p className="text-xs font-bold text-gray-600 mb-2 flex items-center gap-1.5">
-                        <TagIcon /> Coupon Code
+                        <TagIcon /> Mã giảm giá
                     </p>
                     <CouponInput
                         applied={coupon}
@@ -314,20 +314,20 @@ function OrderSummary({ items }) {
                 {/* Checkout button */}
                 {checkedOut ? (
                     <div className="w-full py-3.5 rounded-xl bg-emerald-500 text-white text-sm font-black flex items-center justify-center gap-2">
-                        <CheckCircleIcon /> Order Placed!
+                        <CheckCircleIcon /> Đặt hàng thành công!
                     </div>
                 ) : (
                     < Link to="/checkout"
                         className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-blue-100 transition-all duration-150"
                     >
-                        Proceed to Checkout <ChevronRight />
+                        Tiến hành thanh toán <ChevronRight />
                     </Link>
                 )}
 
                 {/* Security note */}
                 <div className="flex items-center justify-center gap-1.5 text-gray-400">
                     <LockIcon />
-                    <span className="text-[11px] font-medium">Secure checkout — SSL encrypted</span>
+                    <span className="text-[11px] font-medium text-vi">Thanh toán an toàn — mã hóa SSL</span>
                 </div>
 
                 {/* Payment icons */}
@@ -348,7 +348,7 @@ export default function Cart() {
     const { cart: items, updateCartQty, removeFromCart, clearCart } = useAuth();
 
     return (
-        <main className="min-h-screen bg-gray-50">
+        <main lang="vi" className="min-h-screen bg-gray-50">
             <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 space-y-5">
 
                 {/* Breadcrumb */}
@@ -357,8 +357,8 @@ export default function Cart() {
                 {/* Page title */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
-                            Shopping Cart
+                        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight text-vi">
+                            Giỏ hàng
                         </h1>
                         <div className="flex gap-1 mt-1.5">
                             <div className="h-1 w-10 rounded-full bg-blue-600" />
@@ -370,7 +370,7 @@ export default function Cart() {
                             onClick={clearCart}
                             className="text-xs text-red-400 hover:text-red-600 font-bold flex items-center gap-1.5 transition-colors"
                         >
-                            <TrashIcon /> Clear All
+                            <TrashIcon /> Xóa tất cả
                         </button>
                     )}
                 </div>
@@ -385,11 +385,11 @@ export default function Cart() {
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
                             {/* List header */}
-                            <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-gray-50 border-b border-gray-100 text-xs font-black text-gray-400 uppercase tracking-wider">
-                                <span>Product</span>
-                                <span>Unit Price</span>
-                                <span>Quantity</span>
-                                <span>Total</span>
+                            <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-gray-50 border-b border-gray-100 text-xs font-black text-gray-400 text-vi">
+                                <span>Sản phẩm</span>
+                                <span>Đơn giá</span>
+                                <span>Số lượng</span>
+                                <span>Thành tiền</span>
                                 <span></span>
                             </div>
 

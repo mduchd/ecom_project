@@ -34,7 +34,7 @@ export default function CategoryList() {
             <div className="bg-white rounded-2xl p-5 border border-gray-100 shadow-sm">
                 <div className="flex items-center gap-3 mb-5">
                     <div className="w-1.5 h-6 bg-blue-600 rounded-full"></div>
-                    <h2 className="text-lg font-black text-gray-900 uppercase tracking-tight">Danh mục nổi bật</h2>
+                    <h2 className="text-lg font-black text-gray-900 text-vi">Danh mục nổi bật</h2>
                 </div>
                 
                 <div className="grid grid-cols-3 sm:grid-cols-5 gap-4">

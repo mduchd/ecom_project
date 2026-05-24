@@ -96,13 +96,13 @@ function TopBar({ currency, setCurrency, language, setLanguage }) {
                 </div>
 
                 <div className="flex items-center gap-3 sm:gap-4">
-                    <a
-                        href="#"
+                    <Link
+                        to="/track-order"
                         className="hidden sm:inline-flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-semibold px-3 py-1 rounded-full transition-colors duration-150"
                     >
                         <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse inline-block" />
                         Theo dõi đơn
-                    </a>
+                    </Link>
                     <Dropdown selected={currency} options={CURRENCIES} onChange={setCurrency} />
                     <div className="w-px h-3.5 bg-gray-300" />
                     <Dropdown selected={language} options={LANGUAGES} onChange={setLanguage} icon={<FaGlobe className="w-3.5 h-3.5" />} />
@@ -491,7 +491,7 @@ function MobileMenu({ open, onClose }) {
                     ))}
 
                     <div className="border-t border-gray-100 mt-4 pt-4 px-5 space-y-1">
-                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Danh mục</p>
+                        <p className="text-[10px] text-gray-400 font-bold mb-1 text-vi">Danh mục</p>
                         {CATEGORIES.map((cat) => (
                             <button key={cat.label} onClick={() => { onClose(); if (cat.label === "Tất cả danh mục") navigate("/shop"); else navigate(`/shop?category=${encodeURIComponent(cat.label)}`); }} className="flex items-center w-full text-left px-0 py-2 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors">
                                 {cat.icon}

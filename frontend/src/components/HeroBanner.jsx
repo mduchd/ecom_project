@@ -7,8 +7,8 @@ const HERO_SLIDES = [
     id: 1,
     tag: "Sản phẩm nổi bật",
     title: "A4tech Bloody",
-    subtitle: "Tai nghe chơi game",
-    description: "Tai nghe không dây giàu tính năng, tối ưu cho game thủ chuyên nghiệp và người yêu âm thanh.",
+    subtitle: "tài nghe chơi game",
+    description: "tài nghe không dây giàu tính năng, tối ưu cho game thủ chuyên nghiệp và người yêu âm thanh.",
     btnText: "Mua ngay",
     btnColor: "bg-blue-600 hover:bg-blue-700 text-white shadow-lg shadow-blue-500/20",
     bg: "bg-gradient-to-br from-[#eae3d2] via-[#f7f4eb] to-[#dcd5c0]",
@@ -110,7 +110,7 @@ function HeroSlide({ slide, isActive }) {
 
       <div className="relative z-10 flex-1 max-w-[55%]">
         <span
-          className={`inline-block text-[11px] font-bold uppercase tracking-widest mb-3 px-2.5 py-0.5 rounded-full ${
+          className={`inline-block text-[11px] font-bold mb-3 px-2.5 py-0.5 rounded-full text-vi ${
             slide.tagColor || "text-blue-300 bg-blue-900/40 border border-blue-800/40"
           }`}
         >
@@ -151,7 +151,7 @@ function SmallBanner({ banner }) {
       )}
 
       <div className="flex-1 z-10">
-        <p className={`text-[10px] font-bold uppercase tracking-wider opacity-60 ${banner.textColor}`}>{banner.brand}</p>
+        <p className={`text-[10px] font-bold opacity-60 text-vi ${banner.textColor}`}>{banner.brand}</p>
         <h4 className={`text-sm font-black leading-tight whitespace-pre-line ${banner.textColor} mt-0.5 mb-2`}>{banner.title}</h4>
         <button className={`text-[11px] font-bold px-3 py-1 rounded-full transition-all duration-150 group-hover:scale-105 ${banner.btnColor}`}>
           {banner.btnText}

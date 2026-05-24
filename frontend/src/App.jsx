@@ -11,6 +11,7 @@ import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import Auth from './pages/Auth'
 import ThanhToan from './pages/ThanhToan'
+import OrderTracking from './pages/OrderTracking'
 import Footer from './components/Footer';
 import AdminProductForm from './pages/AdminProductForm';
 import AdminDashboard from './pages/AdminDashboard';
@@ -54,7 +55,7 @@ function AdminShell({ children }) {
               Trang quản trị
             </Link>
             <div className="flex items-center gap-4 text-sm font-semibold">
-              <Link to="/admin/dashboard" className="text-gray-600 hover:text-blue-600">Dashboard</Link>
+              <Link to="/admin/dashboard" className="text-gray-600 hover:text-blue-600">Tổng quan</Link>
               <Link to="/admin/products" className="text-gray-600 hover:text-blue-600">Sản phẩm</Link>
             </div>
           </div>
@@ -94,6 +95,7 @@ function AppContent() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/login" element={<Auth />} />
           <Route path="/checkout" element={<ThanhToan />} />
+          <Route path="/track-order" element={<OrderTracking />} />
           <Route path="/admin/products/new" element={<AdminRoute><AdminShell><AdminProductForm /></AdminShell></AdminRoute>} />
           <Route path="/admin/products/edit/:id" element={<AdminRoute><AdminShell><AdminProductForm /></AdminShell></AdminRoute>} />
           <Route path="/admin/dashboard" element={<AdminRoute><AdminShell><AdminDashboard /></AdminShell></AdminRoute>} />
