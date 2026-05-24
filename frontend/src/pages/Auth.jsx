@@ -79,7 +79,7 @@ function PasswordStrength({ password }) {
 
 function SignInForm({ onSwitch }) {
     const navigate = useNavigate();
-    const { login } = useAuth();
+    const { login, loginWithGoogle } = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [showPwd, setShowPwd] = useState(false);
@@ -89,10 +89,24 @@ function SignInForm({ onSwitch }) {
     const [success, setSuccess] = useState(false);
 
     const googleLogin = useGoogleLogin({
-        onSuccess: (tokenResponse) => {
+        onSuccess: async (tokenResponse) => {
             console.log("Google Login Success (Token):", tokenResponse);
+            setLoading(true);
+            try {
+                const loggedInUser = await loginWithGoogle(tokenResponse.access_token);
+                setSuccess(true);
+                const redirectTo = loggedInUser?.role === "admin" ? "/admin/dashboard" : "/";
+                setTimeout(() => navigate(redirectTo), 800);
+            } catch (err) {
+                console.error("Lỗi đăng nhập Google:", err);
+            } finally {
+                setLoading(false);
+            }
         },
-        onError: () => console.log("Đăng nhập Google thất bại"),
+        onError: () => {
+            console.log("Đăng nhập Google thất bại");
+            toast.error("Đăng nhập bằng Google thất bại!");
+        },
     });
 
     const validate = () => {
@@ -211,6 +225,8 @@ function SignInForm({ onSwitch }) {
 }
 
 function SignUpForm({ onSwitch, onSignupSuccess }) {
+    const navigate = useNavigate();
+    const { loginWithGoogle } = useAuth();
     const [name, setName] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -220,10 +236,23 @@ function SignUpForm({ onSwitch, onSignupSuccess }) {
     const [loading, setLoading] = useState(false);
 
     const googleLogin = useGoogleLogin({
-        onSuccess: (tokenResponse) => {
-            console.log("Google Login Success (Token):", tokenResponse);
+        onSuccess: async (tokenResponse) => {
+            console.log("Google Signup Success (Token):", tokenResponse);
+            setLoading(true);
+            try {
+                const loggedInUser = await loginWithGoogle(tokenResponse.access_token);
+                const redirectTo = loggedInUser?.role === "admin" ? "/admin/dashboard" : "/";
+                setTimeout(() => navigate(redirectTo), 800);
+            } catch (err) {
+                console.error("Lỗi đăng ký Google:", err);
+            } finally {
+                setLoading(false);
+            }
         },
-        onError: () => console.log("Đăng ký Google thất bại"),
+        onError: () => {
+            console.log("Đăng ký Google thất bại");
+            toast.error("Đăng ký bằng Google thất bại!");
+        },
     });
 
     const validate = () => {

@@ -94,14 +94,28 @@ public class AuthController {
 
     @PostMapping("/google")
     public ResponseEntity<?> googleLogin(@RequestBody TokenRequest tokenRequest) {
-        // Trong thực tế, bro nên dùng thư viện google-api-client để verify id_token
-        // Ở đây mình demo flow xử lý logic User
-        
-        // Giả sử mình đã có thông tin từ Google sau khi verify
-        // Mình sẽ gọi API Google để lấy info từ access_token hoặc id_token
-        final String uri = "https://oauth2.googleapis.com/tokeninfo?id_token=" + tokenRequest.getToken();
+        String token = tokenRequest.getToken();
+        if (token == null || token.trim().isEmpty()) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Token trống!"));
+        }
+
+        String uri;
+        if (token.contains(".") && token.split("\\.").length == 3) {
+            uri = "https://oauth2.googleapis.com/tokeninfo?id_token=" + token;
+        } else {
+            uri = "https://www.googleapis.com/oauth2/v3/userinfo?access_token=" + token;
+        }
+
         RestTemplate restTemplate = new RestTemplate();
-        Map<String, Object> payload = restTemplate.getForObject(uri, Map.class);
+        Map<String, Object> payload;
+        try {
+            payload = restTemplate.getForObject(uri, Map.class);
+            if (payload == null || !payload.containsKey("email")) {
+                return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Token Google không hợp lệ hoặc thiếu thông tin email!"));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new MessageResponse("Lỗi xác thực Google token: " + e.getMessage()));
+        }
 
         String email = (String) payload.get("email");
         String name = (String) payload.get("name");

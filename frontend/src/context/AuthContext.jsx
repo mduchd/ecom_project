@@ -1,4 +1,4 @@
-﻿import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "../components/Toast.jsx";
 import api from "../services/productService.js";
 
@@ -58,6 +58,37 @@ export function AuthProvider({ children }) {
       return loggedInUser;
     } catch (error) {
       const msg = error.response?.data?.message || "Đăng nhập thất bại! Vui lòng kiểm tra lại tài khoản.";
+      toast.error(msg);
+      throw error;
+    }
+  };
+
+  const loginWithGoogle = async (googleToken) => {
+    try {
+      const response = await api.post("/auth/google", { token: googleToken });
+      const { accessToken, id, username, email: resEmail, roles } = response.data;
+      
+      const role = roles.includes("ROLE_ADMIN") ? "admin" : "user";
+      const loggedInUser = {
+        id,
+        name: username,
+        email: resEmail,
+        role: role,
+        avatar: role === "admin" 
+          ? "https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" 
+          : "https://i.pravatar.cc/150?u=" + resEmail,
+        points: role === "admin" ? 0 : Math.floor(Math.random() * 500) + 100,
+        favorites: []
+      };
+      
+      setUser(loggedInUser);
+      localStorage.setItem("snapcart_user", JSON.stringify(loggedInUser));
+      localStorage.setItem("snapcart_token", accessToken);
+      setIsAuthModalOpen(false);
+      toast.success("Đăng nhập bằng Google thành công!");
+      return loggedInUser;
+    } catch (error) {
+      const msg = error.response?.data?.message || "Đăng nhập bằng Google thất bại!";
       toast.error(msg);
       throw error;
     }
@@ -149,6 +180,7 @@ export function AuthProvider({ children }) {
       value={{
         user,
         login,
+        loginWithGoogle,
         logout,
         toggleFavorite,
         isAuthModalOpen,
