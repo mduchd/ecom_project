@@ -121,7 +121,9 @@ export default function ThanhToan() {
   const grandTotal = subtotal + shipping + tax - pointDiscount;
   const transferContent = pendingPaymentOrderCode || "ThanhToanCart";
   const qrAmount = qrPayableAmount > 0 ? qrPayableAmount : Math.round(grandTotal);
-  const qrUrl = `https://qr.sepay.vn/img?bank=Vietcombank&acc=9339582134&template=compact&amount=${qrAmount}&des=${encodeURIComponent(transferContent)}`;
+  const bankName = import.meta.env.VITE_BANK_NAME || "Vietcombank";
+  const bankAcc = import.meta.env.VITE_BANK_ACC || "9339582134";
+  const qrUrl = `https://qr.sepay.vn/img?bank=${bankName}&acc=${bankAcc}&template=compact&amount=${qrAmount}&des=${encodeURIComponent(transferContent)}`;
 
   const handlePlaceOrder = () => {
     if (cart.length === 0) {
