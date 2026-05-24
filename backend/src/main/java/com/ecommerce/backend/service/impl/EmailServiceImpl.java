@@ -3,6 +3,7 @@ package com.ecommerce.backend.service.impl;
 import com.ecommerce.backend.service.EmailService;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -15,6 +16,9 @@ public class EmailServiceImpl implements EmailService {
 
     @Autowired(required = false)
     private JavaMailSender mailSender;
+
+    @Value("${app.mail.from:onboarding@resend.dev}")
+    private String fromEmail;
 
     @Override
     public void sendOtpEmail(String toEmail, String otp, String type) {
@@ -49,10 +53,13 @@ public class EmailServiceImpl implements EmailService {
         
         StringBuilder itemsHtml = new StringBuilder();
         for (Map<String, Object> item : items) {
+            double price = item.get("price") instanceof Number 
+                ? ((Number) item.get("price")).doubleValue() 
+                : Double.parseDouble(String.valueOf(item.get("price")));
             itemsHtml.append("<tr style=\"border-bottom: 1px solid rgba(255,255,255,0.05);\">")
                 .append("  <td style=\"padding: 12px 0; color: #f1f5f9;\">").append(item.get("name")).append("</td>")
                 .append("  <td style=\"padding: 12px 0; text-align: center; color: #94a3b8;\">x").append(item.get("quantity")).append("</td>")
-                .append("  <td style=\"padding: 12px 0; text-align: right; color: #3b82f6; font-weight: 600;\">$").append(String.format("%.2f", item.get("price"))).append("</td>")
+                .append("  <td style=\"padding: 12px 0; text-align: right; color: #3b82f6; font-weight: 600;\">$").append(String.format("%.2f", price)).append("</td>")
                 .append("</tr>");
         }
 
@@ -97,7 +104,8 @@ public class EmailServiceImpl implements EmailService {
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            helper.setFrom("Snapcart <noreply.snapcart@gmail.com>");
+            String sender = (fromEmail != null && !fromEmail.trim().isEmpty()) ? fromEmail : "noreply.snapcart@gmail.com";
+            helper.setFrom("Snapcart <" + sender + ">");
             helper.setTo(to);
             helper.setSubject(subject);
             helper.setText(htmlBody, true);
