@@ -14,9 +14,18 @@ const DEFAULT_LOYALTY = {
   enabled: false,
 };
 
+const EMPTY_SHIPPING = {
+  fullName: "",
+  phoneNumber: "",
+  address: "",
+  city: "",
+  postalCode: "",
+};
+
 export default function ThanhToan() {
   const { cart, clearCart, user, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const [shippingInfo, setShippingInfo] = useState(EMPTY_SHIPPING);
   const [selectedMethod, setSelectedMethod] = useState("momo");
   const [showQR, setShowQR] = useState(false);
   const [pendingPaymentOrderCode, setPendingPaymentOrderCode] = useState("");
@@ -35,6 +44,21 @@ export default function ThanhToan() {
       refreshProfile();
     }
   }, [user?.id]);
+
+  useEffect(() => {
+    if (!user) return;
+    setShippingInfo((current) => {
+      const isEmpty = Object.values(current).every((value) => !String(value || "").trim());
+      if (!isEmpty) return current;
+      return {
+        fullName: user.fullName || user.name || "",
+        phoneNumber: user.phoneNumber || "",
+        address: user.address || "",
+        city: user.city || "",
+        postalCode: user.postalCode || "",
+      };
+    });
+  }, [user]);
 
   useEffect(() => {
     let cancelled = false;
@@ -104,9 +128,47 @@ export default function ThanhToan() {
   }, [showQR, pendingPaymentOrderCode, pendingPaymentEmail, navigate, clearCart, user, refreshProfile]);
 
   const formatVND = (value) => value.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
-  const buildShippingAddress = (profileUser) => {
-    if (!profileUser) return "";
-    return [profileUser.address, profileUser.city, profileUser.postalCode].filter(Boolean).join(", ");
+  const buildShippingAddress = (info) => {
+    return [info.address, info.city, info.postalCode]
+      .map((value) => String(value || "").trim())
+      .filter(Boolean)
+      .join(", ");
+  };
+  const updateShippingField = (field, value) => {
+    setShippingInfo((prev) => ({ ...prev, [field]: value }));
+  };
+  const validateShippingInfo = () => {
+    const fullName = shippingInfo.fullName.trim();
+    const phoneNumber = shippingInfo.phoneNumber.trim();
+    const address = shippingInfo.address.trim();
+    const city = shippingInfo.city.trim();
+    const postalCode = shippingInfo.postalCode.trim();
+
+    if (!fullName) {
+      toast.warning("Vui lòng nhập họ và tên.");
+      return false;
+    }
+    if (!phoneNumber) {
+      toast.warning("Vui lòng nhập số điện thoại.");
+      return false;
+    }
+    if (!/^[0-9+\-\s()]{8,15}$/.test(phoneNumber)) {
+      toast.warning("Số điện thoại không hợp lệ.");
+      return false;
+    }
+    if (!address) {
+      toast.warning("Vui lòng nhập địa chỉ giao hàng.");
+      return false;
+    }
+    if (!city) {
+      toast.warning("Vui lòng chọn thành phố.");
+      return false;
+    }
+    if (!postalCode) {
+      toast.warning("Vui lòng nhập mã bưu chính.");
+      return false;
+    }
+    return true;
   };
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
   const shipping = subtotal >= 399000 || subtotal === 0 ? 0 : 30000;
@@ -134,6 +196,9 @@ export default function ThanhToan() {
       toast.warning("Giỏ hàng của bạn đang trống!");
       return;
     }
+    if (!validateShippingInfo()) {
+      return;
+    }
 
     const email = user?.email || guestEmail;
     if (!email) {
@@ -150,12 +215,16 @@ export default function ThanhToan() {
   };
 
   const submitOrder = async (email) => {
+    if (!validateShippingInfo()) {
+      return;
+    }
+
     try {
       const savedOrder = await createOrder({
-        customerName: user?.fullName || user?.name || "Khách hàng mới",
+        customerName: shippingInfo.fullName.trim(),
         customerEmail: email,
-        customerPhone: user?.phoneNumber || "",
-        shippingAddress: buildShippingAddress(user),
+        customerPhone: shippingInfo.phoneNumber.trim(),
+        shippingAddress: buildShippingAddress(shippingInfo),
         items: cart.map(item => ({ productId: item.id, quantity: item.qty })),
         paymentMethod: selectedMethod.toUpperCase(),
         pointsToRedeem: loyaltyEnabled ? pointsToUse : 0,
@@ -179,7 +248,7 @@ export default function ThanhToan() {
 
       api.post("/orders/confirm", {
         email: email,
-        fullName: user?.name || "Khách hàng Snapcart",
+        fullName: shippingInfo.fullName.trim() || "Khách hàng Snapcart",
         orderId: savedOrder?.orderCode || String(savedOrder?.id || ""),
         totalAmount: payableAmount,
         items: cart.map(item => ({
@@ -234,8 +303,8 @@ export default function ThanhToan() {
   };
 
   const info_ct = [
-    { label: "Họ và tên", place: "Nhập tên của bạn..." },
-    { label: "Số điện thoại", place: "Nhập số điện thoại..." },
+    { label: "Họ và tên", name: "fullName", place: "Nhập tên của bạn..." },
+    { label: "Số điện thoại", name: "phoneNumber", place: "Nhập số điện thoại..." },
   ];
   const info_ar = [
     { label: "Thành phố", name: "city", type: "select", options: ["Hà Nội", "TP.HCM", "Đà Nẵng"] },
@@ -261,11 +330,14 @@ export default function ThanhToan() {
 
             <div className="flex justify-between gap-5">
               {info_ct.map((item) => (
-                <div key={item.label} className="flex flex-col w-1/2 gap-2">
+                <div key={item.name} className="flex flex-col w-1/2 gap-2">
                   <span className="font-bold text-vi">{item.label}</span>
-                  <input placeholder={item.place}
-                    className="h-10 w-full border border-gray-200 rounded-lg p-1">
-                  </input>
+                  <input
+                    placeholder={item.place}
+                    value={shippingInfo[item.name]}
+                    onChange={(event) => updateShippingField(item.name, event.target.value)}
+                    className="h-10 w-full border border-gray-200 rounded-lg p-1"
+                  />
                 </div>
               ))}
             </div>
@@ -274,8 +346,10 @@ export default function ThanhToan() {
               <span className="font-bold text-vi">Địa chỉ giao hàng</span>
               <input
                 placeholder="Nhập địa chỉ nhận hàng..."
-                className="h-10 w-full border border-gray-200 p-1 rounded-lg">
-              </input>
+                value={shippingInfo.address}
+                onChange={(event) => updateShippingField("address", event.target.value)}
+                className="h-10 w-full border border-gray-200 p-1 rounded-lg"
+              />
             </div>
 
             <div className="flex justify-between gap-4">
@@ -283,17 +357,25 @@ export default function ThanhToan() {
                 <div key={item.name} className="flex flex-col gap-2 w-full">
                   <span className="font-bold text-vi">{item.label}</span>
                   {item.type === "select" ? (
-                    <select className="h-10 w-full border border-gray-200 rounded-lg p-1">
+                    <select
+                      value={shippingInfo[item.name]}
+                      onChange={(event) => updateShippingField(item.name, event.target.value)}
+                      className="h-10 w-full border border-gray-200 rounded-lg p-1"
+                    >
                       <option value="">Chọn</option>
-                      {item.options.map((opt, i) => (
-
-                        <option key={i} value={opt} >
+                      {item.options.map((opt) => (
+                        <option key={opt} value={opt}>
                           {opt}
                         </option>
                       ))}
                     </select>
                   ) : (
-                    <input placeholder={item.placeholder} className={"h-10 border border-gray-200 rounded-lg p-1"}></input>
+                    <input
+                      placeholder={item.placeholder}
+                      value={shippingInfo[item.name]}
+                      onChange={(event) => updateShippingField(item.name, event.target.value)}
+                      className="h-10 border border-gray-200 rounded-lg p-1 w-full"
+                    />
                   )}
                 </div>
               ))}
