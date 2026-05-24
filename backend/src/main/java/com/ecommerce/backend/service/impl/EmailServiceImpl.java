@@ -13,7 +13,7 @@ import java.util.Map;
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    @Autowired
+    @Autowired(required = false)
     private JavaMailSender mailSender;
 
     @Override
@@ -90,6 +90,10 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private void sendHtmlMessage(String to, String subject, String htmlBody) {
+        if (mailSender == null) {
+            System.err.println("WARN: Email sender is not configured (missing spring.mail properties). Simulating email send to: " + to + " with subject: " + subject);
+            return;
+        }
         try {
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
