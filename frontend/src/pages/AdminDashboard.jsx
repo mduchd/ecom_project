@@ -561,7 +561,7 @@ export default function AdminDashboard() {
 
                     {!ordersLoading && ordersMeta.totalItems === 0 && (
                       <tr>
-                        <td className="px-8 py-10 text-sm text-gray-400" colSpan={6}>
+                        <td className="px-8 py-10 text-sm text-gray-400 text-center" colSpan={6}>
                           Không tìm thấy đơn hàng phù hợp với bộ lọc hoặc từ khóa tìm kiếm.
                         </td>
                       </tr>

@@ -117,7 +117,7 @@ function ErrorState({ message, onRetry }) {
 
 function EmptyState({ onReset }) {
   return (
-    <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-400">
+    <div className="col-span-full flex flex-col items-center justify-center py-20 text-center text-gray-400">
       <FaInbox className="w-14 h-14 opacity-20 mb-3" />
       <p className="font-bold text-gray-500 mb-1 text-vi">Không tìm thấy sản phẩm</p>
       <p className="text-sm mb-5 text-vi">Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm.</p>

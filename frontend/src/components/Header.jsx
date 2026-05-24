@@ -351,11 +351,11 @@ function SearchBar() {
                 <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fadeIn">
                     <div className="max-h-[420px] overflow-y-auto">
                         {loadingSuggestions ? (
-                            <div className="px-4 py-4 text-xs font-semibold text-gray-500 text-vi">
+                            <div className="px-4 py-4 text-xs font-semibold text-gray-500 text-center text-vi">
                                 Đang tìm sản phẩm...
                             </div>
                         ) : suggestionError ? (
-                            <div className="px-4 py-4 text-xs font-semibold text-red-500 text-vi">
+                            <div className="px-4 py-4 text-xs font-semibold text-red-500 text-center text-vi">
                                 {suggestionError}
                             </div>
                         ) : suggestions.length > 0 ? (
@@ -399,7 +399,7 @@ function SearchBar() {
                                 );
                             })
                         ) : (
-                            <div className="px-4 py-4 text-xs font-semibold text-gray-500 text-vi">
+                            <div className="px-4 py-4 text-xs font-semibold text-gray-500 text-center text-vi">
                                 Không tìm thấy sản phẩm phù hợp.
                             </div>
                         )}
