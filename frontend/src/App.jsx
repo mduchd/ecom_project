@@ -16,6 +16,7 @@ import Footer from './components/Footer';
 import AdminProductForm from './pages/AdminProductForm';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminDiemTichLuyPage from './pages/AdminDiemTichLuyPage';
+import AdminUsersPage from './pages/AdminUsersPage';
 import AboutUs from './pages/AboutUs'
 import FAQ from './pages/FAQ'
 import Contact from './pages/Contact'
@@ -58,6 +59,7 @@ function AdminShell({ children }) {
             <div className="flex items-center gap-4 text-sm font-semibold">
               <Link to="/admin/dashboard" className="text-gray-600 hover:text-blue-600">Tổng quan</Link>
               <Link to="/admin/products" className="text-gray-600 hover:text-blue-600">Sản phẩm</Link>
+              <Link to="/admin/users" className="text-gray-600 hover:text-blue-600">Người dùng</Link>
               <Link to="/admin/loyalty" className="text-gray-600 hover:text-blue-600">Điểm tích lũy</Link>
             </div>
           </div>
@@ -101,6 +103,7 @@ function AppContent() {
           <Route path="/admin/products/new" element={<AdminRoute><AdminShell><AdminProductForm /></AdminShell></AdminRoute>} />
           <Route path="/admin/products/edit/:id" element={<AdminRoute><AdminShell><AdminProductForm /></AdminShell></AdminRoute>} />
           <Route path="/admin/dashboard" element={<AdminRoute><AdminShell><AdminDashboard /></AdminShell></AdminRoute>} />
+          <Route path="/admin/users" element={<AdminRoute><AdminShell><AdminUsersPage /></AdminShell></AdminRoute>} />
           <Route path="/admin/loyalty" element={<AdminRoute><AdminShell><AdminDiemTichLuyPage /></AdminShell></AdminRoute>} />
           <Route path="/about" element={<AboutUs />} />
           <Route path="/faq" element={<FAQ />} />

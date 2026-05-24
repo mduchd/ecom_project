@@ -1,7 +1,9 @@
 // src/pages/AdminProducts.jsx
 import { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { getProducts, deleteProduct } from "../services/productService";
+import { getAdminProducts, getAdminProductStats, deleteProduct } from "../services/productService";
+import AdminPagination from "../components/AdminPagination.jsx";
+import { ADMIN_PAGE_SIZE, mapPagedResponse } from "../utils/pagination.js";
 import { FaPlus, FaEdit, FaTrash, FaSearch, FaSync, FaSort, FaHome, FaEye, FaSpinner, FaCheck, FaTimes, FaExclamationTriangle, FaInbox, FaBoxOpen, FaCheckCircle, FaTimesCircle, FaTag } from "react-icons/fa";
 
 // ── Icons ────────────────────────────────────────────────────────────────────
@@ -112,25 +114,51 @@ function Toast({ toast }) {
 export default function AdminProducts() {
     // ── Data state ──────────────────────────────────────────────────────────
     const [products, setProducts] = useState([]);
+    const [productsMeta, setProductsMeta] = useState(() => mapPagedResponse({ content: [] }));
+    const [productStats, setProductStats] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
     // ── UI state ────────────────────────────────────────────────────────────
     const [search, setSearch] = useState("");
+    const [debouncedSearch, setDebouncedSearch] = useState("");
     const [categoryFilter, setCategoryFilter] = useState("All");
     const [sortField, setSortField] = useState(null);
     const [sortDir, setSortDir] = useState("asc");
     const [deleteTarget, setDeleteTarget] = useState(null);
     const [deleteLoading, setDeleteLoading] = useState(false);
     const [toast, setToast] = useState(null);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(ADMIN_PAGE_SIZE);
 
     // ── Fetch products ───────────────────────────────────────────────────────
+    useEffect(() => {
+        const timer = setTimeout(() => setDebouncedSearch(search), 300);
+        return () => clearTimeout(timer);
+    }, [search]);
+
     const fetchProducts = useCallback(async () => {
         setLoading(true);
         setError(null);
         try {
-            const data = await getProducts();
-            setProducts(data);
+            const [data, stats] = await Promise.all([
+                getAdminProducts({
+                    page,
+                    size: pageSize,
+                    search: debouncedSearch,
+                    category: categoryFilter,
+                    sortField,
+                    sortDir,
+                }),
+                getAdminProductStats(),
+            ]);
+            const mapped = mapPagedResponse(data, page);
+            if (mapped.correctedPage != null) {
+                setPage(mapped.correctedPage);
+            }
+            setProductsMeta(mapped);
+            setProducts(mapped.items);
+            setProductStats(stats);
         } catch (err) {
             setError(
                 err.response?.status === 503 || !err.response
@@ -140,7 +168,7 @@ export default function AdminProducts() {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [page, pageSize, debouncedSearch, categoryFilter, sortField, sortDir]);
 
     useEffect(() => { fetchProducts(); }, [fetchProducts]);
 
@@ -156,7 +184,7 @@ export default function AdminProducts() {
         setDeleteLoading(true);
         try {
             await deleteProduct(deleteTarget.id);
-            setProducts((prev) => prev.filter((p) => p.id !== deleteTarget.id));
+            await fetchProducts();
             showToast(`Đã xóa "${deleteTarget.name}".`, "success");
         } catch (err) {
             showToast(
@@ -181,30 +209,17 @@ export default function AdminProducts() {
         }
     };
 
-    // ── Derived: filter + sort ───────────────────────────────────────────────
-    const categories = ["All", ...new Set(products.map((p) => p.category).filter(Boolean))];
+    const categories = ["All", ...(productStats?.categories ?? [])];
 
-    const displayed = products
-        .filter((p) => {
-            const matchSearch = p.name?.toLowerCase().includes(search.toLowerCase()) ||
-                p.category?.toLowerCase().includes(search.toLowerCase());
-            const matchCategory = categoryFilter === "All" || p.category === categoryFilter;
-            return matchSearch && matchCategory;
-        })
-        .sort((a, b) => {
-            if (!sortField) return 0;
-            const valA = a[sortField] ?? "";
-            const valB = b[sortField] ?? "";
-            const cmp = typeof valA === "number"
-                ? valA - valB
-                : String(valA).localeCompare(String(valB));
-            return sortDir === "asc" ? cmp : -cmp;
-        });
+    useEffect(() => {
+        setPage(1);
+    }, [debouncedSearch, categoryFilter, sortField, sortDir, pageSize]);
 
     // ── Stat counters ────────────────────────────────────────────────────────
-    const inStockCount = products.filter((p) => p.stockQuantity > 0).length;
-    const outStockCount = products.length - inStockCount;
-    const categoryCount = new Set(products.map((p) => p.category)).size;
+    const inStockCount = productStats?.inStockCount ?? 0;
+    const outStockCount = productStats?.outOfStockCount ?? 0;
+    const categoryCount = productStats?.categoryCount ?? 0;
+    const totalProducts = productStats?.totalProducts ?? productsMeta.totalItems;
 
     // ── Sortable column header ───────────────────────────────────────────────
     const SortHeader = ({ field, label }) => (
@@ -259,7 +274,7 @@ export default function AdminProducts() {
                     {/* ── Stat cards ── */}
                     {!loading && !error && (
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            <StatCard label="Tổng sản phẩm" value={products.length} icon={<FaBoxOpen />} color="text-blue-600" bg="bg-blue-50" />
+                            <StatCard label="Tổng sản phẩm" value={totalProducts} icon={<FaBoxOpen />} color="text-blue-600" bg="bg-blue-50" />
                             <StatCard label="Còn hàng" value={inStockCount} icon={<FaCheckCircle />} color="text-emerald-600" bg="bg-emerald-50" />
                             <StatCard label="Hết hàng" value={outStockCount} icon={<FaTimesCircle />} color="text-red-500" bg="bg-red-50" />
                             <StatCard label="Danh mục" value={categoryCount} icon={<FaTag />} color="text-purple-600" bg="bg-purple-50" />
@@ -275,7 +290,7 @@ export default function AdminProducts() {
                                 <h2 className="text-sm font-black text-gray-800 text-vi">
                                     Tất cả sản phẩm
                                     <span className="ml-2 text-xs font-bold bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">
-                                        {displayed.length}
+                                        {productsMeta.totalItems}
                                     </span>
                                 </h2>
                                 {/* Category filter pills */}
@@ -359,7 +374,7 @@ export default function AdminProducts() {
                                         {loading && Array(6).fill(0).map((_, i) => <SkeletonRow key={i} />)}
 
                                         {/* Empty state */}
-                                        {!loading && displayed.length === 0 && (
+                                        {!loading && productsMeta.totalItems === 0 && (
                                             <tr>
                                                 <td colSpan={7}>
                                                     <div className="flex flex-col items-center justify-center py-16 text-gray-400">
@@ -372,7 +387,7 @@ export default function AdminProducts() {
                                         )}
 
                                         {/* Data rows */}
-                                        {!loading && displayed.map((product) => (
+                                        {!loading && products.map((product) => (
                                             <tr
                                                 key={product.id}
                                                 className="hover:bg-blue-50/40 transition-colors duration-100 group"
@@ -474,15 +489,18 @@ export default function AdminProducts() {
                             </div>
                         )}
 
-                        {/* Table footer */}
-                        {!loading && !error && displayed.length > 0 && (
-                            <div className="px-5 py-3 border-t border-gray-100 bg-gray-50 text-xs text-gray-400 font-medium text-vi">
-                                Hiển thị <span className="font-bold text-gray-600">{displayed.length}</span> /{" "}
-                                <span className="font-bold text-gray-600">{products.length}</span> sản phẩm
-                                {search && (
-                                    <span> · lọc theo "<span className="text-blue-600 font-bold">{search}</span>"</span>
-                                )}
-                            </div>
+                        {!loading && !error && (
+                            <AdminPagination
+                                currentPage={productsMeta.currentPage}
+                                totalPages={productsMeta.totalPages}
+                                totalItems={productsMeta.totalItems}
+                                from={productsMeta.from}
+                                to={productsMeta.to}
+                                pageSize={pageSize}
+                                itemLabel="sản phẩm"
+                                onPageChange={setPage}
+                                onPageSizeChange={setPageSize}
+                            />
                         )}
                     </div>
                 </div>

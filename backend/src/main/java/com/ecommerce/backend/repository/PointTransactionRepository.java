@@ -2,6 +2,7 @@ package com.ecommerce.backend.repository;
 
 import com.ecommerce.backend.entity.PointTransaction;
 import com.ecommerce.backend.entity.PointTransactionType;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -19,7 +20,16 @@ public interface PointTransactionRepository extends JpaRepository<PointTransacti
             left join fetch t.order
             order by t.createdAt desc
             """)
-    List<PointTransaction> findRecentWithUserAndOrder(Pageable pageable);
+    Page<PointTransaction> findRecentWithUserAndOrder(Pageable pageable);
+
+    @Query("""
+            select t
+            from PointTransaction t
+            join fetch t.user
+            left join fetch t.order
+            order by t.createdAt desc
+            """)
+    List<PointTransaction> findRecentWithUserAndOrderList(Pageable pageable);
 
     List<PointTransaction> findByUserIdOrderByCreatedAtDesc(Long userId);
 

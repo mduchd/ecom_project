@@ -127,7 +127,7 @@ function OrderTrackingView({ initialCode, initialEmail }) {
           {!order && (
             <div className="h-full min-h-[300px] flex flex-col items-center justify-center text-center text-gray-400">
               <FaTruck className="text-5xl mb-4" />
-              <p className="font-bold text-vi">Thông tin tracking sẽ hiển thị tại đây.</p>
+              <p className="font-bold text-vi">Thông tin đơn hàng sẽ hiển thị tại đây.</p>
             </div>
           )}
 

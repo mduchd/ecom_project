@@ -20,8 +20,10 @@ export const layThongKeDiem = async () => {
   return response.data;
 };
 
-export const layLichSuDiem = async () => {
-  const response = await api.get("/admin/loyalty/transactions");
+export const layLichSuDiem = async ({ page = 1, size = 10 } = {}) => {
+  const response = await api.get("/admin/loyalty/transactions", {
+    params: { page, size },
+  });
   return response.data;
 };
 

@@ -77,7 +77,7 @@ public class WebSecurityConfig {
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/orders")).hasRole("ADMIN")
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/orders/code/**")).hasRole("ADMIN")
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PATCH, "/api/orders/**")).hasRole("ADMIN")
-                    .requestMatchers(AntPathRequestMatcher.antMatcher("/api/admin/loyalty/**")).hasRole("ADMIN")
+                    .requestMatchers(AntPathRequestMatcher.antMatcher("/api/admin/**")).hasRole("ADMIN")
                     .anyRequest().authenticated()
                 );
 

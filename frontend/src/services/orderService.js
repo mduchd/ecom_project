@@ -18,6 +18,23 @@ export const getOrders = async () => {
   return response.data;
 };
 
+export const getAdminOrders = async ({ page = 1, size = 10, search = "", status = "ALL" } = {}) => {
+  const response = await api.get("/admin/orders", {
+    params: {
+      page,
+      size,
+      search: search.trim() || undefined,
+      status: status === "ALL" ? undefined : status,
+    },
+  });
+  return response.data;
+};
+
+export const getAdminOrderStats = async () => {
+  const response = await api.get("/admin/orders/stats");
+  return response.data;
+};
+
 export const updateOrderStatus = async (id, status) => {
   const response = await api.patch(`/orders/${id}/status`, { status });
   return response.data;

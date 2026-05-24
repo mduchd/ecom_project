@@ -104,5 +104,31 @@ export const uploadFile = async (file) => {
     return response.data;
 };
 
+export const getAdminProducts = async ({
+    page = 1,
+    size = 10,
+    search = "",
+    category = "All",
+    sortField = null,
+    sortDir = "asc",
+} = {}) => {
+    const response = await api.get("/admin/products", {
+        params: {
+            page,
+            size,
+            search: search.trim() || undefined,
+            category: category === "All" ? undefined : category,
+            sortField: sortField || undefined,
+            sortDir: sortField ? sortDir : undefined,
+        },
+    });
+    return response.data;
+};
+
+export const getAdminProductStats = async () => {
+    const response = await api.get("/admin/products/stats");
+    return response.data;
+};
+
 export default api;
 

@@ -4,6 +4,7 @@ import com.ecommerce.backend.dto.AdminLoyaltySummaryResponse;
 import com.ecommerce.backend.dto.AdminPointAdjustmentRequest;
 import com.ecommerce.backend.dto.LoyaltySettingRequest;
 import com.ecommerce.backend.dto.LoyaltySettingResponse;
+import com.ecommerce.backend.dto.PagedResponse;
 import com.ecommerce.backend.dto.PointTransactionResponse;
 import com.ecommerce.backend.entity.LoyaltySetting;
 import com.ecommerce.backend.entity.PointTransaction;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -55,10 +57,17 @@ public class AdminLoyaltyController {
     }
 
     @GetMapping("/transactions")
-    public ResponseEntity<List<PointTransactionResponse>> getTransactions() {
-        return ResponseEntity.ok(loyaltyService.getTransactions().stream()
-                .map(this::toTransactionResponse)
-                .toList());
+    public ResponseEntity<PagedResponse<PointTransactionResponse>> getTransactions(
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        PagedResponse<PointTransaction> paged = loyaltyService.getTransactionsPage(page, size);
+        return ResponseEntity.ok(new PagedResponse<>(
+                paged.getContent().stream().map(this::toTransactionResponse).toList(),
+                paged.getTotalElements(),
+                paged.getTotalPages(),
+                paged.getPage(),
+                paged.getSize()
+        ));
     }
 
     @PostMapping("/adjustments")

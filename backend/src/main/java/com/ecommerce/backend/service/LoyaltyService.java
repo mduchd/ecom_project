@@ -1,5 +1,6 @@
 package com.ecommerce.backend.service;
 
+import com.ecommerce.backend.dto.PagedResponse;
 import com.ecommerce.backend.entity.LoyaltySetting;
 import com.ecommerce.backend.entity.Order;
 import com.ecommerce.backend.entity.PointTransaction;
@@ -8,7 +9,10 @@ import com.ecommerce.backend.entity.User;
 import com.ecommerce.backend.repository.LoyaltySettingRepository;
 import com.ecommerce.backend.repository.PointTransactionRepository;
 import com.ecommerce.backend.repository.UserRepository;
+import com.ecommerce.backend.util.PageFetch;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -213,9 +217,23 @@ public class LoyaltyService {
     }
 
     @Transactional(readOnly = true)
+    public PagedResponse<PointTransaction> getTransactionsPage(int page, int size) {
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.max(1, Math.min(size, 100));
+        Pageable pageable = PageRequest.of(safePage - 1, safeSize);
+        Page<PointTransaction> result = transactionRepository.findRecentWithUserAndOrder(pageable);
+        result = PageFetch.clampRequestedPage(
+                result,
+                safePage,
+                transactionRepository::findRecentWithUserAndOrder
+        );
+        return PagedResponse.from(result, safePage);
+    }
+
+    @Transactional(readOnly = true)
     public List<PointTransaction> getRecentTransactions(int limit) {
         int safeLimit = Math.max(1, Math.min(limit, 500));
-        return transactionRepository.findRecentWithUserAndOrder(PageRequest.of(0, safeLimit));
+        return transactionRepository.findRecentWithUserAndOrderList(PageRequest.of(0, safeLimit));
     }
 
     @Transactional(readOnly = true)
