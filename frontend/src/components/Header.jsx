@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
+import { getProducts } from "../services/productService";
 import {
     FaPhoneAlt,
     FaChevronDown,
@@ -47,6 +48,20 @@ const NAV_LINKS = [
     { label: "Sản phẩm", to: "/shop" },
     { label: "Liên hệ", to: "/contact" },
 ];
+
+const formatCurrency = (value) => {
+    if (value === null || value === undefined || value === "") return "Liên hệ";
+    return `${Number(value).toLocaleString("vi-VN")}đ`;
+};
+
+const getSearchPrice = (product) => {
+    const price = Number(product.price || 0);
+    const oldPrice = Number(product.discountPrice || 0);
+    return {
+        current: formatCurrency(price),
+        old: oldPrice > price ? formatCurrency(oldPrice) : null,
+    };
+};
 
 function Dropdown({ options, selected, onChange, icon }) {
     const [open, setOpen] = useState(false);
@@ -239,22 +254,91 @@ function RegionDropdown() {
 
 function SearchBar() {
     const [query, setQuery] = useState("");
+    const [suggestions, setSuggestions] = useState([]);
+    const [loadingSuggestions, setLoadingSuggestions] = useState(false);
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const [suggestionError, setSuggestionError] = useState("");
+    const searchRef = useRef(null);
     const navigate = useNavigate();
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (searchRef.current && !searchRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    useEffect(() => {
+        const keyword = query.trim();
+
+        if (keyword.length < 2) {
+            setSuggestions([]);
+            setLoadingSuggestions(false);
+            setSuggestionError("");
+            setDropdownOpen(false);
+            return;
+        }
+
+        let cancelled = false;
+        setLoadingSuggestions(true);
+        setSuggestionError("");
+
+        const timer = setTimeout(async () => {
+            try {
+                const data = await getProducts(null, keyword);
+                if (cancelled) return;
+                const list = Array.isArray(data) ? data.slice(0, 6) : [];
+                setSuggestions(list);
+                setDropdownOpen(true);
+            } catch (err) {
+                if (cancelled) return;
+                setSuggestions([]);
+                setSuggestionError("Không tải được gợi ý sản phẩm.");
+                setDropdownOpen(true);
+            } finally {
+                if (!cancelled) setLoadingSuggestions(false);
+            }
+        }, 250);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timer);
+        };
+    }, [query]);
 
     const handleSearch = (e) => {
         e.preventDefault();
-        if (query.trim()) {
-            navigate(`/shop?search=${encodeURIComponent(query.trim())}`);
+        const keyword = query.trim();
+        if (keyword) {
+            setDropdownOpen(false);
+            navigate(`/shop?search=${encodeURIComponent(keyword)}`);
         }
     };
 
+    const handleSelectProduct = (product) => {
+        setQuery(product.name || "");
+        setDropdownOpen(false);
+        navigate(`/product/${product.id}`);
+    };
+
+    const showDropdown = dropdownOpen && query.trim().length >= 2;
+
     return (
-        <form onSubmit={handleSearch} className="flex-1 max-w-lg mx-2 lg:mx-4">
+        <form onSubmit={handleSearch} className="relative flex-1 max-w-lg mx-2 lg:mx-4" ref={searchRef}>
             <div className="flex h-11 rounded-xl overflow-hidden border-2 border-blue-600 shadow-sm focus-within:shadow-md focus-within:border-blue-700 transition-all duration-200 bg-white">
                 <input
                     type="text"
                     value={query}
-                    onChange={(e) => setQuery(e.target.value)}
+                    onChange={(e) => {
+                        setQuery(e.target.value);
+                        setDropdownOpen(true);
+                    }}
+                    onFocus={() => {
+                        if (query.trim().length >= 2) setDropdownOpen(true);
+                    }}
                     placeholder="Tìm kiếm sản phẩm..."
                     className="flex-1 px-4 text-xs font-medium text-gray-700 placeholder-gray-400 outline-none bg-white"
                 />
@@ -262,6 +346,71 @@ function SearchBar() {
                     <FaSearch className="w-4 h-4" />
                 </button>
             </div>
+            {showDropdown && (
+                <div className="absolute left-0 right-0 top-full mt-2 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-fadeIn">
+                    <div className="max-h-[420px] overflow-y-auto">
+                        {loadingSuggestions ? (
+                            <div className="px-4 py-4 text-xs font-semibold text-gray-500 text-vi">
+                                Đang tìm sản phẩm...
+                            </div>
+                        ) : suggestionError ? (
+                            <div className="px-4 py-4 text-xs font-semibold text-red-500 text-vi">
+                                {suggestionError}
+                            </div>
+                        ) : suggestions.length > 0 ? (
+                            suggestions.map((product) => {
+                                const price = getSearchPrice(product);
+                                const inStock = Number(product.stockQuantity || 0) > 0;
+
+                                return (
+                                    <button
+                                        key={product.id}
+                                        type="button"
+                                        onClick={() => handleSelectProduct(product)}
+                                        className="w-full flex gap-3 px-3 py-3 text-left hover:bg-blue-50 transition-colors border-b border-gray-100 last:border-b-0"
+                                    >
+                                        <div className="w-14 h-14 rounded-xl bg-gray-50 border border-gray-100 flex items-center justify-center flex-shrink-0 overflow-hidden">
+                                            {product.imageUrl ? (
+                                                <img src={product.imageUrl} alt={product.name} className="w-full h-full object-contain p-1.5" />
+                                            ) : (
+                                                <FaSearch className="w-5 h-5 text-gray-300" />
+                                            )}
+                                        </div>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex items-start justify-between gap-2">
+                                                <h4 className="text-xs font-black text-gray-900 leading-snug line-clamp-2">
+                                                    {product.name}
+                                                </h4>
+                                                <div className="text-right flex-shrink-0">
+                                                    <p className="text-xs font-black text-blue-700">{price.current}</p>
+                                                    {price.old && <p className="text-[10px] text-gray-400 line-through">{price.old}</p>}
+                                                </div>
+                                            </div>
+                                            <div className="mt-1 flex flex-wrap items-center gap-1.5 text-[10px] font-bold">
+                                                {product.brand && <span className="px-1.5 py-0.5 rounded bg-gray-100 text-gray-600">{product.brand}</span>}
+                                                {product.category && <span className="px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">{product.category}</span>}
+                                                <span className={`px-1.5 py-0.5 rounded ${inStock ? "bg-emerald-50 text-emerald-700" : "bg-red-50 text-red-600"}`}>
+                                                    {inStock ? `Còn ${product.stockQuantity} sản phẩm` : "Hết hàng"}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </button>
+                                );
+                            })
+                        ) : (
+                            <div className="px-4 py-4 text-xs font-semibold text-gray-500 text-vi">
+                                Không tìm thấy sản phẩm phù hợp.
+                            </div>
+                        )}
+                    </div>
+                    <button
+                        type="submit"
+                        className="w-full px-4 py-2.5 text-xs font-black text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors text-left"
+                    >
+                        Xem tất cả kết quả cho "{query.trim()}"
+                    </button>
+                </div>
+            )}
         </form>
     );
 }

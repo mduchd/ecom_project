@@ -5,6 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "../components/Toast.jsx";
 import api from "../services/productService.js";
 import { createOrder } from "../services/orderService.js";
+import { saveRecentOrder, updateRecentOrderStatus } from "../utils/recentOrders.js";
 
 export default function ThanhToan() {
   const { cart, clearCart, user } = useAuth();
@@ -30,6 +31,7 @@ export default function ThanhToan() {
             setShowQR(false);
             const orderCode = pendingPaymentOrderCode;
             const orderEmail = pendingPaymentEmail;
+            updateRecentOrderStatus(orderCode, response.data.status, response.data.statusLabel);
             setPendingPaymentOrderCode("");
             setPendingPaymentEmail("");
             toast.success("Thanh toán thành công! Cảm ơn bạn đã mua hàng tại Snapcart.");
@@ -83,6 +85,17 @@ export default function ThanhToan() {
         productSummary: cart.map(item => item.name).join(", "),
         totalAmount: Math.round(grandTotal),
         paymentMethod: selectedMethod.toUpperCase()
+      });
+
+      saveRecentOrder({
+        orderCode: savedOrder?.orderCode,
+        email,
+        productSummary: cart.map(item => item.name).join(", "),
+        totalAmount: Math.round(grandTotal),
+        paymentMethod: selectedMethod.toUpperCase(),
+        status: "PENDING",
+        statusLabel: "Chờ xử lý",
+        createdAt: savedOrder?.createdAt || new Date().toISOString(),
       });
 
       api.post("/orders/confirm", {

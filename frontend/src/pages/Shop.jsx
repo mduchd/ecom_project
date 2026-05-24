@@ -173,7 +173,7 @@ export default function Shop() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [category, setCategory] = useState(searchParams.get("category") || "All");
   const [sort, setSort] = useState("default");
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const [page, setPage] = useState(1);
 
   const [products, setProducts] = useState([]);
@@ -183,7 +183,10 @@ export default function Shop() {
 
   useEffect(() => {
     const urlCat = searchParams.get("category") || "All";
+    const urlSearch = searchParams.get("search") || "";
     setCategory(urlCat);
+    setSearch(urlSearch);
+    setPage(1);
   }, [searchParams]);
 
   const fetchProducts = useCallback(async () => {
@@ -230,11 +233,15 @@ export default function Shop() {
   const handleCategory = (val) => {
     setCategory(val);
     setPage(1);
-    if (val === "All") {
-      setSearchParams({});
-    } else {
-      setSearchParams({ category: val });
-    }
+    const nextParams = {};
+    if (val !== "All") nextParams.category = val;
+    if (search.trim()) nextParams.search = search.trim();
+    setSearchParams(nextParams);
+  };
+
+  const handleSearchChange = (value) => {
+    setSearch(value);
+    setPage(1);
   };
 
   const handleReset = () => {
@@ -273,7 +280,7 @@ export default function Shop() {
           sort={sort}
           setSort={setSort}
           search={search}
-          setSearch={setSearch}
+          setSearch={handleSearchChange}
           total={sorted.length}
           currentCount={paginated.length}
           categories={categories}

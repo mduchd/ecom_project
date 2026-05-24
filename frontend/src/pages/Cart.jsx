@@ -1,8 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from 'react-router-dom';
-import ThanhToan from "./ThanhToan";
 import { useAuth } from "../context/AuthContext.jsx";
-import { FaTrash, FaTag, FaShoppingCart, FaLock, FaChevronRight, FaHome, FaCheckCircle, FaTimes, FaGift, FaSpinner, FaCheck, FaArrowLeft, FaTruck } from "react-icons/fa";
+import { trackOrder } from "../services/orderService.js";
+import { loadRecentOrders, removeRecentOrder, updateRecentOrderStatus } from "../utils/recentOrders.js";
+import { FaTrash, FaTag, FaShoppingCart, FaLock, FaChevronRight, FaHome, FaCheckCircle, FaTimes, FaGift, FaSpinner, FaCheck, FaArrowLeft, FaTruck, FaBox, FaSearch } from "react-icons/fa";
 
 const VALID_COUPONS = {
     SAVE10: { type: "percent", value: 10, label: "10% giảm" },
@@ -11,6 +12,25 @@ const VALID_COUPONS = {
 };
 
 const FREE_SHIPPING_THRESHOLD = 2000000;
+
+const STATUS_BADGE = {
+    PENDING: "bg-amber-100 text-amber-700",
+    PAID: "bg-sky-100 text-sky-700",
+    SHIPPING: "bg-blue-100 text-blue-700",
+    DELIVERED: "bg-emerald-100 text-emerald-700",
+    CANCELED: "bg-red-100 text-red-700",
+};
+
+function formatOrderDate(value) {
+    if (!value) return "—";
+    return new Date(value).toLocaleString("vi-VN", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+    });
+}
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 const TrashIcon = () => <FaTrash className="w-4 h-4" />;
@@ -343,6 +363,144 @@ function OrderSummary({ items }) {
     );
 }
 
+// ── Recent Orders ────────────────────────────────────────────────────────────
+function RecentOrdersSection() {
+    const [orders, setOrders] = useState(() => loadRecentOrders());
+    const [refreshing, setRefreshing] = useState(false);
+
+    useEffect(() => {
+        const stored = loadRecentOrders();
+        setOrders(stored);
+        if (stored.length === 0) return undefined;
+
+        let cancelled = false;
+
+        const refreshStatuses = async () => {
+            setRefreshing(true);
+            const results = await Promise.all(
+                stored.map(async (order) => {
+                    try {
+                        const data = await trackOrder(order.orderCode, order.email);
+                        updateRecentOrderStatus(order.orderCode, data.status, data.statusLabel);
+                        return { ...order, status: data.status, statusLabel: data.statusLabel };
+                    } catch {
+                        return order;
+                    }
+                })
+            );
+
+            if (!cancelled) {
+                setOrders(results);
+                setRefreshing(false);
+            }
+        };
+
+        refreshStatuses();
+        return () => { cancelled = true; };
+    }, []);
+
+    const handleRemove = (orderCode) => {
+        setOrders(removeRecentOrder(orderCode));
+    };
+
+    if (orders.length === 0) {
+        return (
+            <section className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sm:p-8">
+                <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <FaBox className="w-5 h-5" />
+                    </div>
+                    <div>
+                        <h2 className="text-lg font-black text-gray-900 text-vi">Đơn hàng đã đặt</h2>
+                        <p className="text-xs text-gray-400 text-vi">Theo dõi các đơn hàng bạn đã đặt trên thiết bị này.</p>
+                    </div>
+                </div>
+                <div className="mt-6 py-10 text-center border border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                    <FaTruck className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                    <p className="text-sm font-bold text-gray-500 text-vi">Chưa có đơn hàng nào được lưu.</p>
+                    <p className="text-xs text-gray-400 mt-1 text-vi">Sau khi đặt hàng, đơn sẽ xuất hiện tại đây để bạn theo dõi nhanh.</p>
+                    <Link
+                        to="/track-order"
+                        className="inline-flex items-center gap-2 mt-4 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-bold text-blue-600 hover:border-blue-300 transition-colors"
+                    >
+                        <FaSearch className="w-3.5 h-3.5" /> Tra cứu bằng mã đơn
+                    </Link>
+                </div>
+            </section>
+        );
+    }
+
+    return (
+        <section className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+            <div className="px-5 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+                        <FaBox className="w-4 h-4" />
+                    </div>
+                    <div>
+                        <h2 className="text-base font-black text-gray-900 text-vi">Đơn hàng đã đặt</h2>
+                        <p className="text-xs text-gray-400 text-vi">{orders.length} đơn trên thiết bị này</p>
+                    </div>
+                </div>
+                {refreshing && (
+                    <span className="text-xs text-gray-400 flex items-center gap-1.5">
+                        <FaSpinner className="w-3 h-3 animate-spin" /> Đang cập nhật
+                    </span>
+                )}
+            </div>
+
+            <div className="divide-y divide-gray-50">
+                {orders.map((order) => (
+                    <div key={order.orderCode} className="p-4 sm:p-5 hover:bg-blue-50/20 transition-colors">
+                        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                            <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <p className="text-sm font-black text-blue-600">{order.orderCode}</p>
+                                    <span className={`text-[10px] font-black px-2.5 py-0.5 rounded-full ${STATUS_BADGE[order.status] || STATUS_BADGE.PENDING}`}>
+                                        {order.statusLabel || "Chờ xử lý"}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-gray-600 mt-1 line-clamp-2">{order.productSummary}</p>
+                                <p className="text-xs text-gray-400 mt-1">
+                                    {formatOrderDate(order.createdAt)}
+                                    {order.paymentMethod && ` · ${order.paymentMethod}`}
+                                </p>
+                            </div>
+                            <div className="flex items-center gap-3 sm:flex-col sm:items-end sm:gap-2">
+                                <p className="text-base font-black text-gray-900">
+                                    {Number(order.totalAmount || 0).toLocaleString("vi-VN")}đ
+                                </p>
+                                <div className="flex items-center gap-2">
+                                    <Link
+                                        to={`/track-order?code=${encodeURIComponent(order.orderCode)}&email=${encodeURIComponent(order.email)}`}
+                                        className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors"
+                                    >
+                                        <FaTruck className="w-3 h-3" /> Theo dõi
+                                    </Link>
+                                    <button
+                                        type="button"
+                                        onClick={() => handleRemove(order.orderCode)}
+                                        className="w-8 h-8 rounded-lg bg-gray-100 hover:bg-red-50 text-gray-400 hover:text-red-500 flex items-center justify-center transition-colors"
+                                        title="Xóa khỏi danh sách"
+                                    >
+                                        <FaTimes className="w-3.5 h-3.5" />
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                ))}
+            </div>
+
+            <div className="px-5 py-3 border-t border-gray-100 bg-gray-50 text-center">
+                <Link to="/track-order" className="text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors text-vi">
+                    Tra cứu đơn khác bằng mã và email →
+                </Link>
+            </div>
+        </section>
+    );
+}
+
 // ── Cart Page ────────────────────────────────────────────────────────────────
 export default function Cart() {
     const { cart: items, updateCartQty, removeFromCart, clearCart } = useAuth();
@@ -424,6 +582,8 @@ export default function Cart() {
                         <OrderSummary items={items} />
                     </div>
                 )}
+
+                <RecentOrdersSection />
             </div>
         </main>
     );
