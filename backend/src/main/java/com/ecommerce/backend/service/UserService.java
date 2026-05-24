@@ -65,6 +65,8 @@ public class UserService {
                 user.getAddress(),
                 user.getCity(),
                 user.getPostalCode(),
-                roles);
+                roles,
+                user.getPointsBalance(),
+                user.isPointsLocked());
     }
 }

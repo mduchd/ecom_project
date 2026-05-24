@@ -1,16 +1,20 @@
 package com.ecommerce.backend.service;
 
+import com.ecommerce.backend.dto.CreateOrderItemRequest;
 import com.ecommerce.backend.dto.CreateOrderRequest;
 import com.ecommerce.backend.dto.OrderTrackingResponse;
 import com.ecommerce.backend.entity.Order;
+import com.ecommerce.backend.entity.Product;
 import com.ecommerce.backend.exception.OrderTrackingNotFoundException;
 import com.ecommerce.backend.repository.OrderRepository;
+import com.ecommerce.backend.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -21,35 +25,93 @@ import static org.mockito.Mockito.when;
 
 class OrderServiceTest {
     private OrderRepository orderRepository;
+    private com.ecommerce.backend.repository.UserRepository userRepository;
+    private ProductRepository productRepository;
+    private LoyaltyService loyaltyService;
     private OrderService orderService;
 
     @BeforeEach
     void setUp() {
         orderRepository = Mockito.mock(OrderRepository.class);
-        orderService = new OrderService(orderRepository);
+        userRepository = Mockito.mock(com.ecommerce.backend.repository.UserRepository.class);
+        productRepository = Mockito.mock(ProductRepository.class);
+        loyaltyService = Mockito.mock(LoyaltyService.class);
+        orderService = new OrderService(orderRepository, userRepository, productRepository, loyaltyService);
+    }
+
+    private CreateOrderRequest buildRequest(String paymentMethod, int pointsToRedeem) {
+        CreateOrderItemRequest item = new CreateOrderItemRequest();
+        item.setProductId(1L);
+        item.setQuantity(1);
+
+        CreateOrderRequest request = new CreateOrderRequest();
+        request.setCustomerName("Nguyen Van A");
+        request.setCustomerEmail("a@example.com");
+        request.setItems(List.of(item));
+        request.setPaymentMethod(paymentMethod);
+        request.setPointsToRedeem(pointsToRedeem);
+        return request;
+    }
+
+    private void mockProduct(long id, String name, BigDecimal price, int stock) {
+        Product product = new Product();
+        product.setId(id);
+        product.setName(name);
+        product.setPrice(price);
+        product.setStockQuantity(stock);
+        when(productRepository.findById(id)).thenReturn(Optional.of(product));
+    }
+
+    private void mockPersistedOrderSave() {
+        when(orderRepository.save(Mockito.any(Order.class))).thenAnswer(invocation -> {
+            Order order = invocation.getArgument(0);
+            if (order.getId() == null) {
+                order.setId(1L);
+            }
+            return order;
+        });
     }
 
     @Test
     void createOrderSuccess() {
-        CreateOrderRequest request = new CreateOrderRequest();
-        request.setCustomerName("Nguyen Van A");
-        request.setCustomerEmail("a@example.com");
-        request.setProductSummary("Laptop Asus x1");
-        request.setTotalAmount(new BigDecimal("1500"));
-        request.setPaymentMethod("COD");
+        mockProduct(1L, "Laptop Asus", new BigDecimal("1500"), 10);
+        mockPersistedOrderSave();
 
-        when(orderRepository.save(Mockito.any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
-
-        Order created = orderService.create(request);
+        Order created = orderService.create(buildRequest("COD", 0), null);
 
         assertNotNull(created);
         assertEquals("Nguyen Van A", created.getCustomerName());
         assertEquals("a@example.com", created.getCustomerEmail());
         assertEquals("Laptop Asus x1", created.getProductSummary());
-        assertEquals(new BigDecimal("1500"), created.getTotalAmount());
+        assertEquals(new BigDecimal("33000"), created.getTotalAmount());
         assertEquals("COD", created.getPaymentMethod());
         assertEquals("Chờ duyệt", created.getStatus());
         assertNotNull(created.getOrderCode());
+    }
+
+    @Test
+    void createOrderRedeemsPointsAfterOrderPersisted() {
+        mockProduct(1L, "Laptop Asus", new BigDecimal("200000"), 10);
+        mockPersistedOrderSave();
+
+        com.ecommerce.backend.entity.User user = com.ecommerce.backend.entity.User.builder()
+                .id(9L)
+                .username("customer")
+                .email("a@example.com")
+                .pointsBalance(100)
+                .build();
+
+        when(userRepository.findById(9L)).thenReturn(Optional.of(user));
+        when(loyaltyService.redeemPoints(Mockito.eq(user), Mockito.any(Order.class), Mockito.eq(20), Mockito.eq(new BigDecimal("200000"))))
+                .thenReturn(new BigDecimal("20000.00"));
+
+        Order created = orderService.create(buildRequest("COD", 20), 9L);
+
+        assertEquals(user, created.getUser());
+        assertEquals(20, created.getPointsRedeemed());
+        assertEquals(new BigDecimal("20000.00"), created.getPointsDiscount());
+        assertEquals(new BigDecimal("210000.00"), created.getTotalAmount());
+        verify(loyaltyService).redeemPoints(Mockito.eq(user), Mockito.argThat(order -> order.getId() != null), Mockito.eq(20), Mockito.eq(new BigDecimal("200000")));
     }
 
     @Test
@@ -145,5 +207,111 @@ class OrderServiceTest {
         assertEquals("DELIVERED", response.getStatus());
         assertEquals("DONE", response.getSteps().get(2).getState());
         assertEquals("CURRENT", response.getSteps().get(3).getState());
+    }
+
+    @Test
+    void updateStatusToDeliveredCreditsPointsOnce() {
+        Order order = Order.builder()
+                .id(1L)
+                .orderCode("SPC260524001")
+                .status("Đang giao")
+                .totalAmount(new BigDecimal("200000"))
+                .pointsCredited(false)
+                .pointsRedeemed(0)
+                .build();
+
+        when(orderRepository.findByIdWithUser(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(Mockito.any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Order updated = orderService.updateStatus(1L, "Đã giao");
+
+        assertEquals("Đã giao", updated.getStatus());
+        verify(loyaltyService).creditEarnedPoints(order);
+    }
+
+    @Test
+    void updateStatusToCanceledRefundsAndReversesPoints() {
+        Order order = Order.builder()
+                .id(1L)
+                .orderCode("SPC260524001")
+                .status("Đã giao")
+                .totalAmount(new BigDecimal("200000"))
+                .pointsRedeemed(20)
+                .pointsEarned(18)
+                .pointsCredited(true)
+                .build();
+
+        when(orderRepository.findByIdWithUser(1L)).thenReturn(Optional.of(order));
+        when(orderRepository.save(Mockito.any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        orderService.updateStatus(1L, "Đã hủy");
+
+        verify(loyaltyService).refundRedeemedPoints(order);
+        verify(loyaltyService).reverseEarnedPoints(order);
+    }
+
+    @Test
+    void cancelPendingOrderByOwnerRefundsRedeemedPoints() {
+        com.ecommerce.backend.entity.User user = com.ecommerce.backend.entity.User.builder()
+                .id(2L)
+                .email("a@example.com")
+                .pointsBalance(80)
+                .build();
+        Order order = Order.builder()
+                .id(3L)
+                .orderCode("SPC260524001")
+                .customerEmail("a@example.com")
+                .status("Chờ duyệt")
+                .paymentMethod("COD")
+                .pointsRedeemed(20)
+                .user(user)
+                .build();
+
+        when(orderRepository.findByOrderCodeWithUser("SPC260524001")).thenReturn(Optional.of(order));
+        when(orderRepository.save(Mockito.any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Order canceled = orderService.cancelPending("SPC260524001", null, 2L);
+
+        assertEquals("Đã hủy", canceled.getStatus());
+        verify(loyaltyService).refundRedeemedPoints(order);
+    }
+
+    @Test
+    void cancelPendingOrderByGuestTokenForOnlinePayment() {
+        Order order = Order.builder()
+                .id(4L)
+                .orderCode("SPC260524002")
+                .status("Chờ duyệt")
+                .paymentMethod("MOMO")
+                .cancelToken("token-abc")
+                .cancelTokenExpiresAt(LocalDateTime.now().plusMinutes(10))
+                .build();
+
+        when(orderRepository.findByOrderCodeWithUser("SPC260524002")).thenReturn(Optional.of(order));
+        when(orderRepository.save(Mockito.any(Order.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        Order canceled = orderService.cancelPending("SPC260524002", "token-abc", null);
+
+        assertEquals("Đã hủy", canceled.getStatus());
+    }
+
+    @Test
+    void cancelPendingOrderRejectsCodeAndEmailOnly() {
+        Order order = Order.builder()
+                .id(5L)
+                .orderCode("SPC260524003")
+                .customerEmail("a@example.com")
+                .status("Chờ duyệt")
+                .paymentMethod("MOMO")
+                .build();
+
+        when(orderRepository.findByOrderCodeWithUser("SPC260524003")).thenReturn(Optional.of(order));
+
+        IllegalArgumentException ex = assertThrows(
+                IllegalArgumentException.class,
+                () -> orderService.cancelPending("SPC260524003", null, null)
+        );
+
+        assertEquals("Không có quyền hủy đơn hàng này.", ex.getMessage());
     }
 }

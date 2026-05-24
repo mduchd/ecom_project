@@ -5,6 +5,14 @@ export const createOrder = async (payload) => {
   return response.data;
 };
 
+export const cancelPendingOrder = async (code, cancelToken) => {
+  const response = await api.post("/orders/cancel", {
+    code,
+    cancelToken: cancelToken || undefined,
+  });
+  return response.data;
+};
+
 export const getOrders = async () => {
   const response = await api.get("/orders");
   return response.data;

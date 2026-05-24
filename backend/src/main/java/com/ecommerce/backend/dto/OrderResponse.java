@@ -1,33 +1,46 @@
 package com.ecommerce.backend.dto;
 
-import com.ecommerce.backend.entity.OrderStatus;
-import com.ecommerce.backend.entity.PaymentMethod;
+import com.ecommerce.backend.entity.Order;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Getter
-@Setter
 @AllArgsConstructor
 public class OrderResponse {
     private Long id;
-    private OrderStatus status;
-    private PaymentMethod paymentMethod;
-    private String receiverName;
-    private String phoneNumber;
-    private String shippingAddress;
-    private String city;
-    private String postalCode;
-    private List<OrderItemResponse> items;
-    private BigDecimal subtotal;
-    private BigDecimal shippingFee;
-    private BigDecimal discount;
-    private BigDecimal taxAmount;
-    private BigDecimal total;
-    private String couponCode;
+    private String orderCode;
+    private String customerName;
+    private String customerEmail;
+    private String productSummary;
+    private BigDecimal totalAmount;
+    private String paymentMethod;
+    private String status;
     private LocalDateTime createdAt;
+    private Integer pointsRedeemed;
+    private BigDecimal pointsDiscount;
+    private String cancelToken;
+
+    public static OrderResponse from(Order order) {
+        return from(order, false);
+    }
+
+    public static OrderResponse from(Order order, boolean includeCancelToken) {
+        return new OrderResponse(
+                order.getId(),
+                order.getOrderCode(),
+                order.getCustomerName(),
+                order.getCustomerEmail(),
+                order.getProductSummary(),
+                order.getTotalAmount(),
+                order.getPaymentMethod(),
+                order.getStatus(),
+                order.getCreatedAt(),
+                order.getPointsRedeemed(),
+                order.getPointsDiscount(),
+                includeCancelToken ? order.getCancelToken() : null
+        );
+    }
 }

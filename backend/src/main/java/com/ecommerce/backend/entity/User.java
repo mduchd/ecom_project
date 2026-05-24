@@ -51,6 +51,14 @@ public class User {
 
     @Column(nullable = false)
     @Builder.Default
+    private Integer pointsBalance = 0;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean pointsLocked = false;
+
+    @Column(nullable = false)
+    @Builder.Default
     private boolean enabled = true;
     
 }

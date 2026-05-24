@@ -1,12 +1,15 @@
 package com.ecommerce.backend.controller;
 
+import com.ecommerce.backend.dto.CancelOrderRequest;
 import com.ecommerce.backend.dto.CreateOrderRequest;
+import com.ecommerce.backend.dto.OrderResponse;
 import com.ecommerce.backend.dto.OrderTrackingResponse;
 import com.ecommerce.backend.dto.UpdateOrderStatusRequest;
-import com.ecommerce.backend.entity.Order;
+import com.ecommerce.backend.security.services.UserDetailsImpl;
 import com.ecommerce.backend.service.OrderService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,18 +26,20 @@ public class OrderController {
     }
 
     @PostMapping
-    public ResponseEntity<Order> createOrder(@Valid @RequestBody CreateOrderRequest request) {
-        return ResponseEntity.ok(orderService.create(request));
+    public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody CreateOrderRequest request,
+                                                     @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails == null ? null : userDetails.getId();
+        return ResponseEntity.ok(OrderResponse.from(orderService.create(request, userId), true));
     }
 
     @GetMapping
-    public ResponseEntity<List<Order>> getOrders() {
-        return ResponseEntity.ok(orderService.getAll());
+    public ResponseEntity<List<OrderResponse>> getOrders() {
+        return ResponseEntity.ok(orderService.getAll().stream().map(OrderResponse::from).toList());
     }
 
     @GetMapping("/code/{orderCode}")
-    public ResponseEntity<Order> getOrderByCode(@PathVariable String orderCode) {
-        return ResponseEntity.ok(orderService.getByOrderCode(orderCode));
+    public ResponseEntity<OrderResponse> getOrderByCode(@PathVariable String orderCode) {
+        return ResponseEntity.ok(OrderResponse.from(orderService.getByOrderCode(orderCode)));
     }
 
     @GetMapping("/track")
@@ -42,8 +47,18 @@ public class OrderController {
         return ResponseEntity.ok(orderService.track(code, email));
     }
 
+    @PostMapping("/cancel")
+    public ResponseEntity<OrderResponse> cancelPendingOrder(@Valid @RequestBody CancelOrderRequest request,
+                                                            @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails == null ? null : userDetails.getId();
+        return ResponseEntity.ok(OrderResponse.from(
+                orderService.cancelPending(request.getCode(), request.getCancelToken(), userId),
+                true
+        ));
+    }
+
     @PatchMapping("/{id}/status")
-    public ResponseEntity<Order> updateOrderStatus(@PathVariable Long id, @Valid @RequestBody UpdateOrderStatusRequest request) {
-        return ResponseEntity.ok(orderService.updateStatus(id, request.getStatus()));
+    public ResponseEntity<OrderResponse> updateOrderStatus(@PathVariable Long id, @Valid @RequestBody UpdateOrderStatusRequest request) {
+        return ResponseEntity.ok(OrderResponse.from(orderService.updateStatus(id, request.getStatus())));
     }
 }

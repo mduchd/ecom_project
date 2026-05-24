@@ -20,4 +20,6 @@ public class UserProfileResponse {
     private String city;
     private String postalCode;
     private List<String> roles;
+    private Integer pointsBalance;
+    private boolean pointsLocked;
 }
