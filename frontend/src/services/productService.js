@@ -3,7 +3,7 @@ import axios from "axios";
 
 // ── Axios instance dùng chung ─────────────────────────────────────────────
 const api = axios.create({
-    baseURL: "http://localhost:8080/api",
+    baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
     timeout: 10000, // 10 giây timeout
     headers: {
         "Content-Type": "application/json",

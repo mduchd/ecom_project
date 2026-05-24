@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import axios from "axios";
+import api from "../services/productService";
 
 import { FaRobot, FaPaperPlane, FaTimes, FaStar } from "react-icons/fa";
 
@@ -36,7 +36,7 @@ export default function AIChatBot() {
 
         try {
             // Tạm thời gọi API mock hoặc backend sau khi setup xong
-            const response = await axios.post("http://localhost:8080/api/ai/chat", {
+            const response = await api.post("/ai/chat", {
                 message: userMsg
             });
             
