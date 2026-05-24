@@ -26,6 +26,7 @@ api.interceptors.response.use(
     (error) => {
         const message =
             error.response?.data?.message ||
+            error.response?.data?.error ||
             error.message ||
             "Đã xảy ra lỗi không mong muốn.";
         console.error("[API Error]", message);
@@ -98,8 +99,9 @@ export const uploadFile = async (file) => {
         headers: {
             "Content-Type": "multipart/form-data",
         },
+        timeout: 60000,
     });
-    return response.data; // trả về { url: "..." }
+    return response.data;
 };
 
 export default api;

@@ -3,6 +3,12 @@ import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { getProductById, createProduct, updateProduct, uploadFile } from "../services/productService";
 import { FaArrowLeft, FaSave, FaSpinner, FaUpload } from "react-icons/fa";
+import {
+    UPLOAD_ACCEPTED_EXTENSIONS,
+    UPLOAD_HINT,
+    getApiErrorMessage,
+    validateImageFile,
+} from "../utils/uploadUtils";
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 const ArrowLeftIcon = () => <FaArrowLeft className="w-4 h-4" />;
@@ -82,21 +88,38 @@ export default function AdminProductForm() {
         const file = e.target.files[0];
         if (!file) return;
 
+        const validationError = validateImageFile(file);
+        if (validationError) {
+            setError(validationError);
+            e.target.value = "";
+            return;
+        }
+
         setUploading(true);
         setError(null);
         try {
             const res = await uploadFile(file);
             setFormData((prev) => ({ ...prev, imageUrl: res.url }));
         } catch (err) {
-            setError(err.response?.data?.message || "Không tải lên được ảnh.");
+            setError(getApiErrorMessage(err, "Không tải lên được ảnh."));
         } finally {
             setUploading(false);
+            e.target.value = "";
         }
     };
 
     const handleSubImageUpload = async (e) => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
+
+        for (const file of files) {
+            const validationError = validateImageFile(file);
+            if (validationError) {
+                setError(validationError);
+                e.target.value = "";
+                return;
+            }
+        }
 
         setUploadingSub(true);
         setError(null);
@@ -110,9 +133,10 @@ export default function AdminProductForm() {
             }
             setSubImagesList((prev) => [...prev, ...uploadedUrls]);
         } catch (err) {
-            setError(err.response?.data?.message || "Không tải lên được ảnh thư viện.");
+            setError(getApiErrorMessage(err, "Không tải lên được ảnh thư viện."));
         } finally {
             setUploadingSub(false);
+            e.target.value = "";
         }
     };
 
@@ -149,7 +173,7 @@ export default function AdminProductForm() {
             // Thành công thì đá về trang quản lý
             navigate("/admin/products");
         } catch (err) {
-            setError(err.response?.data?.message || "Có lỗi xảy ra khi lưu sản phẩm.");
+            setError(getApiErrorMessage(err, "Có lỗi xảy ra khi lưu sản phẩm."));
             setSaving(false);
         }
     };
@@ -258,12 +282,13 @@ export default function AdminProductForm() {
                             {/* File Upload Input */}
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Tải ảnh sản phẩm</label>
+                                <p className="text-xs text-gray-500 mb-2 text-vi">{UPLOAD_HINT}</p>
                                 <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 active:scale-[0.98] text-blue-600 rounded-xl text-sm font-bold cursor-pointer border border-blue-200 border-dashed transition-all text-vi">
                                     <FaUpload className="w-4 h-4" />
                                     <span>{uploading ? "Đang tải lên..." : "Chọn file ảnh"}</span>
                                     <input 
                                         type="file" 
-                                        accept="image/*" 
+                                        accept={UPLOAD_ACCEPTED_EXTENSIONS}
                                         onChange={handleFileUpload} 
                                         className="hidden" 
                                         disabled={uploading}
@@ -299,12 +324,13 @@ export default function AdminProductForm() {
                             {/* File Upload Input */}
                             <div>
                                 <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Tải nhiều ảnh thư viện</label>
+                                <p className="text-xs text-gray-500 mb-2 text-vi">{UPLOAD_HINT}</p>
                                 <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 active:scale-[0.98] text-blue-600 rounded-xl text-sm font-bold cursor-pointer border border-blue-200 border-dashed transition-all text-vi">
                                     <FaUpload className="w-4 h-4" />
                                     <span>{uploadingSub ? "Đang tải lên..." : "Chọn ảnh thư viện"}</span>
                                     <input 
                                         type="file" 
-                                        accept="image/*" 
+                                        accept={UPLOAD_ACCEPTED_EXTENSIONS}
                                         multiple
                                         onChange={handleSubImageUpload} 
                                         className="hidden" 

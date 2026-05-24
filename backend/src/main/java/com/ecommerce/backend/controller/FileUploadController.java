@@ -25,9 +25,14 @@ public class FileUploadController {
             String url = cloudinaryService.uploadFile(file);
             return ResponseEntity.ok(Map.of("url", url));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+            return ResponseEntity.badRequest().body(errorBody(e.getMessage()));
         } catch (IOException e) {
-            return ResponseEntity.internalServerError().body(Map.of("error", "Không tải lên được file: " + e.getMessage()));
+            String message = e.getMessage() != null ? e.getMessage() : "Không tải lên được ảnh. Vui lòng thử lại.";
+            return ResponseEntity.internalServerError().body(errorBody(message));
         }
+    }
+
+    private Map<String, String> errorBody(String message) {
+        return Map.of("message", message, "error", message);
     }
 }
