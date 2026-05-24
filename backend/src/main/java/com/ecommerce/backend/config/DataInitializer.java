@@ -1,9 +1,11 @@
 package com.ecommerce.backend.config;
 
 import com.ecommerce.backend.entity.ERole;
+import com.ecommerce.backend.entity.LoyaltySetting;
 import com.ecommerce.backend.entity.Product;
 import com.ecommerce.backend.entity.Role;
 import com.ecommerce.backend.entity.User;
+import com.ecommerce.backend.repository.LoyaltySettingRepository;
 import com.ecommerce.backend.repository.ProductRepository;
 import com.ecommerce.backend.repository.RoleRepository;
 import com.ecommerce.backend.repository.UserRepository;
@@ -21,8 +23,16 @@ import java.util.Set;
 public class DataInitializer {
 
     @Bean
-    CommandLineRunner initDatabase(RoleRepository roleRepository, ProductRepository productRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    CommandLineRunner initDatabase(RoleRepository roleRepository,
+                                   ProductRepository productRepository,
+                                   UserRepository userRepository,
+                                   LoyaltySettingRepository loyaltySettingRepository,
+                                   PasswordEncoder passwordEncoder) {
         return args -> {
+            if (loyaltySettingRepository.findById(1L).isEmpty()) {
+                loyaltySettingRepository.save(LoyaltySetting.defaultSetting());
+            }
+
             // Init Roles
             if (roleRepository.findByName(ERole.ROLE_USER).isEmpty()) {
                 roleRepository.save(new Role(null, ERole.ROLE_USER));

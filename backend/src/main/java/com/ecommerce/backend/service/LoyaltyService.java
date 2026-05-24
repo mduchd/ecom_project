@@ -61,6 +61,16 @@ public class LoyaltyService {
         }
     }
 
+    private int currentBalance(User user) {
+        return user.getPointsBalance() == null ? 0 : user.getPointsBalance();
+    }
+
+    private BigDecimal resolveEarnBaseAmount(Order order) {
+        BigDecimal payable = order.getTotalAmount() == null ? BigDecimal.ZERO : order.getTotalAmount();
+        BigDecimal pointsDiscount = order.getPointsDiscount() == null ? BigDecimal.ZERO : order.getPointsDiscount();
+        return payable.add(pointsDiscount);
+    }
+
     @Transactional
     public BigDecimal redeemPoints(User user, Order order, int requestedPoints, BigDecimal orderAmountBeforePoints) {
         if (requestedPoints <= 0) {
@@ -76,7 +86,7 @@ public class LoyaltyService {
         if (user.isPointsLocked()) {
             throw new IllegalArgumentException("Tài khoản của bạn đang bị khóa sử dụng điểm.");
         }
-        if (requestedPoints > user.getPointsBalance()) {
+        if (requestedPoints > currentBalance(user)) {
             throw new IllegalArgumentException("Số điểm sử dụng vượt quá số dư hiện có.");
         }
 
@@ -90,7 +100,7 @@ public class LoyaltyService {
             throw new IllegalArgumentException("Số điểm sử dụng vượt quá giới hạn giảm giá cho đơn hàng này.");
         }
 
-        user.setPointsBalance(user.getPointsBalance() - requestedPoints);
+        user.setPointsBalance(currentBalance(user) - requestedPoints);
         transactionRepository.save(PointTransaction.builder()
                 .user(user)
                 .order(order)
@@ -111,14 +121,14 @@ public class LoyaltyService {
         if (!setting.isEnabled()) {
             return 0;
         }
-        int points = order.getTotalAmount()
+        int points = resolveEarnBaseAmount(order)
                 .divide(setting.getEarnAmountPerPoint(), 0, RoundingMode.DOWN)
                 .intValue();
         if (points <= 0) {
             return 0;
         }
         User user = order.getUser();
-        user.setPointsBalance(user.getPointsBalance() + points);
+        user.setPointsBalance(currentBalance(user) + points);
         order.setPointsEarned(points);
         order.setPointsCredited(true);
         transactionRepository.save(PointTransaction.builder()
@@ -139,7 +149,7 @@ public class LoyaltyService {
             return;
         }
         User user = order.getUser();
-        user.setPointsBalance(user.getPointsBalance() + order.getPointsRedeemed());
+        user.setPointsBalance(currentBalance(user) + order.getPointsRedeemed());
         order.setRedeemedPointsRefunded(true);
         transactionRepository.save(PointTransaction.builder()
                 .user(user)
@@ -157,7 +167,7 @@ public class LoyaltyService {
             return;
         }
         User user = order.getUser();
-        user.setPointsBalance(Math.max(0, user.getPointsBalance() - order.getPointsEarned()));
+        user.setPointsBalance(Math.max(0, currentBalance(user) - order.getPointsEarned()));
         order.setEarnedPointsReversed(true);
         transactionRepository.save(PointTransaction.builder()
                 .user(user)
@@ -174,7 +184,7 @@ public class LoyaltyService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với id: " + userId));
         int signedPoints = increase ? points : -points;
-        int newBalance = user.getPointsBalance() + signedPoints;
+        int newBalance = currentBalance(user) + signedPoints;
         if (newBalance < 0) {
             throw new IllegalArgumentException("Không thể trừ quá số điểm hiện có của khách hàng.");
         }

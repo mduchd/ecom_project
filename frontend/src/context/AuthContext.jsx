@@ -5,6 +5,38 @@ import { getMyProfile } from "../services/userService.js";
 
 const AuthContext = createContext();
 
+const readStoredUser = () => {
+  const savedUser = localStorage.getItem("snapcart_user");
+  if (!savedUser) {
+    return null;
+  }
+  try {
+    const parsedUser = JSON.parse(savedUser);
+    if (!parsedUser.favorites) {
+      parsedUser.favorites = [];
+    }
+    return parsedUser;
+  } catch (error) {
+    console.error("Không thể đọc thông tin người dùng đã lưu", error);
+    return null;
+  }
+};
+
+const applyProfileToUser = (baseUser, profile) => {
+  if (!baseUser || !profile) {
+    return baseUser;
+  }
+  const pointsBalance = profile.pointsBalance ?? profile.points ?? baseUser.points ?? 0;
+  const pointsLocked = profile.pointsLocked ?? profile.isPointsLocked ?? baseUser.pointsLocked ?? false;
+
+  return {
+    ...baseUser,
+    name: profile.fullName || profile.username || baseUser.name,
+    points: Number(pointsBalance) || 0,
+    pointsLocked: Boolean(pointsLocked),
+  };
+};
+
 export function useAuth() {
   return useContext(AuthContext);
 }
@@ -14,15 +46,13 @@ export function AuthProvider({ children }) {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [cart, setCart] = useState([]);
 
-  // Th盻ｭ l蘯･y thﾃｴng tin ﾄ惰ハg nh蘯ｭp t盻ｫ localStorage khi kh盻殃 ch蘯｡y
+  // Khôi phục phiên đăng nhập và làm mới số điểm từ server
   useEffect(() => {
-    const savedUser = localStorage.getItem("snapcart_user");
-    if (savedUser) {
-      const parsedUser = JSON.parse(savedUser);
-      // ﾄ雪ｺ｣m b蘯｣o cﾃ｡c trﾆｰ盻拵g m盻嬖 t盻渡 t蘯｡i ﾄ黛ｻ・trﾃ｡nh crash
-      if (!parsedUser.favorites) parsedUser.favorites = [];
-      setUser(parsedUser);
+    const storedUser = readStoredUser();
+    if (storedUser) {
+      setUser(storedUser);
     }
+
     const savedCart = localStorage.getItem("snapcart_cart");
     if (savedCart) {
       try {
@@ -31,6 +61,27 @@ export function AuthProvider({ children }) {
         console.error("Không thể đọc dữ liệu giỏ hàng", e);
       }
     }
+
+    const token = localStorage.getItem("snapcart_token");
+    if (!token) {
+      return;
+    }
+
+    getMyProfile()
+      .then((profile) => {
+        setUser((prev) => {
+          const baseUser = prev || storedUser || readStoredUser();
+          if (!baseUser) {
+            return prev;
+          }
+          const updated = applyProfileToUser(baseUser, profile);
+          localStorage.setItem("snapcart_user", JSON.stringify(updated));
+          return updated;
+        });
+      })
+      .catch((error) => {
+        console.error("Không thể làm mới số điểm tích lũy", error);
+      });
   }, []);
 
   const login = async (email, password) => {
@@ -55,12 +106,7 @@ export function AuthProvider({ children }) {
 
       localStorage.setItem("snapcart_token", actualToken);
       const profile = await getMyProfile();
-      const userWithProfile = {
-        ...loggedInUser,
-        name: profile.fullName || profile.username || loggedInUser.name,
-        points: profile.pointsBalance || 0,
-        pointsLocked: Boolean(profile.pointsLocked),
-      };
+      const userWithProfile = applyProfileToUser(loggedInUser, profile);
       setUser(userWithProfile);
       localStorage.setItem("snapcart_user", JSON.stringify(userWithProfile));
       setIsAuthModalOpen(false);
@@ -95,12 +141,7 @@ export function AuthProvider({ children }) {
 
       localStorage.setItem("snapcart_token", actualToken);
       const profile = await getMyProfile();
-      const userWithProfile = {
-        ...loggedInUser,
-        name: profile.fullName || profile.username || loggedInUser.name,
-        points: profile.pointsBalance || 0,
-        pointsLocked: Boolean(profile.pointsLocked),
-      };
+      const userWithProfile = applyProfileToUser(loggedInUser, profile);
       setUser(userWithProfile);
       localStorage.setItem("snapcart_user", JSON.stringify(userWithProfile));
       setIsAuthModalOpen(false);
@@ -150,15 +191,11 @@ export function AuthProvider({ children }) {
     try {
       const profile = await getMyProfile();
       setUser((prev) => {
-        if (!prev) {
+        const baseUser = prev || readStoredUser();
+        if (!baseUser) {
           return prev;
         }
-        const updated = {
-          ...prev,
-          name: profile.fullName || profile.username || prev.name,
-          points: profile.pointsBalance || 0,
-          pointsLocked: Boolean(profile.pointsLocked),
-        };
+        const updated = applyProfileToUser(baseUser, profile);
         localStorage.setItem("snapcart_user", JSON.stringify(updated));
         return updated;
       });

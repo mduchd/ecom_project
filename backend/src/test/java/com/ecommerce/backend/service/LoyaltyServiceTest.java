@@ -1,6 +1,7 @@
 package com.ecommerce.backend.service;
 
 import com.ecommerce.backend.entity.LoyaltySetting;
+import com.ecommerce.backend.entity.Order;
 import com.ecommerce.backend.entity.PointTransaction;
 import com.ecommerce.backend.entity.PointTransactionType;
 import com.ecommerce.backend.entity.User;
@@ -95,5 +96,32 @@ class LoyaltyServiceTest {
         org.mockito.Mockito.verify(transactionRepository).save(org.mockito.Mockito.argThat(tx ->
                 tx.getType() == PointTransactionType.REDEEM && tx.getPoints() == -20
         ));
+    }
+
+    @Test
+    void creditEarnedPointsUsesAmountBeforePointsDiscount() {
+        var userRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.UserRepository.class);
+        var transactionRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.PointTransactionRepository.class);
+        var settingRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.LoyaltySettingRepository.class);
+        LoyaltyService service = new LoyaltyService(userRepository, transactionRepository, settingRepository);
+
+        User user = User.builder().id(1L).username("customer").email("customer@example.com").pointsBalance(0).build();
+        Order order = Order.builder()
+                .id(10L)
+                .orderCode("SPC260524001")
+                .user(user)
+                .totalAmount(new BigDecimal("490000.00"))
+                .pointsDiscount(new BigDecimal("10000.00"))
+                .pointsCredited(false)
+                .build();
+
+        org.mockito.Mockito.when(settingRepository.findById(1L)).thenReturn(java.util.Optional.of(LoyaltySetting.defaultSetting()));
+        org.mockito.Mockito.when(transactionRepository.save(org.mockito.Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        int earned = service.creditEarnedPoints(order);
+
+        assertEquals(50, earned);
+        assertEquals(50, order.getPointsEarned());
+        assertEquals(50, user.getPointsBalance());
     }
 }
