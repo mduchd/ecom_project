@@ -263,17 +263,98 @@ function SearchBar() {
 }
 
 function UserActions({ cartCount, cartTotal }) {
+    const { user, logout } = useAuth();
+    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const dropdownRef = useRef(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const handleLogout = () => {
+        setDropdownOpen(false);
+        logout();
+        navigate("/");
+    };
+
     return (
         <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
-            <Link to="/login" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors group">
-                <span className="w-8 h-8 rounded-full border-2 border-gray-200 group-hover:border-blue-400 flex items-center justify-center transition-colors">
-                    <FaUser className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
-                </span>
-                <div className="leading-tight hidden lg:block">
-                    <p className="text-[10px] text-gray-400 font-medium">Xin chào</p>
-                    <p className="text-xs font-bold">Đăng nhập / Đăng ký</p>
+            {user ? (
+                <div className="relative" ref={dropdownRef}>
+                    <button
+                        onClick={() => setDropdownOpen(!dropdownOpen)}
+                        className="hidden md:flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors group select-none text-left focus:outline-none"
+                    >
+                        <img
+                            src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0D8ABC&color=fff`}
+                            alt={user.name}
+                            className="w-8 h-8 rounded-full border-2 border-gray-200 group-hover:border-blue-400 object-cover flex-shrink-0"
+                            onError={(e) => {
+                                e.target.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0D8ABC&color=fff`;
+                            }}
+                        />
+                        <div className="leading-tight hidden lg:block max-w-[100px]">
+                            <p className="text-[10px] text-gray-400 font-medium truncate">Xin chào,</p>
+                            <p className="text-xs font-bold truncate text-gray-800">{user.name}</p>
+                        </div>
+                        <FaChevronDown className="w-2.5 h-2.5 text-gray-400 group-hover:text-blue-600 hidden lg:block" />
+                    </button>
+
+                    {dropdownOpen && (
+                        <div className="absolute top-full right-0 mt-2 w-52 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 py-2.5 overflow-hidden animate-fadeIn">
+                            <div className="px-4 py-2 border-b border-gray-100">
+                                <p className="text-xs font-black text-gray-800 truncate">{user.name}</p>
+                                <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
+                                {user.points > 0 && (
+                                    <p className="text-[10px] text-yellow-600 font-bold mt-1">⭐ {user.points} điểm tích lũy</p>
+                                )}
+                            </div>
+                            <div className="py-1">
+                                {user.role === "admin" && (
+                                    <Link
+                                        to="/admin/dashboard"
+                                        onClick={() => setDropdownOpen(false)}
+                                        className="flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                    >
+                                        🛠️ Quản trị hệ thống
+                                    </Link>
+                                )}
+                                <Link
+                                    to="/shop"
+                                    onClick={() => setDropdownOpen(false)}
+                                    className="flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                >
+                                    🛍️ Mua sắm
+                                </Link>
+                            </div>
+                            <div className="border-t border-gray-100 my-1"></div>
+                            <button
+                                onClick={handleLogout}
+                                className="flex items-center w-full gap-2.5 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors text-left"
+                            >
+                                🚪 Đăng xuất
+                            </button>
+                        </div>
+                    )}
                 </div>
-            </Link>
+            ) : (
+                <Link to="/login" className="hidden md:flex items-center gap-2 text-gray-700 hover:text-blue-600 transition-colors group">
+                    <span className="w-8 h-8 rounded-full border-2 border-gray-200 group-hover:border-blue-400 flex items-center justify-center transition-colors">
+                        <FaUser className="w-5 h-5 text-gray-600 group-hover:text-blue-600" />
+                    </span>
+                    <div className="leading-tight hidden lg:block">
+                        <p className="text-[10px] text-gray-400 font-medium">Xin chào</p>
+                        <p className="text-xs font-bold">Đăng nhập / Đăng ký</p>
+                    </div>
+                </Link>
+            )}
 
             <div className="hidden md:block w-px h-8 bg-gray-200" />
 
@@ -335,6 +416,15 @@ function DesktopNav() {
 }
 
 function MobileMenu({ open, onClose }) {
+    const { user, logout } = useAuth();
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        onClose();
+        navigate("/");
+    };
+
     return (
         <>
             <div onClick={onClose} className={`fixed inset-0 bg-black/40 z-40 transition-opacity duration-300 lg:hidden ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}`} />
@@ -347,6 +437,34 @@ function MobileMenu({ open, onClose }) {
                 </div>
 
                 <nav className="flex-1 overflow-y-auto py-4">
+                    {user && (
+                        <div className="px-5 pb-4 mb-4 border-b border-gray-100">
+                            <div className="flex items-center gap-3">
+                                <img
+                                    src={user.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.name)}&background=0D8ABC&color=fff`}
+                                    alt={user.name}
+                                    className="w-10 h-10 rounded-full border border-gray-200 object-cover"
+                                />
+                                <div className="leading-tight">
+                                    <p className="text-xs font-black text-gray-800 truncate">{user.name}</p>
+                                    <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
+                                </div>
+                            </div>
+                            {user.points > 0 && (
+                                <p className="text-[10px] text-yellow-600 font-bold mt-2">⭐ {user.points} điểm tích lũy</p>
+                            )}
+                            {user.role === "admin" && (
+                                <Link
+                                    to="/admin/dashboard"
+                                    onClick={onClose}
+                                    className="block mt-2 text-xs font-bold text-blue-600 hover:underline"
+                                >
+                                    🛠️ Quản trị hệ thống
+                                </Link>
+                            )}
+                        </div>
+                    )}
+
                     {NAV_LINKS.map((link) => (
                         <Link
                             key={link.label}
@@ -362,7 +480,7 @@ function MobileMenu({ open, onClose }) {
                     <div className="border-t border-gray-100 mt-4 pt-4 px-5 space-y-1">
                         <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Danh mục</p>
                         {CATEGORIES.map((cat) => (
-                            <button key={cat.label} onClick={onClose} className="flex items-center w-full text-left px-0 py-2 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors">
+                            <button key={cat.label} onClick={() => { onClose(); if (cat.label === "Tất cả danh mục") navigate("/shop"); else navigate(`/shop?category=${encodeURIComponent(cat.label)}`); }} className="flex items-center w-full text-left px-0 py-2 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors">
                                 {cat.icon}
                                 <span className="ml-1 truncate">{cat.label}</span>
                             </button>
@@ -371,10 +489,19 @@ function MobileMenu({ open, onClose }) {
                 </nav>
 
                 <div className="px-5 py-4 border-t border-gray-100 bg-gray-50">
-                    <Link to="/login" onClick={onClose} className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
-                        <FaUser className="w-5 h-5" />
-                        <span className="text-sm font-bold">Đăng nhập / Đăng ký</span>
-                    </Link>
+                    {user ? (
+                        <button
+                            onClick={handleLogout}
+                            className="flex items-center gap-3 text-red-600 hover:text-red-800 transition-colors font-bold text-sm w-full text-left"
+                        >
+                            🚪 Đăng xuất
+                        </button>
+                    ) : (
+                        <Link to="/login" onClick={onClose} className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
+                            <FaUser className="w-5 h-5" />
+                            <span className="text-sm font-bold">Đăng nhập / Đăng ký</span>
+                        </Link>
+                    )}
                 </div>
             </div>
         </>
