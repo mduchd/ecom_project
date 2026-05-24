@@ -8,6 +8,7 @@ import com.ecommerce.backend.entity.User;
 import com.ecommerce.backend.repository.LoyaltySettingRepository;
 import com.ecommerce.backend.repository.PointTransactionRepository;
 import com.ecommerce.backend.repository.UserRepository;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -198,6 +199,22 @@ public class LoyaltyService {
 
     @Transactional(readOnly = true)
     public List<PointTransaction> getTransactions() {
-        return transactionRepository.findAllByOrderByCreatedAtDesc();
+        return getRecentTransactions(200);
+    }
+
+    @Transactional(readOnly = true)
+    public List<PointTransaction> getRecentTransactions(int limit) {
+        int safeLimit = Math.max(1, Math.min(limit, 500));
+        return transactionRepository.findRecentWithUserAndOrder(PageRequest.of(0, safeLimit));
+    }
+
+    @Transactional(readOnly = true)
+    public Integer sumPointsByType(PointTransactionType type) {
+        return transactionRepository.sumPointsByType(type);
+    }
+
+    @Transactional(readOnly = true)
+    public Integer sumAbsolutePointsByType(PointTransactionType type) {
+        return transactionRepository.sumAbsolutePointsByType(type);
     }
 }

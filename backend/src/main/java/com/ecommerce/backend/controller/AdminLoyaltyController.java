@@ -6,7 +6,6 @@ import com.ecommerce.backend.dto.LoyaltySettingRequest;
 import com.ecommerce.backend.dto.LoyaltySettingResponse;
 import com.ecommerce.backend.dto.PointTransactionResponse;
 import com.ecommerce.backend.entity.LoyaltySetting;
-import com.ecommerce.backend.entity.PointTransaction;
 import com.ecommerce.backend.entity.PointTransactionType;
 import com.ecommerce.backend.repository.UserRepository;
 import com.ecommerce.backend.service.LoyaltyService;
@@ -80,20 +79,10 @@ public class AdminLoyaltyController {
 
     @GetMapping("/summary")
     public ResponseEntity<AdminLoyaltySummaryResponse> getSummary() {
-        Integer activePoints = userRepository.findAll().stream()
-                .mapToInt(user -> user.getPointsBalance() == null ? 0 : user.getPointsBalance())
-                .sum();
-        long customersWithPoints = userRepository.findAll().stream()
-                .filter(user -> user.getPointsBalance() != null && user.getPointsBalance() > 0)
-                .count();
-        Integer earned = loyaltyService.getTransactions().stream()
-                .filter(tx -> tx.getType() == PointTransactionType.EARN)
-                .mapToInt(PointTransaction::getPoints)
-                .sum();
-        Integer redeemed = loyaltyService.getTransactions().stream()
-                .filter(tx -> tx.getType() == PointTransactionType.REDEEM)
-                .mapToInt(tx -> Math.abs(tx.getPoints()))
-                .sum();
+        Integer activePoints = userRepository.sumActivePoints();
+        long customersWithPoints = userRepository.countUsersWithPoints();
+        Integer earned = loyaltyService.sumPointsByType(PointTransactionType.EARN);
+        Integer redeemed = loyaltyService.sumAbsolutePointsByType(PointTransactionType.REDEEM);
         return ResponseEntity.ok(new AdminLoyaltySummaryResponse(customersWithPoints, activePoints, earned, redeemed));
     }
 
