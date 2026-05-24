@@ -31,16 +31,16 @@ function Breadcrumb({ category }) {
   return (
     <nav className="flex items-center gap-1.5 text-xs text-gray-500 flex-wrap">
       <Link to="/" className="flex items-center gap-1 hover:text-blue-600 transition-colors font-medium">
-        <FaHome className="w-3.5 h-3.5" /> Home
+        <FaHome className="w-3.5 h-3.5" /> Trang chủ
       </Link>
       <span className="text-gray-300">/</span>
-      <Link to="/shop" className="hover:text-blue-600 transition-colors font-medium">
-        Products
+      <Link to="/shop" className="hover:text-blue-600 transition-colors font-medium text-vi">
+        Sản phẩm
       </Link>
       {category !== "All" && (
         <>
           <span className="text-gray-300">/</span>
-          <span className="text-blue-600 font-semibold">{category}</span>
+          <span className="text-blue-600 font-semibold text-vi">{categoryLabel(category)}</span>
         </>
       )}
     </nav>
@@ -71,9 +71,9 @@ function SelectDropdown({ options, value, onChange }) {
 function Toolbar({ category, setCategory, sort, setSort, search, setSearch, total, currentCount, categories }) {
   return (
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white border border-gray-100 rounded-2xl px-4 py-3 shadow-sm">
-      <p className="text-sm text-gray-500">
-        Showing <span className="font-bold text-gray-800">{currentCount}</span> of {" "}
-        <span className="font-bold text-gray-800">{total}</span> products
+      <p className="text-sm text-gray-500 text-vi">
+        Hiển thị <span className="font-bold text-gray-800">{currentCount}</span> /{" "}
+        <span className="font-bold text-gray-800">{total}</span> sản phẩm
       </p>
 
       <div className="flex items-center gap-2 flex-wrap">
@@ -85,7 +85,7 @@ function Toolbar({ category, setCategory, sort, setSort, search, setSearch, tota
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search products..."
+            placeholder="Tìm kiếm sản phẩm..."
             className="pl-9 pr-3 py-2 text-sm border border-gray-200 rounded-xl w-44 outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all"
           />
         </div>
@@ -103,13 +103,13 @@ function ErrorState({ message, onRetry }) {
       <div className="w-16 h-16 rounded-full bg-red-50 flex items-center justify-center mb-4">
         <FaExclamationTriangle className="w-8 h-8 text-red-400" />
       </div>
-      <h3 className="text-base font-black text-gray-700 mb-1">Failed to load products</h3>
-      <p className="text-sm text-gray-400 mb-5 max-w-xs">{message}</p>
+      <h3 className="text-base font-black text-gray-700 mb-1 text-vi">Không tải được sản phẩm</h3>
+      <p className="text-sm text-gray-400 mb-5 max-w-xs text-vi">{message}</p>
       <button
         onClick={onRetry}
-        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors shadow-md shadow-blue-100"
+        className="inline-flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors shadow-md shadow-blue-100 text-vi"
       >
-        <FaSync className="w-4 h-4" /> Try Again
+        <FaSync className="w-4 h-4" /> Thử lại
       </button>
     </div>
   );
@@ -119,13 +119,13 @@ function EmptyState({ onReset }) {
   return (
     <div className="col-span-full flex flex-col items-center justify-center py-20 text-gray-400">
       <FaInbox className="w-14 h-14 opacity-20 mb-3" />
-      <p className="font-bold text-gray-500 mb-1">No products found</p>
-      <p className="text-sm mb-5">Try adjusting your filters or search term.</p>
+      <p className="font-bold text-gray-500 mb-1 text-vi">Không tìm thấy sản phẩm</p>
+      <p className="text-sm mb-5 text-vi">Hãy thử điều chỉnh bộ lọc hoặc từ khóa tìm kiếm.</p>
       <button
         onClick={onReset}
-        className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors"
+        className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors text-vi"
       >
-        Reset Filters
+        Đặt lại bộ lọc
       </button>
     </div>
   );
@@ -141,7 +141,7 @@ function Pagination({ current, total, onChange }) {
         disabled={current === 1}
         className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
       >
-        <FaChevronLeft className="w-4 h-4" /> Prev
+        <FaChevronLeft className="w-4 h-4" /> Trước
       </button>
 
       {Array.from({ length: total }).map((_, i) => (
@@ -163,7 +163,7 @@ function Pagination({ current, total, onChange }) {
         disabled={current === total}
         className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border border-gray-200 text-gray-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-600 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
       >
-        Next <FaChevronRight className="w-4 h-4" />
+        Sau <FaChevronRight className="w-4 h-4" />
       </button>
     </div>
   );
@@ -204,8 +204,8 @@ export default function Shop() {
     } catch (err) {
       setError(
         err.response?.status === 503
-          ? "Cannot connect to server. Please make sure the backend is running on port 8080."
-          : err.message || "Something went wrong."
+          ? "Không thể kết nối máy chủ. Vui lòng đảm bảo backend đang chạy ở cổng 8080."
+          : err.message || "Đã xảy ra lỗi."
       );
       setProducts([]);
     } finally {
@@ -246,14 +246,14 @@ export default function Shop() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50">
+    <main lang="vi" className="min-h-screen bg-gray-50">
       <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 space-y-5">
         <Breadcrumb category={category} />
 
         <div className="flex items-end justify-between">
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
-              {category === "All" ? "All Products" : category}
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight text-vi">
+              {category === "All" ? "Tất cả sản phẩm" : categoryLabel(category)}
             </h1>
             <div className="flex gap-1 mt-1.5">
               <div className="h-1 w-10 rounded-full bg-blue-600" />
@@ -261,8 +261,8 @@ export default function Shop() {
             </div>
           </div>
           {!loading && !error && (
-            <span className="text-sm text-gray-400 font-medium hidden sm:block">
-              {products.length} items found
+            <span className="text-sm text-gray-400 font-medium hidden sm:block text-vi">
+              Tìm thấy {products.length} sản phẩm
             </span>
           )}
         </div>

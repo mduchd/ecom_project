@@ -27,7 +27,7 @@ public class FileUploadController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         } catch (IOException e) {
-            return ResponseEntity.internalServerError().body(Map.of("error", "Failed to upload file: " + e.getMessage()));
+            return ResponseEntity.internalServerError().body(Map.of("error", "Không tải lên được file: " + e.getMessage()));
         }
     }
 }

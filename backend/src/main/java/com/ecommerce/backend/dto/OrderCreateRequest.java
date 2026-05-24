@@ -14,7 +14,7 @@ import java.util.List;
 @Setter
 public class OrderCreateRequest {
     @Valid
-    @NotEmpty
+    @NotEmpty(message = "Đơn hàng phải có ít nhất một sản phẩm")
     private List<OrderItemRequest> items;
 
     private String couponCode;

@@ -109,12 +109,12 @@ export default function ThanhToan() {
   };
  
   const info_ct = [
-    {label: "Full Name", place: "Nhập tên của bạn..."},
-    {label: "Phone Number", place: "Nhập số điện thoại..."},
+    {label: "Họ và tên", place: "Nhập tên của bạn..."},
+    {label: "Số điện thoại", place: "Nhập số điện thoại..."},
   ];
   const info_ar = [
-    {label: "City", name: "city", type: "select", options: ["Hà Nội", "TP.HCM", "Đà Nẵng"]},
-    {label: "Postal Code", name: "postalCode", type: "input", placeholder: "Nhập mã bưu chính..."},
+    {label: "Thành phố", name: "city", type: "select", options: ["Hà Nội", "TP.HCM", "Đà Nẵng"]},
+    {label: "Mã bưu chính", name: "postalCode", type: "input", placeholder: "Nhập mã bưu chính..."},
   ];
   const pay_method = [
     {id: "momo", icon: FaWallet, label: "Ví MoMo"},
@@ -123,21 +123,21 @@ export default function ThanhToan() {
   ];
   return (
     <div className="bg-gray-50 min-h-screen">
-      <main className={"max-w-7xl mx-auto px-10 py-5 grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-12 bg-white shadow-sm border border-gray-100 flex"}>
+      <main lang="vi" className={"max-w-7xl mx-auto px-10 py-5 grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-12 bg-white shadow-sm border border-gray-100 flex"}>
         
         <div className="flex flex-col gap-3">
-          <h1 className="text-3xl font-semibold">Secure Checkout</h1>
-          {/**Delivery Infomation */}
+          <h1 className="text-3xl font-semibold text-vi">Thanh toán an toàn</h1>
+          {/**Thông tin giao hàng */}
           <div className ="bg-white p-4 rounded-lg flex flex-col gap-3 border border-gray-200">
             <div className="flex items-center gap-4">
               <FaShippingFast className="text-xl text-blue-600" />
-              <h2 className="text-2xl ">Delivery Infomation</h2>
+              <h2 className="text-2xl text-vi">Thông tin giao hàng</h2>
             </div>
 
             <div className="flex justify-between gap-5">
               {info_ct.map((item, index) => (
                 <div key={item.label} className="flex flex-col w-1/2 gap-2">
-                <span className="font-bold">{item.label}</span>
+                <span className="font-bold text-vi">{item.label}</span>
                 <input placeholder={item.place}
                  className="h-10 w-full border border-gray-200 rounded-lg p-1">
                 </input>
@@ -146,7 +146,7 @@ export default function ThanhToan() {
             </div>
             
             <div className="flex flex-col gap-2">
-              <span className="font-bold">Shipping Address</span>
+              <span className="font-bold text-vi">Địa chỉ giao hàng</span>
               <input 
               placeholder="Nhập địa chỉ nhận hàng..."
               className="h-10 w-full border border-gray-200 p-1 rounded-lg">
@@ -156,7 +156,7 @@ export default function ThanhToan() {
             <div className ="flex justify-between gap-4">
               {info_ar.map((item) => (
                 <div key={item.name} className="flex flex-col gap-2 w-full">
-                  <span className="font-bold">{item.label}</span>
+                  <span className="font-bold text-vi">{item.label}</span>
                   {item.type ==="select" ? (
                     <select className = "h-10 w-full border border-gray-200 rounded-lg p-1">
                       <option value ="">Chọn</option>
@@ -174,11 +174,11 @@ export default function ThanhToan() {
               ))}
             </div>
           </div>
-          {/**Payment Method */}
+          {/**Phương thức thanh toán */}
           <div className="bg-white flex flex-col gap-3 p-4 rounded-lg border border-gray-200">
               <div className="flex items-center gap-4">
                 <FaWallet className="text-xl text-blue-600" />
-                <h2 className="text-2xl">Payment Method</h2>
+                <h2 className="text-2xl text-vi">Phương thức thanh toán</h2>
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-2">
                 {pay_method.map((item)=>(
@@ -220,7 +220,7 @@ export default function ThanhToan() {
         </div>
         {/**Thẻ phải */}
         <div className="w-full flex flex-col p-5 bg-white rounded-lg gap-3 border border-gray-200">
-          <span className="font-semibold text-2xl">Order Summary</span>
+          <span className="font-semibold text-2xl text-vi">Tóm tắt đơn hàng</span>
           
           <div className="flex flex-col gap-4 max-h-[350px] overflow-y-auto pr-2">
             {cart.map((item) => (
@@ -228,8 +228,8 @@ export default function ThanhToan() {
                  <img src={item.image} alt={item.name} className ="w-20 h-20 object-cover bg-gray-100 rounded-lg" />
                 <div className="ml-5 flex flex-col justify-center gap-1">
                     <span className="font-bold text-gray-800 text-[15px]">{item.name}</span>
-                      <p className="text-gray-500 text-[12px] font-medium">
-                        Qty: {item.qty} {item.variant && `| ${item.variant}`} {item.color && `| ${item.color}`}
+                      <p className="text-gray-500 text-[12px] font-medium text-vi">
+                        SL: {item.qty} {item.variant && `| ${item.variant}`} {item.color && `| ${item.color}`}
                       </p>
                       <span className="font-semibold text-[15px]">{formatVND(item.price * item.qty)}</span>
                 </div>
@@ -240,11 +240,11 @@ export default function ThanhToan() {
           <div className="h-0 w-full border-t border-gray-300 my-2"></div>
           
           <div className="flex justify-between">
-            <span className="font-semibold text-gray-600">Subtotal</span>
+            <span className="font-semibold text-gray-600 text-vi">Tạm tính</span>
             <span className="font-semibold">{formatVND(subtotal)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold text-gray-600">Shipping</span>
+            <span className="font-semibold text-gray-600 text-vi">Phí vận chuyển</span>
             <span className="font-semibold">{shipping === 0 ? "Miễn phí" : formatVND(shipping)}</span>
           </div>
           <div className="flex justify-between">
@@ -253,7 +253,7 @@ export default function ThanhToan() {
           </div>
 
           <div className="flex justify-between items-center mt-2 border-t border-gray-200 pt-3">
-            <span className="text-gray-500 font-semibold">Total</span>
+            <span className="text-gray-500 font-semibold text-vi">Tổng cộng</span>
             <span className="font-black text-2xl text-blue-600">{formatVND(grandTotal)}</span>
           </div>
 
@@ -263,7 +263,7 @@ export default function ThanhToan() {
               className="w-full flex items-center justify-center gap-2 border 
              p-3 bg-blue-600 rounded-xl hover:scale-[1.02] hover:bg-blue-700 shadow-lg 
              active:scale-95 transition-all hover:shadow-gray-700 duration-300 cursor-pointer mt-2">
-               <span className="text-white font-bold text-xl tracking-widest">PLACE ORDER & PAY</span>
+               <span className="text-white font-bold text-xl text-vi">Đặt hàng và thanh toán</span>
                <FaArrowRight className="text-white"/>
              </button>
            ) : (
@@ -272,7 +272,7 @@ export default function ThanhToan() {
               className="w-full flex items-center justify-center gap-2 border 
              p-3 bg-emerald-600 rounded-xl hover:scale-[1.02] hover:bg-emerald-700 shadow-lg 
              active:scale-95 transition-all hover:shadow-gray-700 duration-300 cursor-pointer mt-2">
-               <span className="text-white font-bold text-xl tracking-widest">PLACE ORDER</span>
+               <span className="text-white font-bold text-xl text-vi">Đặt hàng</span>
                <FaArrowRight className="text-white"/>
              </button>
           )}
@@ -302,7 +302,7 @@ export default function ThanhToan() {
               <p className="text-sm text-gray-500 mb-6 text-vi">Mở ứng dụng {selectedMethod === 'momo' ? 'MoMo' : 'Ngân hàng'} và quét mã bên dưới</p>
               
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex justify-center mb-6">
-                <img src={qrUrl} alt="QR Code" className="w-56 h-auto mix-blend-multiply" />
+                <img src={qrUrl} alt="Mã QR thanh toán" className="w-56 h-auto mix-blend-multiply" />
               </div>
 
               <div className="flex flex-col gap-2">

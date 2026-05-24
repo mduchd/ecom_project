@@ -45,7 +45,7 @@ public class CloudinaryService {
      */
     public String uploadFile(MultipartFile file) throws IOException {
         if (file == null || file.isEmpty()) {
-            throw new IllegalArgumentException("File cannot be empty");
+            throw new IllegalArgumentException("Tệp không được để trống");
         }
 
         if (cloudinary == null) {

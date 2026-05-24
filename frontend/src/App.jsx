@@ -54,7 +54,7 @@ function AdminShell({ children }) {
               Trang quản trị
             </Link>
             <div className="flex items-center gap-4 text-sm font-semibold">
-              <Link to="/admin/dashboard" className="text-gray-600 hover:text-blue-600">Dashboard</Link>
+              <Link to="/admin/dashboard" className="text-gray-600 hover:text-blue-600">Tổng quan</Link>
               <Link to="/admin/products" className="text-gray-600 hover:text-blue-600">Sản phẩm</Link>
             </div>
           </div>

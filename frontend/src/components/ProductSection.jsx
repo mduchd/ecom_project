@@ -10,7 +10,7 @@ export default function ProductSection({
 }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("Top 30");
+  const [activeTab, setActiveTab] = useState("Nổi bật");
 
   useEffect(() => {
     let mounted = true;
@@ -38,11 +38,11 @@ export default function ProductSection({
     products.forEach((p) => {
       if (p?.category) set.add(p.category);
     });
-    return ["Top 30", ...Array.from(set).slice(0, 6)];
+    return ["Nổi bật", ...Array.from(set).slice(0, 6)];
   }, [products]);
 
   const displayedProducts = useMemo(() => {
-    if (activeTab === "Top 30") {
+    if (activeTab === "Nổi bật") {
       return products.slice(0, 10);
     }
     return products.filter((p) => p.category === activeTab).slice(0, 10);

@@ -71,7 +71,7 @@ export default function FlashSale() {
                     {/* Countdown Timer Boxes */}
                     <div className="flex items-center gap-2 text-white">
                         <FaClock className="w-4 h-4 text-white/80" />
-                        <span className="text-xs font-bold mr-1">KẾT THÚC SAU:</span>
+                        <span className="text-xs font-bold mr-1 text-vi">Kết thúc sau:</span>
                         <div className="flex items-center gap-1 font-mono text-sm font-black">
                             <span className="bg-white text-blue-600 px-2.5 py-1 rounded-lg shadow-sm">{h}</span>
                             <span>:</span>

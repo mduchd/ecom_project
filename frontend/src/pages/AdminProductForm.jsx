@@ -63,7 +63,7 @@ export default function AdminProductForm() {
                         setSubImagesList([]);
                     }
                 } catch (err) {
-                    setError("Failed to fetch product details.");
+                    setError("Không tải được thông tin sản phẩm.");
                 } finally {
                     setLoading(false);
                 }
@@ -88,7 +88,7 @@ export default function AdminProductForm() {
             const res = await uploadFile(file);
             setFormData((prev) => ({ ...prev, imageUrl: res.url }));
         } catch (err) {
-            setError(err.response?.data?.message || "Failed to upload image.");
+            setError(err.response?.data?.message || "Không tải lên được ảnh.");
         } finally {
             setUploading(false);
         }
@@ -110,7 +110,7 @@ export default function AdminProductForm() {
             }
             setSubImagesList((prev) => [...prev, ...uploadedUrls]);
         } catch (err) {
-            setError(err.response?.data?.message || "Failed to upload gallery image(s).");
+            setError(err.response?.data?.message || "Không tải lên được ảnh thư viện.");
         } finally {
             setUploadingSub(false);
         }
@@ -149,7 +149,7 @@ export default function AdminProductForm() {
             // Thành công thì đá về trang quản lý
             navigate("/admin/products");
         } catch (err) {
-            setError(err.response?.data?.message || "Something went wrong while saving.");
+            setError(err.response?.data?.message || "Có lỗi xảy ra khi lưu sản phẩm.");
             setSaving(false);
         }
     };
@@ -176,18 +176,18 @@ export default function AdminProductForm() {
                             <ArrowLeftIcon />
                         </Link>
                         <div>
-                            <h1 className="text-2xl font-black text-gray-900 tracking-tight">
-                                {isEditMode ? "Edit Product" : "Add New Product"}
+                            <h1 className="text-2xl font-black text-gray-900 tracking-tight text-vi">
+                                {isEditMode ? "Sửa sản phẩm" : "Thêm sản phẩm mới"}
                             </h1>
-                            <p className="text-sm text-gray-400 font-medium">
-                                {isEditMode ? `Updating product #${id}` : "Fill in the details below"}
+                            <p className="text-sm text-gray-400 font-medium text-vi">
+                                {isEditMode ? `Cập nhật sản phẩm #${id}` : "Điền thông tin bên dưới"}
                             </p>
                         </div>
                     </div>
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 text-red-500 p-4 rounded-xl mb-6 text-sm font-bold border border-red-100">
+                    <div className="bg-red-50 text-red-500 p-4 rounded-xl mb-6 text-sm font-bold border border-red-100 text-vi">
                         {error}
                     </div>
                 )}
@@ -198,21 +198,21 @@ export default function AdminProductForm() {
                     {/* Cột trái (Thông tin chính) */}
                     <div className="lg:col-span-2 space-y-6">
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-5">
-                            <h2 className="text-base font-black text-gray-800 border-b border-gray-50 pb-3">Basic Information</h2>
+                            <h2 className="text-base font-black text-gray-800 border-b border-gray-50 pb-3 text-vi">Thông tin cơ bản</h2>
 
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Product Name <span className="text-red-500">*</span></label>
-                                <input required type="text" name="name" value={formData.name} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" placeholder="e.g. Laptop ASUS ROG Strix" />
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Tên sản phẩm <span className="text-red-500">*</span></label>
+                                <input required type="text" name="name" value={formData.name} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all text-vi" placeholder="VD: Laptop ASUS ROG Strix" />
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Brand</label>
-                                    <input type="text" name="brand" value={formData.brand} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" placeholder="e.g. ASUS, Apple" />
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Thương hiệu</label>
+                                    <input type="text" name="brand" value={formData.brand} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" placeholder="VD: ASUS, Apple" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Category <span className="text-red-500">*</span></label>
-                                    <select name="category" value={formData.category} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer">
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Danh mục <span className="text-red-500">*</span></label>
+                                    <select name="category" value={formData.category} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer text-vi">
                                         {CATEGORIES.map(cat => <option key={cat} value={cat}>{cat}</option>)}
                                     </select>
                                 </div>
@@ -220,32 +220,32 @@ export default function AdminProductForm() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Price (VND) <span className="text-red-500">*</span></label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Giá (VND) <span className="text-red-500">*</span></label>
                                     <input required type="number" name="price" value={formData.price} onChange={handleChange} min="0" step="1" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Discount Price (VND)</label>
-                                    <input type="number" name="discountPrice" value={formData.discountPrice} onChange={handleChange} min="0" step="1" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" placeholder="Original price" />
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Giá gốc (VND)</label>
+                                    <input type="number" name="discountPrice" value={formData.discountPrice} onChange={handleChange} min="0" step="1" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" placeholder="Giá trước khi giảm" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Stock Quantity <span className="text-red-500">*</span></label>
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Số lượng tồn kho <span className="text-red-500">*</span></label>
                                     <input required type="number" name="stockQuantity" value={formData.stockQuantity} onChange={handleChange} min="0" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" />
                                 </div>
                             </div>
                         </div>
 
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-5">
-                            <h2 className="text-base font-black text-gray-800 border-b border-gray-50 pb-3">Details & Specifications</h2>
+                            <h2 className="text-base font-black text-gray-800 border-b border-gray-50 pb-3 text-vi">Mô tả &amp; thông số</h2>
 
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Description</label>
-                                <textarea name="description" value={formData.description} onChange={handleChange} rows="4" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all resize-none" placeholder="Write a detailed description about the product..." />
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Mô tả</label>
+                                <textarea name="description" value={formData.description} onChange={handleChange} rows="4" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all resize-none text-vi" placeholder="Viết mô tả chi tiết về sản phẩm..." />
                             </div>
 
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Specifications</label>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Thông số kỹ thuật</label>
                                 <textarea name="specifications" value={formData.specifications} onChange={handleChange} rows="3" className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all resize-none font-mono" placeholder="CPU: Intel Core i7 | RAM: 16GB | SSD: 512GB" />
-                                <p className="text-xs text-gray-400 mt-1.5 font-medium">Format: <span className="text-gray-600 bg-gray-100 px-1 py-0.5 rounded">Property: Value | Property: Value</span></p>
+                                <p className="text-xs text-gray-400 mt-1.5 font-medium text-vi">Định dạng: <span className="text-gray-600 bg-gray-100 px-1 py-0.5 rounded">Thuộc tính: Giá trị | Thuộc tính: Giá trị</span></p>
                             </div>
                         </div>
                     </div>
@@ -253,14 +253,14 @@ export default function AdminProductForm() {
                     {/* Cột phải (Ảnh + Nút Submit) */}
                     <div className="space-y-6">
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-5">
-                            <h2 className="text-base font-black text-gray-800 border-b border-gray-50 pb-3">Media</h2>
+                            <h2 className="text-base font-black text-gray-800 border-b border-gray-50 pb-3 text-vi">Hình ảnh</h2>
 
                             {/* File Upload Input */}
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Upload Product Image</label>
-                                <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 active:scale-[0.98] text-blue-600 rounded-xl text-sm font-bold cursor-pointer border border-blue-200 border-dashed transition-all">
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Tải ảnh sản phẩm</label>
+                                <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 active:scale-[0.98] text-blue-600 rounded-xl text-sm font-bold cursor-pointer border border-blue-200 border-dashed transition-all text-vi">
                                     <FaUpload className="w-4 h-4" />
-                                    <span>{uploading ? "Uploading..." : "Choose Image File"}</span>
+                                    <span>{uploading ? "Đang tải lên..." : "Chọn file ảnh"}</span>
                                     <input 
                                         type="file" 
                                         accept="image/*" 
@@ -273,7 +273,7 @@ export default function AdminProductForm() {
 
                             {/* Or Enter URL */}
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Or Image URL <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Hoặc URL ảnh <span className="text-red-500">*</span></label>
                                 <input required type="url" name="imageUrl" value={formData.imageUrl} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" placeholder="https://example.com/image.jpg" />
                             </div>
 
@@ -282,26 +282,26 @@ export default function AdminProductForm() {
                                 {uploading ? (
                                     <div className="flex flex-col items-center gap-2">
                                         <FaSpinner className="w-6 h-6 text-blue-600 animate-spin" />
-                                        <span className="text-xs font-bold text-gray-400">Uploading to cloud...</span>
+                                        <span className="text-xs font-bold text-gray-400 text-vi">Đang tải lên cloud...</span>
                                     </div>
                                 ) : formData.imageUrl ? (
-                                    <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => { e.target.src = "https://via.placeholder.com/400?text=Invalid+Image+URL"; }} />
+                                    <img src={formData.imageUrl} alt="Xem trước" className="w-full h-full object-cover" onError={(e) => { e.target.src = "https://via.placeholder.com/400?text=Invalid+Image+URL"; }} />
                                 ) : (
-                                    <span className="text-sm font-bold text-gray-400">Image Preview</span>
+                                    <span className="text-sm font-bold text-gray-400 text-vi">Xem trước ảnh</span>
                                 )}
                             </div>
                         </div>
 
                         {/* Product Gallery Box */}
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-5">
-                            <h2 className="text-base font-black text-gray-800 border-b border-gray-50 pb-3">Product Gallery</h2>
+                            <h2 className="text-base font-black text-gray-800 border-b border-gray-50 pb-3 text-vi">Thư viện ảnh</h2>
 
                             {/* File Upload Input */}
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Upload Gallery Images (Multiple)</label>
-                                <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 active:scale-[0.98] text-blue-600 rounded-xl text-sm font-bold cursor-pointer border border-blue-200 border-dashed transition-all">
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5 text-vi">Tải nhiều ảnh thư viện</label>
+                                <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 active:scale-[0.98] text-blue-600 rounded-xl text-sm font-bold cursor-pointer border border-blue-200 border-dashed transition-all text-vi">
                                     <FaUpload className="w-4 h-4" />
-                                    <span>{uploadingSub ? "Uploading..." : "Choose Gallery Images"}</span>
+                                    <span>{uploadingSub ? "Đang tải lên..." : "Chọn ảnh thư viện"}</span>
                                     <input 
                                         type="file" 
                                         accept="image/*" 
@@ -315,7 +315,7 @@ export default function AdminProductForm() {
 
                             {/* Or Enter URL */}
                             <div className="space-y-1.5">
-                                <label className="block text-sm font-bold text-gray-700">Or Add Image URL</label>
+                                <label className="block text-sm font-bold text-gray-700 text-vi">Hoặc thêm URL ảnh</label>
                                 <div className="flex gap-2">
                                     <input 
                                         type="url" 
@@ -327,23 +327,23 @@ export default function AdminProductForm() {
                                     <button 
                                         type="button" 
                                         onClick={handleAddSubImageUrl}
-                                        className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold rounded-xl active:scale-[0.98] transition-all"
+                                        className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold rounded-xl active:scale-[0.98] transition-all text-vi"
                                     >
-                                        Add
+                                        Thêm
                                     </button>
                                 </div>
                             </div>
 
                             {/* Sub Images List Grid */}
                             <div className="space-y-2">
-                                <label className="block text-sm font-bold text-gray-700">Gallery Preview ({subImagesList.length})</label>
+                                <label className="block text-sm font-bold text-gray-700 text-vi">Xem trước thư viện ({subImagesList.length})</label>
                                 {subImagesList.length > 0 ? (
                                     <div className="grid grid-cols-3 gap-2">
                                         {subImagesList.map((imgUrl, index) => (
                                             <div key={index} className="aspect-square bg-gray-50 rounded-xl border border-gray-150 overflow-hidden relative group shadow-sm">
                                                 <img 
                                                     src={imgUrl} 
-                                                    alt={`Gallery preview ${index + 1}`} 
+                                                    alt={`Ảnh thư viện ${index + 1}`} 
                                                     className="w-full h-full object-cover" 
                                                     onError={(e) => { e.target.src = "https://via.placeholder.com/150?text=Invalid+URL"; }} 
                                                 />
@@ -351,7 +351,7 @@ export default function AdminProductForm() {
                                                     type="button"
                                                     onClick={() => handleRemoveSubImage(index)}
                                                     className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md transition-all opacity-90 sm:opacity-0 group-hover:opacity-100"
-                                                    title="Remove Image"
+                                                    title="Xóa ảnh"
                                                 >
                                                     &times;
                                                 </button>
@@ -359,8 +359,8 @@ export default function AdminProductForm() {
                                         ))}
                                     </div>
                                 ) : (
-                                    <div className="py-6 border-2 border-dashed border-gray-100 rounded-xl flex items-center justify-center text-xs font-bold text-gray-400">
-                                        No gallery images added
+                                    <div className="py-6 border-2 border-dashed border-gray-100 rounded-xl flex items-center justify-center text-xs font-bold text-gray-400 text-vi">
+                                        Chưa có ảnh thư viện
                                     </div>
                                 )}
                             </div>
@@ -369,16 +369,16 @@ export default function AdminProductForm() {
                         <button
                             type="submit"
                             disabled={saving}
-                            className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-sm font-black rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed"
+                            className="w-full py-3.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-sm font-black rounded-xl shadow-lg shadow-blue-200 transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed text-vi"
                         >
                             {saving ? (
                                 <>
                                     <FaSpinner className="w-4 h-4 animate-spin" />
-                                    Saving...
+                                    Đang lưu...
                                 </>
                             ) : (
                                 <>
-                                    <SaveIcon /> {isEditMode ? "Save Changes" : "Create Product"}
+                                    <SaveIcon /> {isEditMode ? "Lưu thay đổi" : "Tạo sản phẩm"}
                                 </>
                             )}
                         </button>

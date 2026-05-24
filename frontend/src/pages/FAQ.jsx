@@ -11,7 +11,7 @@ const FAQ = () => {
             <span className="group-open:rotate-180 transition-transform text-2xl text-blue-600">+</span>
           </summary>
           <p className="mt-4 text-gray-600 leading-relaxed">
-            Bạn có thể nhấn vào nút "Track Order" trên thanh menu ở góc phải màn hình, sau đó nhập mã đơn hàng của bạn để xem trạng thái vận chuyển hiện tại.
+            Bạn có thể nhấn vào nút "Theo dõi đơn hàng" trên thanh menu ở góc phải màn hình, sau đó nhập mã đơn hàng của bạn để xem trạng thái vận chuyển hiện tại.
           </p>
         </details>
         <details className="p-5 border rounded-lg group bg-white shadow-sm cursor-pointer open:bg-blue-50 transition-colors">
