@@ -66,6 +66,11 @@ public class OrderService {
         return orderRepository.save(existing);
     }
 
+    public Order getByOrderCode(String orderCode) {
+        return orderRepository.findByOrderCode(orderCode)
+                .orElseThrow(() -> new RuntimeException("Order not found with code: " + orderCode));
+    }
+
     private String generateOrderCode() {
         String timePart = LocalDateTime.now().format(CODE_TIME);
         int randomPart = ThreadLocalRandom.current().nextInt(100, 1000);

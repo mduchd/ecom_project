@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaShippingFast, FaWallet, FaMoneyCheckAlt, FaArrowRight, FaTimes, FaEnvelope } from "react-icons/fa";
 import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +14,33 @@ export default function ThanhToan() {
   const [pendingPaymentOrderCode, setPendingPaymentOrderCode] = useState("");
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
+
+  // Tự động kiểm tra trạng thái thanh toán qua Webhook SePay (Polling mỗi 3 giây)
+  useEffect(() => {
+    let intervalId;
+    if (showQR && pendingPaymentOrderCode) {
+      intervalId = setInterval(async () => {
+        try {
+          const response = await api.get(`/orders/code/${pendingPaymentOrderCode}`);
+          // Khi SePay webhook nhận thanh toán thành công, status chuyển thành "Đang giao" (STATUS_SHIPPING)
+          if (response.data && response.data.status === "Đang giao") {
+            clearInterval(intervalId);
+            setShowQR(false);
+            setPendingPaymentOrderCode("");
+            toast.success("Thanh toán thành công! Cảm ơn bạn đã mua hàng tại Snapcart.");
+            clearCart(true);
+            navigate("/");
+          }
+        } catch (err) {
+          console.error("Lỗi khi kiểm tra trạng thái thanh toán:", err);
+        }
+      }, 3000);
+    }
+
+    return () => {
+      if (intervalId) clearInterval(intervalId);
+    };
+  }, [showQR, pendingPaymentOrderCode, navigate, clearCart]);
   
   const formatVND = (value) => value.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);

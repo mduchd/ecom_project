@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useGoogleLogin } from "@react-oauth/google";
 import api from "../services/productService.js";
@@ -260,7 +260,7 @@ function SignUpForm({ onSwitch, onSignupSuccess }) {
             });
 
             toast.success(response.data?.message || "Đăng ký thành công. Vui lòng kiểm tra email.");
-            onSignupSuccess(email);
+            onSignupSuccess(email, response.data?.message);
         } catch (err) {
             const msg = err.response?.data?.message || "Đăng ký thất bại. Vui lòng thử lại.";
             toast.error(msg);
@@ -350,11 +350,12 @@ function SignUpForm({ onSwitch, onSignupSuccess }) {
     );
 }
 
-function OtpVerificationForm({ email, onVerifySuccess, onCancel }) {
+function OtpVerificationForm({ email, initialMessage, onVerifySuccess, onCancel }) {
     const [otp, setOtp] = useState("");
     const [loading, setLoading] = useState(false);
     const [resending, setResending] = useState(false);
     const [error, setError] = useState("");
+    const [serverMessage, setServerMessage] = useState(initialMessage || "");
 
     const handleVerify = async (e) => {
         e.preventDefault();
@@ -379,8 +380,11 @@ function OtpVerificationForm({ email, onVerifySuccess, onCancel }) {
         setError("");
         setResending(true);
         try {
-            await api.post(`/auth/resend-otp?email=${encodeURIComponent(email)}`);
-            toast.success("Đã gửi lại mã OTP vào email của bạn.");
+            const response = await api.post(`/auth/resend-otp?email=${encodeURIComponent(email)}`);
+            toast.success("Đã gửi lại mã OTP.");
+            if (response.data?.message) {
+                setServerMessage(response.data.message);
+            }
         } catch (err) {
             setError(err.response?.data?.message || "Gửi lại OTP thất bại.");
         } finally {
@@ -395,6 +399,12 @@ function OtpVerificationForm({ email, onVerifySuccess, onCancel }) {
                 <p className="text-sm text-gray-600 font-medium">Mã OTP 6 số đã được gửi tới:</p>
                 <p className="text-sm font-bold text-gray-800 bg-gray-50 py-1.5 px-3 rounded-xl inline-block border border-gray-100">{email}</p>
             </div>
+
+            {serverMessage && (
+                <div className="bg-amber-50 border border-amber-200/60 text-amber-800 text-xs p-3.5 rounded-xl font-semibold text-center leading-relaxed animate-fadeIn">
+                    ⚠️ {serverMessage}
+                </div>
+            )}
 
             <div className="space-y-1.5">
                 <label className="block text-xs font-bold text-gray-600 text-center uppercase tracking-wider">Nhập mã OTP 6 số</label>
@@ -438,9 +448,11 @@ function OtpVerificationForm({ email, onVerifySuccess, onCancel }) {
 export default function Auth() {
     const [mode, setMode] = useState("signin");
     const [verifyEmail, setVerifyEmail] = useState("");
+    const [serverMessage, setServerMessage] = useState("");
 
-    const handleSignupSuccess = (email) => {
+    const handleSignupSuccess = (email, message) => {
         setVerifyEmail(email);
+        setServerMessage(message);
         setMode("verify_otp");
     };
 
@@ -497,7 +509,7 @@ export default function Auth() {
                         {mode === "signin" && <SignInForm onSwitch={() => setMode("signup")} />}
                         {mode === "signup" && <SignUpForm onSwitch={() => setMode("signin")} onSignupSuccess={handleSignupSuccess} />}
                         {mode === "verify_otp" && (
-                            <OtpVerificationForm email={verifyEmail} onVerifySuccess={handleVerifySuccess} onCancel={() => setMode("signup")} />
+                            <OtpVerificationForm email={verifyEmail} initialMessage={serverMessage} onVerifySuccess={handleVerifySuccess} onCancel={() => setMode("signup")} />
                         )}
                     </div>
                 </div>
