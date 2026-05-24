@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "../components/Toast.jsx";
 import api from "../services/productService.js";
+import { getMyProfile } from "../services/userService.js";
 
 const AuthContext = createContext();
 
@@ -47,16 +48,24 @@ export function AuthProvider({ children }) {
         avatar: avatar || (role === "admin" 
           ? "https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" 
           : "https://i.pravatar.cc/150?u=" + resEmail),
-        points: role === "admin" ? 0 : Math.floor(Math.random() * 500) + 100,
+        points: 0,
+        pointsLocked: false,
         favorites: []
       };
-      
-      setUser(loggedInUser);
-      localStorage.setItem("snapcart_user", JSON.stringify(loggedInUser));
+
       localStorage.setItem("snapcart_token", actualToken);
+      const profile = await getMyProfile();
+      const userWithProfile = {
+        ...loggedInUser,
+        name: profile.fullName || profile.username || loggedInUser.name,
+        points: profile.pointsBalance || 0,
+        pointsLocked: Boolean(profile.pointsLocked),
+      };
+      setUser(userWithProfile);
+      localStorage.setItem("snapcart_user", JSON.stringify(userWithProfile));
       setIsAuthModalOpen(false);
       toast.success("Đăng nhập thành công!");
-      return loggedInUser;
+      return userWithProfile;
     } catch (error) {
       const msg = error.response?.data?.message || "Đăng nhập thất bại! Vui lòng kiểm tra lại tài khoản.";
       toast.error(msg);
@@ -79,16 +88,24 @@ export function AuthProvider({ children }) {
         avatar: avatar || (role === "admin" 
           ? "https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" 
           : "https://i.pravatar.cc/150?u=" + resEmail),
-        points: role === "admin" ? 0 : Math.floor(Math.random() * 500) + 100,
+        points: 0,
+        pointsLocked: false,
         favorites: []
       };
-      
-      setUser(loggedInUser);
-      localStorage.setItem("snapcart_user", JSON.stringify(loggedInUser));
+
       localStorage.setItem("snapcart_token", actualToken);
+      const profile = await getMyProfile();
+      const userWithProfile = {
+        ...loggedInUser,
+        name: profile.fullName || profile.username || loggedInUser.name,
+        points: profile.pointsBalance || 0,
+        pointsLocked: Boolean(profile.pointsLocked),
+      };
+      setUser(userWithProfile);
+      localStorage.setItem("snapcart_user", JSON.stringify(userWithProfile));
       setIsAuthModalOpen(false);
       toast.success("Đăng nhập bằng Google thành công!");
-      return loggedInUser;
+      return userWithProfile;
     } catch (error) {
       const msg = error.response?.data?.message || "Đăng nhập bằng Google thất bại!";
       toast.error(msg);
@@ -124,6 +141,32 @@ export function AuthProvider({ children }) {
     localStorage.removeItem("snapcart_user");
     localStorage.removeItem("snapcart_token");
     toast.success("Đã đăng xuất");
+  };
+
+  const refreshProfile = async () => {
+    if (!localStorage.getItem("snapcart_token")) {
+      return null;
+    }
+    try {
+      const profile = await getMyProfile();
+      setUser((prev) => {
+        if (!prev) {
+          return prev;
+        }
+        const updated = {
+          ...prev,
+          name: profile.fullName || profile.username || prev.name,
+          points: profile.pointsBalance || 0,
+          pointsLocked: Boolean(profile.pointsLocked),
+        };
+        localStorage.setItem("snapcart_user", JSON.stringify(updated));
+        return updated;
+      });
+      return profile;
+    } catch (error) {
+      console.error("Không thể làm mới hồ sơ người dùng", error);
+      return null;
+    }
   };
 
   const openAuthModal = () => setIsAuthModalOpen(true);
@@ -184,6 +227,7 @@ export function AuthProvider({ children }) {
         login,
         loginWithGoogle,
         logout,
+        refreshProfile,
         toggleFavorite,
         isAuthModalOpen,
         openAuthModal,

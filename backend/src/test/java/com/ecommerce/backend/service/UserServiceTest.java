@@ -70,4 +70,21 @@ class UserServiceTest {
         assertEquals("Ha Noi", response.getCity());
         assertEquals("550000", response.getPostalCode());
     }
+
+    @Test
+    void getProfileIncludesLoyaltyPointFields() {
+        User user = User.builder()
+                .id(1L)
+                .username("customer")
+                .email("customer@example.com")
+                .pointsBalance(88)
+                .pointsLocked(true)
+                .build();
+        when(userRepository.findById(1L)).thenReturn(Optional.of(user));
+
+        UserProfileResponse response = userService.getProfile(1L);
+
+        assertEquals(88, response.getPointsBalance());
+        assertEquals(true, response.isPointsLocked());
+    }
 }

@@ -4,18 +4,46 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { useNavigate } from "react-router-dom";
 import { toast } from "../components/Toast.jsx";
 import api from "../services/productService.js";
-import { createOrder } from "../services/orderService.js";
+import { createOrder, cancelPendingOrder } from "../services/orderService.js";
+import { layCauHinhCheckout } from "../services/diemTichLuyService.js";
 import { saveRecentOrder, updateRecentOrderStatus } from "../utils/recentOrders.js";
 
+const DEFAULT_LOYALTY = {
+  pointValue: 1000,
+  maxRedeemPercent: 30,
+  enabled: false,
+};
+
 export default function ThanhToan() {
-  const { cart, clearCart, user } = useAuth();
+  const { cart, clearCart, user, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const [selectedMethod, setSelectedMethod] = useState("momo");
   const [showQR, setShowQR] = useState(false);
   const [pendingPaymentOrderCode, setPendingPaymentOrderCode] = useState("");
   const [pendingPaymentEmail, setPendingPaymentEmail] = useState("");
+  const [pendingCancelToken, setPendingCancelToken] = useState("");
+  const [qrPayableAmount, setQrPayableAmount] = useState(0);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
+  const [pointsToUse, setPointsToUse] = useState(0);
+  const [loyaltySettings, setLoyaltySettings] = useState(DEFAULT_LOYALTY);
+  const [loyaltySettingsLoaded, setLoyaltySettingsLoaded] = useState(false);
+
+  useEffect(() => {
+    layCauHinhCheckout()
+      .then((settings) => {
+        setLoyaltySettings({
+          pointValue: Number(settings.pointValue || DEFAULT_LOYALTY.pointValue),
+          maxRedeemPercent: Number(settings.maxRedeemPercent || DEFAULT_LOYALTY.maxRedeemPercent),
+          enabled: Boolean(settings.enabled),
+        });
+        setLoyaltySettingsLoaded(true);
+      })
+      .catch(() => {
+        setLoyaltySettings(DEFAULT_LOYALTY);
+        setLoyaltySettingsLoaded(false);
+      });
+  }, []);
 
   // Tự động kiểm tra trạng thái thanh toán qua Webhook SePay (Polling mỗi 3 giây)
   useEffect(() => {
@@ -34,7 +62,12 @@ export default function ThanhToan() {
             updateRecentOrderStatus(orderCode, response.data.status, response.data.statusLabel);
             setPendingPaymentOrderCode("");
             setPendingPaymentEmail("");
+            setPendingCancelToken("");
+            setQrPayableAmount(0);
             toast.success("Thanh toán thành công! Cảm ơn bạn đã mua hàng tại Snapcart.");
+            if (user) {
+              await refreshProfile();
+            }
             clearCart(true);
             navigate(`/track-order?code=${encodeURIComponent(orderCode)}&email=${encodeURIComponent(orderEmail)}`);
           }
@@ -47,15 +80,27 @@ export default function ThanhToan() {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [showQR, pendingPaymentOrderCode, pendingPaymentEmail, navigate, clearCart]);
+  }, [showQR, pendingPaymentOrderCode, pendingPaymentEmail, navigate, clearCart, user, refreshProfile]);
   
   const formatVND = (value) => value.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
   const shipping = subtotal >= 399000 || subtotal === 0 ? 0 : 30000;
   const tax = 0;
-  const grandTotal = subtotal + shipping + tax;
+  const availablePoints = user?.points || 0;
+  const pointValue = Number(loyaltySettings.pointValue || DEFAULT_LOYALTY.pointValue);
+  const maxRedeemPercent = Number(loyaltySettings.maxRedeemPercent || DEFAULT_LOYALTY.maxRedeemPercent);
+  const loyaltyEnabled = loyaltySettingsLoaded && Boolean(loyaltySettings.enabled);
+  const maxPointDiscount = loyaltyEnabled
+    ? Math.floor(subtotal * (maxRedeemPercent / 100))
+    : 0;
+  const requestedPointDiscount = pointsToUse * pointValue;
+  const pointDiscount = loyaltyEnabled
+    ? Math.min(requestedPointDiscount, maxPointDiscount, subtotal)
+    : 0;
+  const grandTotal = subtotal + shipping + tax - pointDiscount;
   const transferContent = pendingPaymentOrderCode || "ThanhToanCart";
-  const qrUrl = `https://qr.sepay.vn/img?bank=Vietcombank&acc=9339582134&template=compact&amount=${Math.round(grandTotal)}&des=${encodeURIComponent(transferContent)}`;
+  const qrAmount = qrPayableAmount > 0 ? qrPayableAmount : Math.round(grandTotal);
+  const qrUrl = `https://qr.sepay.vn/img?bank=Vietcombank&acc=9339582134&template=compact&amount=${qrAmount}&des=${encodeURIComponent(transferContent)}`;
 
   const handlePlaceOrder = () => {
     if (cart.length === 0) {
@@ -82,16 +127,21 @@ export default function ThanhToan() {
       const savedOrder = await createOrder({
         customerName: user?.name || "Khách hàng mới",
         customerEmail: email,
-        productSummary: cart.map(item => item.name).join(", "),
-        totalAmount: Math.round(grandTotal),
-        paymentMethod: selectedMethod.toUpperCase()
+        items: cart.map(item => ({ productId: item.id, quantity: item.qty })),
+        paymentMethod: selectedMethod.toUpperCase(),
+        pointsToRedeem: loyaltyEnabled ? pointsToUse : 0,
       });
+
+      const payableAmount = Math.round(Number(savedOrder?.totalAmount || grandTotal));
+      if (user) {
+        await refreshProfile();
+      }
 
       saveRecentOrder({
         orderCode: savedOrder?.orderCode,
         email,
         productSummary: cart.map(item => item.name).join(", "),
-        totalAmount: Math.round(grandTotal),
+        totalAmount: payableAmount,
         paymentMethod: selectedMethod.toUpperCase(),
         status: "PENDING",
         statusLabel: "Chờ xử lý",
@@ -102,7 +152,7 @@ export default function ThanhToan() {
         email: email,
         fullName: user?.name || "Khách hàng Snapcart",
         orderId: savedOrder?.orderCode || String(savedOrder?.id || ""),
-        totalAmount: Math.round(grandTotal),
+        totalAmount: payableAmount,
         items: cart.map(item => ({
           name: item.name,
           quantity: item.qty,
@@ -115,6 +165,8 @@ export default function ThanhToan() {
       if (selectedMethod === "momo" || selectedMethod === "bank") {
         setPendingPaymentOrderCode(savedOrder?.orderCode || "ThanhToanCart");
         setPendingPaymentEmail(email);
+        setPendingCancelToken(savedOrder?.cancelToken || "");
+        setQrPayableAmount(payableAmount);
         setShowQR(true);
       } else {
         toast.success("Đặt hàng thành công! Bạn có thể theo dõi trạng thái đơn hàng.");
@@ -123,6 +175,31 @@ export default function ThanhToan() {
       }
     } catch (error) {
       const msg = error.response?.data?.message || "Tạo đơn hàng thất bại. Vui lòng thử lại.";
+      toast.error(msg);
+    }
+  };
+
+  const handleCancelPendingPayment = async () => {
+    const orderCode = pendingPaymentOrderCode;
+    const cancelToken = pendingCancelToken;
+    setShowQR(false);
+    setPendingPaymentOrderCode("");
+    setPendingPaymentEmail("");
+    setPendingCancelToken("");
+    setQrPayableAmount(0);
+
+    if (!orderCode) {
+      return;
+    }
+
+    try {
+      await cancelPendingOrder(orderCode, cancelToken);
+      if (user) {
+        await refreshProfile();
+      }
+      toast.success("Đã hủy thanh toán và hoàn lại điểm nếu có.");
+    } catch (error) {
+      const msg = error.response?.data?.message || "Không thể hủy đơn hàng. Vui lòng liên hệ hỗ trợ.";
       toast.error(msg);
     }
   };
@@ -271,6 +348,42 @@ export default function ThanhToan() {
             <span className="font-semibold">{formatVND(tax)}</span>
           </div>
 
+          {user && !loyaltySettingsLoaded && (
+            <p className="text-xs text-amber-600 text-vi">
+              Không tải được cấu hình điểm tích lũy.
+            </p>
+          )}
+
+          {user && loyaltyEnabled && (
+            <div className="rounded-xl border border-blue-100 bg-blue-50 p-3 space-y-3">
+              <div className="flex items-center justify-between gap-3">
+                <div>
+                  <p className="text-sm font-black text-gray-900 text-vi">Dùng điểm tích lũy</p>
+                  <p className="text-xs text-gray-500 text-vi">
+                    Bạn có {availablePoints.toLocaleString("vi-VN")} điểm. Tối đa giảm {formatVND(maxPointDiscount)} ({maxRedeemPercent}% tạm tính).
+                  </p>
+                </div>
+                <input
+                  type="number"
+                  min="0"
+                  max={availablePoints}
+                  value={pointsToUse}
+                  onChange={(event) => {
+                    const next = Math.max(0, Math.min(Number(event.target.value || 0), availablePoints));
+                    setPointsToUse(next);
+                  }}
+                  className="w-24 rounded-lg border border-blue-200 bg-white px-3 py-2 text-right text-sm font-bold outline-none focus:border-blue-500"
+                />
+              </div>
+              {pointDiscount > 0 && (
+                <div className="flex justify-between text-sm font-bold text-blue-700">
+                  <span className="text-vi">Giảm từ điểm</span>
+                  <span>-{formatVND(pointDiscount)}</span>
+                </div>
+              )}
+            </div>
+          )}
+
           <div className="flex justify-between items-center mt-2 border-t border-gray-200 pt-3">
             <span className="text-gray-500 font-semibold text-vi">Tổng cộng</span>
             <span className="font-black text-2xl text-blue-600">{formatVND(grandTotal)}</span>
@@ -303,11 +416,7 @@ export default function ThanhToan() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
           <div className="bg-white rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl animate-fadeIn relative">
              <button 
-               onClick={() => {
-                 setShowQR(false);
-                 setPendingPaymentOrderCode("");
-                 setPendingPaymentEmail("");
-               }}
+               onClick={handleCancelPendingPayment}
                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 bg-gray-100 hover:bg-red-50 p-2 rounded-full transition-colors"
              >
                <FaTimes />
@@ -346,11 +455,7 @@ export default function ThanhToan() {
                   Đã hoàn tất thanh toán
                 </button>
                 <button 
-                  onClick={() => {
-                    setShowQR(false);
-                    setPendingPaymentOrderCode("");
-                    setPendingPaymentEmail("");
-                  }}
+                  onClick={handleCancelPendingPayment}
                   className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors"
                 >
                   Hủy thanh toán

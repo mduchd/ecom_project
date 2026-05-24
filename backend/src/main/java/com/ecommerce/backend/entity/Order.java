@@ -1,5 +1,6 @@
 package com.ecommerce.backend.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,6 +42,42 @@ public class Order {
 
     @Column(nullable = false, length = 32)
     private String status;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
+    @JsonIgnore
+    private User user;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer pointsRedeemed = 0;
+
+    @Column(nullable = false, precision = 12, scale = 2)
+    @Builder.Default
+    private BigDecimal pointsDiscount = BigDecimal.ZERO;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private Integer pointsEarned = 0;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean pointsCredited = false;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean redeemedPointsRefunded = false;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean earnedPointsReversed = false;
+
+    @Column(length = 64)
+    @JsonIgnore
+    private String cancelToken;
+
+    @JsonIgnore
+    private LocalDateTime cancelTokenExpiresAt;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;

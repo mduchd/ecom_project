@@ -465,10 +465,10 @@ function UserActions({ cartCount, cartTotal }) {
                             <div className="px-4 py-2 border-b border-gray-100">
                                 <p className="text-xs font-black text-gray-800 truncate">{user.name}</p>
                                 <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
-                                {user.points > 0 && (
+                                {Number(user.points || 0) > 0 && (
                                     <div className="flex items-center gap-1 text-[10px] text-yellow-600 font-bold mt-1.5 bg-yellow-50/50 px-2 py-0.5 rounded-lg border border-yellow-100/40 w-fit">
                                         <FaStar className="w-2.5 h-2.5 text-yellow-500 fill-current" />
-                                        <span>{user.points} điểm tích lũy</span>
+                                        <span>{Number(user.points || 0).toLocaleString("vi-VN")} điểm tích lũy</span>
                                     </div>
                                 )}
                             </div>
@@ -609,10 +609,10 @@ function MobileMenu({ open, onClose }) {
                                     <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
                                 </div>
                             </div>
-                            {user.points > 0 && (
+                            {Number(user.points || 0) > 0 && (
                                 <div className="flex items-center gap-1 text-[10px] text-yellow-600 font-bold mt-2">
                                     <FaStar className="w-3 h-3 text-yellow-500 fill-current" />
-                                    <span>{user.points} điểm tích lũy</span>
+                                    <span>{Number(user.points || 0).toLocaleString("vi-VN")} điểm tích lũy</span>
                                 </div>
                             )}
                             {user.role === "admin" && (
