@@ -52,7 +52,7 @@ export function AuthProvider({ children }) {
     // Fake login: cứ nhập là thành công
     const role = email.toLowerCase() === "admin@luxe.com" ? "admin" : "user";
     const fakeUser = {
-      name: role === "admin" ? "Administrator" : (email.split("@")[0] || "Khách hàng"),
+      name: role === "admin" ? "Quản trị viên" : (email.split("@")[0] || "Khách hàng"),
       email: email,
       role: role,
       avatar: role === "admin" 

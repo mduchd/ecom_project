@@ -121,7 +121,7 @@ export default function ProductCard({ product }) {
                 <div className="flex items-center gap-1.5">
                     <span className={`w-1.5 h-1.5 rounded-full ${isAvailable ? "bg-emerald-500" : "bg-red-400"}`} />
                     <span className={`text-[11px] font-medium ${isAvailable ? "text-emerald-600" : "text-red-400"}`}>
-                        {isAvailable ? "In stock" : "Out of stock"}
+                        {isAvailable ? "Còn hàng" : "Hết hàng"}
                     </span>
                 </div>
 
@@ -144,12 +144,12 @@ export default function ProductCard({ product }) {
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                             </svg>
-                            Added!
+                            Đã thêm!
                         </>
                     ) : (
                         <>
                             <CartIcon />
-                            Add to Cart
+                            Thêm vào giỏ
                         </>
                     )}
                 </button>

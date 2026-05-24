@@ -6,7 +6,7 @@ export default function BannerSp( {sanPhamHienTai, onMuaNgay}){
             <div className="fixed z-50 bottom-2  left-0 right-0 mx-auto h-20 w-full max-w-4xl px-4 py-2 bg-white 
             shadow-md rounded-xl flex justify-between shadow-lg border border-gray-100">
                 <div className=" rounded-lg flex items-center p-2 gap-5">
-                    <img src={sanPhamHienTai.image} className="h-full object-contain" alt="Tai nghe" />
+                    <img src={sanPhamHienTai.image} className="h-full object-contain" alt="tài nghe" />
                     <p className="font-bold text-lg">{sanPhamHienTai.name} | Chính hãng VNA</p>
                 </div> 
                 <div className="flex gap-4 items-center">

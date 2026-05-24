@@ -58,14 +58,17 @@ const GlobeIcon = () => (
 
 // ── Data ────────────────────────────────────────────────────────────────────
 const CATEGORIES = [
-    "All Categories", "Laptops", "PC & Computers", "Accessories",
-    "Gaming & VR", "Networking", "Cameras", "Cell Phones", "Tablets",
-    "Storage & USB", "Sounds", "Office",
+    "Tất cả danh mục", "Laptop", "Máy tính", "Phụ kiện",
+    "Gaming & VR", "Mạng", "Máy ảnh", "Điện thoại", "Máy tính bảng",
+    "Lưu trữ & USB", "Âm thanh", "Văn phòng",
 ];
-
 const CURRENCIES = ["USD", "EUR", "GBP", "JPY", "AUD"];
-const LANGUAGES = ["English", "Spanish", "French", "German", "Vietnamese"];
-const NAV_LINKS = ["Home", "Pages", "Products", "Contact"];
+const LANGUAGES = ["Tiếng Việt", "English", "Español", "Français", "Deutsch"];
+const NAV_LINKS = [
+    { label: "Trang chủ", to: "/" },
+    { label: "Sản phẩm", to: "/shop" },
+    { label: "Liên hệ", to: "/contact" },
+];
 
 // ── Sub-components ──────────────────────────────────────────────────────────
 
@@ -116,7 +119,7 @@ function TopBar({ currency, setCurrency, language, setLanguage }) {
                         className="hidden sm:inline-flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-semibold px-3 py-1 rounded-full transition-colors duration-150"
                     >
                         <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse inline-block" />
-                        Track Order
+                        Theo dõi đơn hàng
                     </a>
 
                     <Dropdown selected={currency} options={CURRENCIES} onChange={setCurrency} />
@@ -136,7 +139,7 @@ function TopBar({ currency, setCurrency, language, setLanguage }) {
 }
 
 function SearchBar() {
-    const [category, setCategory] = useState("All Categories");
+    const [category, setCategory] = useState("Tất cả danh mục");
     const [catOpen, setCatOpen] = useState(false);
     const [query, setQuery] = useState("");
 
@@ -172,7 +175,7 @@ function SearchBar() {
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
-                    placeholder="Search anything..."
+                    placeholder="Tìm kiếm sản phẩm..."
                     className="flex-1 px-4 text-sm text-gray-700 placeholder-gray-400 outline-none bg-white"
                 />
 
@@ -203,8 +206,8 @@ function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
                     <UserIcon />
                 </span>
                 <div className="leading-tight hidden lg:block">
-                    <p className="text-[10px] text-gray-400 font-medium">Welcome</p>
-                    <p className="text-xs font-bold">Log In / Sign Up</p>
+                    <p className="text-[10px] text-gray-400 font-medium text-vi">Xin chào</p>
+                    <p className="text-xs font-bold text-vi">Đăng nhập / Đăng ký</p>
                 </div>
             </Link>
 
@@ -222,7 +225,7 @@ function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
                     )}
                 </div>
                 <div id="cart-icon" className="leading-tight hidden lg:block">
-                    <p className="text-[10px] text-gray-400 font-medium">Cart</p>
+                    <p className="text-[10px] text-gray-400 font-medium text-vi">Giỏ hàng</p>
                     <p className="text-xs font-bold text-gray-800">${cartTotal}</p>
                 </div>
             </Link>
@@ -231,26 +234,26 @@ function UserActions({ cartCount = 3, cartTotal = "1,520.00" }) {
 }
 
 const NAV_ITEMS = [
-    { label: "Home", to: "/", children: null },
+    { label: "Trang chủ", to: "/", children: null },
     {
-        label: "Pages",
+        label: "Trang",
         to: "#",
         children: [
-            { label: "About Us", to: "/about", icon: "👋" },
+            { label: "Về chúng tôi", to: "/about", icon: "👋" },
             { label: "FAQ", to: "/faq", icon: "❓" },
-            { label: "Contact", to: "/contact", icon: "✉️" },
+            { label: "Liên hệ", to: "/contact", icon: "✉️" },
         ],
     },
     {
-        label: "Products",
+        label: "Sản phẩm",
         to: "/shop",
         children: [
-            { label: "Laptops", to: "/shop?category=Laptop", icon: "💻" },
-            { label: "Cameras", to: "/shop?category=Điện thoại", icon: "📷" },
-            { label: "Accessories", to: "/shop?category=Phụ kiện", icon: "🎧" },
+            { label: "Laptop", to: "/shop?category=Laptop", icon: "💻" },
+            { label: "Điện thoại", to: "/shop?category=Điện thoại", icon: "📷" },
+            { label: "Phụ kiện", to: "/shop?category=Phụ kiện", icon: "🎧" },
         ],
     },
-    { label: "Contact", to: "/contact", children: null },
+    { label: "Liên hệ", to: "/contact", children: null },
 ];
 
 // ── Nav Dropdown Item ────────────────────────────────────────────────────────
@@ -273,7 +276,7 @@ function NavDropdown({ item }) {
         return (
             <Link
                 to={item.to}
-                className="flex items-center gap-0.5 text-sm font-semibold text-gray-700 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all duration-150"
+                className="flex items-center gap-0.5 text-sm font-semibold text-gray-700 hover:text-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-50 transition-all duration-150 text-vi"
             >
                 {item.label}
             </Link>
@@ -362,18 +365,18 @@ function MobileMenu({ open, onClose }) {
 
                     {NAV_LINKS.map((link) => (
                         <Link
-                            key={link}
-                            to={link === "Home" ? "/" : link === "Products" ? "/shop" : `/${link.toLowerCase()}`}
+                            key={link.to}
+                            to={link.to}
                             onClick={onClose}
-                            className="flex items-center justify-between px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                            className="flex items-center justify-between px-5 py-3 text-sm font-semibold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors text-vi"
                         >
-                            {link}
+                            {link.label}
                             <ChevronDown className="w-3.5 h-3.5 -rotate-90 text-gray-400" />
                         </Link>
                     ))}
 
                     <div className="border-t border-gray-100 mt-4 pt-4 px-5 space-y-3">
-                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold">Categories</p>
+                        <p className="text-[10px] text-gray-400 font-bold text-vi">Danh mục</p>
                         {CATEGORIES.slice(1).map((cat) => (
                             <a
                                 key={cat}
@@ -390,7 +393,7 @@ function MobileMenu({ open, onClose }) {
                 <div className="px-5 py-4 border-t border-gray-100 bg-gray-50">
                     <a href="#" className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">
                         <UserIcon />
-                        <span className="text-sm font-bold">Log In / Sign Up</span>
+                        <span className="text-sm font-bold text-vi">Đăng nhập / Đăng ký</span>
                     </a>
                 </div>
             </div>
@@ -401,7 +404,7 @@ function MobileMenu({ open, onClose }) {
 // ── Main Header Component ───────────────────────────────────────────────────
 export default function Header() {
     const [currency, setCurrency] = useState("USD");
-    const [language, setLanguage] = useState("English");
+    const [language, setLanguage] = useState("Tiếng Việt");
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const { cart } = useAuth();
     

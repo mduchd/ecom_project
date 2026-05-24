@@ -4,12 +4,12 @@ import { useState, useEffect } from "react";
 const HERO_SLIDES = [
   {
     id: 1,
-    tag: "Featured Product",
+    tag: "Sản phẩm nổi bật",
     title: "A4tech Bloody",
-    subtitle: "Gaming Headphone",
+    subtitle: "tài nghe gaming",
     description:
-      "Feature-Packed Wireless Headset Engineered For Professional Gamers And Audiophiles.",
-    btnText: "Buy Now",
+      "tài nghe không dây đa tính năng, thiết kế cho game thủ chuyên nghiệp và người yêu âm thanh.",
+    btnText: "Mua ngay",
     btnColor: "bg-blue-600 hover:bg-blue-700",
     bg: "bg-gradient-to-br from-slate-700 via-slate-600 to-slate-800",
     textColor: "text-white",
@@ -19,12 +19,12 @@ const HERO_SLIDES = [
   },
   {
     id: 2,
-    tag: "New Arrival",
+    tag: "Hàng mới",
     title: "Sony WH-1000",
-    subtitle: "XM5 Wireless",
+    subtitle: "XM5 không dây",
     description:
-      "Industry-leading noise cancellation with up to 30 hours battery life.",
-    btnText: "Shop Now",
+      "Công nghệ chống ồn hàng đầu với thời lượng pin lên đến 30 giờ.",
+    btnText: "Mua sắm",
     btnColor: "bg-yellow-400 hover:bg-yellow-500 text-gray-900",
     bg: "bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900",
     textColor: "text-white",
@@ -34,12 +34,12 @@ const HERO_SLIDES = [
   },
   {
     id: 3,
-    tag: "Best Deal",
+    tag: "Ưu đãi hot",
     title: "Meta Quest 3",
-    subtitle: "VR Headset",
+    subtitle: "Kính VR",
     description:
-      "Experience mixed reality with breakthrough Meta Reality technology.",
-    btnText: "Discover",
+      "Trải nghiệm thực tế hỗn hợp với công nghệ Meta Reality đột phá.",
+    btnText: "Khám phá",
     btnColor: "bg-purple-500 hover:bg-purple-600",
     bg: "bg-gradient-to-br from-gray-900 via-purple-950 to-gray-900",
     textColor: "text-white",
@@ -54,7 +54,7 @@ const SMALL_BANNERS = [
     id: 1,
     brand: "Oraimo",
     title: "Watch 5\nSmart Watch",
-    btnText: "Buy Now",
+    btnText: "Mua ngay",
     bg: "bg-gradient-to-br from-slate-100 to-blue-50",
     textColor: "text-slate-800",
     btnColor: "bg-blue-600 hover:bg-blue-700 text-white",
@@ -66,20 +66,20 @@ const SMALL_BANNERS = [
     id: 2,
     brand: "IPS",
     title: "NPTE 200VA\nSine Wave IPS",
-    btnText: "Shop Now",
+    btnText: "Mua sắm",
     bg: "bg-gradient-to-br from-gray-800 to-gray-900",
     textColor: "text-white",
     btnColor: "bg-white hover:bg-gray-100 text-gray-900",
     image:
       "https://images.unsplash.com/photo-1518770660439-4636190af475?w=200&q=80",
     tag: "Power",
-    discount: "40% OFF",
+    discount: "Giảm 40%",
   },
   {
     id: 3,
     brand: "Bruker",
     title: "TP-Link Archer\nAX53 Router",
-    btnText: "Discover",
+    btnText: "Khám phá",
     bg: "bg-gradient-to-br from-indigo-50 to-slate-100",
     textColor: "text-slate-800",
     btnColor: "bg-slate-700 hover:bg-slate-800 text-white",
@@ -91,7 +91,7 @@ const SMALL_BANNERS = [
     id: 4,
     brand: "Canon",
     title: "EOS R50\nMirrorless Camera",
-    btnText: "From $995",
+    btnText: "Từ $995",
     bg: "bg-gradient-to-br from-gray-900 to-zinc-800",
     textColor: "text-white",
     btnColor: "bg-yellow-400 hover:bg-yellow-500 text-gray-900",
@@ -114,7 +114,7 @@ function HeroSlide({ slide, isActive }) {
 
       {/* Content */}
       <div className="relative z-10 flex-1 max-w-[55%]">
-        <span className="inline-block text-[11px] font-bold uppercase tracking-widest text-blue-300 mb-3">
+        <span className="inline-block text-[11px] font-bold text-blue-300 mb-3 text-vi">
           {slide.tag}
         </span>
         <h2 className={`text-3xl md:text-4xl font-black leading-tight ${slide.textColor} mb-1`}>
@@ -170,7 +170,7 @@ function SmallBanner({ banner }) {
 
       {/* Text */}
       <div className="flex-1 z-10">
-        <p className={`text-[10px] font-bold uppercase tracking-wider opacity-60 ${banner.textColor}`}>
+        <p className={`text-[10px] font-bold opacity-60 text-vi ${banner.textColor}`}>
           {banner.brand}
         </p>
         <h4 className={`text-sm font-black leading-tight whitespace-pre-line ${banner.textColor} mt-0.5 mb-2`}>

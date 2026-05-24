@@ -98,10 +98,10 @@ function PasswordStrength({ password }) {
 
     const strength = getStrength(password);
     const levels = [
-        { label: "Weak", color: "bg-red-400" },
-        { label: "Fair", color: "bg-orange-400" },
-        { label: "Good", color: "bg-yellow-400" },
-        { label: "Strong", color: "bg-emerald-500" },
+        { label: "Yếu", color: "bg-red-400" },
+        { label: "Trung bình", color: "bg-orange-400" },
+        { label: "Tốt", color: "bg-yellow-400" },
+        { label: "Mạnh", color: "bg-emerald-500" },
     ];
     const current = levels[strength - 1];
 
@@ -118,7 +118,7 @@ function PasswordStrength({ password }) {
                 ))}
             </div>
             <p className="text-[11px] font-bold" style={{ color: strength >= 3 ? "#10b981" : strength === 2 ? "#f59e0b" : "#f87171" }}>
-                {current?.label} password
+                {current?.label} — mật khẩu
             </p>
         </div>
     );
@@ -144,10 +144,10 @@ function SignInForm({ onSwitch }) {
 
     const validate = () => {
         const e = {};
-        if (!email) e.email = "Email is required.";
-        else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Enter a valid email.";
-        if (!password) e.password = "Password is required.";
-        else if (password.length < 6) e.password = "Minimum 6 characters.";
+        if (!email) e.email = "Vui lòng nhập email.";
+        else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Email không hợp lệ.";
+        if (!password) e.password = "Vui lòng nhập mật khẩu.";
+        else if (password.length < 6) e.password = "Tối thiểu 6 ký tự.";
         return e;
     };
 
@@ -186,9 +186,9 @@ function SignInForm({ onSwitch }) {
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <InputField
-                label="Email Address"
+                label="Email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="ban@example.com"
                 icon={<MailIcon />}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -196,9 +196,9 @@ function SignInForm({ onSwitch }) {
             />
 
             <InputField
-                label="Password"
+                label="Mật khẩu"
                 type={showPwd ? "text" : "password"}
-                placeholder="Enter your password"
+                placeholder="Nhập mật khẩu"
                 icon={<LockIcon />}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -225,13 +225,13 @@ function SignInForm({ onSwitch }) {
                     >
                         {remember && <CheckIcon />}
                     </button>
-                    <span className="text-xs text-gray-600 font-medium">Remember me</span>
+                    <span className="text-xs text-gray-600 font-medium text-vi">Ghi nhớ đăng nhập</span>
                 </label>
                 <Link
                     to="/forgot-password"
-                    className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                    className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors text-vi"
                 >
-                    Forgot password?
+                    Quên mật khẩu?
                 </Link>
             </div>
 
@@ -251,16 +251,16 @@ function SignInForm({ onSwitch }) {
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                     </svg>
                 ) : success ? (
-                    <><CheckIcon /> Signed In!</>
+                    <><CheckIcon /> Đăng nhập thành công!</>
                 ) : (
-                    "Sign In"
+                    "Đăng nhập"
                 )}
             </button>
 
             {/* Divider */}
             <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-gray-100" />
-                <span className="text-xs text-gray-400 font-medium">or continue with</span>
+                <span className="text-xs text-gray-400 font-medium text-vi">hoặc tiếp tục với</span>
                 <div className="flex-1 h-px bg-gray-100" />
             </div>
 
@@ -268,20 +268,20 @@ function SignInForm({ onSwitch }) {
             <button
                 type="button"
                 onClick={() => googleLogin()}
-                className="w-full py-2.5 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-sm font-bold text-gray-700 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98]"
+                className="w-full py-2.5 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-sm font-bold text-gray-700 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] text-vi"
             >
-                <GoogleIcon /> Sign in with Google
+                <GoogleIcon /> Đăng nhập bằng Google
             </button>
 
             {/* Switch */}
-            <p className="text-center text-xs text-gray-500">
-                Don't have an account?{" "}
+            <p className="text-center text-xs text-gray-500 text-vi">
+                Chưa có tài khoản?{" "}
                 <button
                     type="button"
                     onClick={onSwitch}
                     className="font-black text-blue-600 hover:text-blue-800 hover:underline transition-colors"
                 >
-                    Sign up
+                    Đăng ký
                 </button>
             </p>
         </form>
@@ -308,12 +308,12 @@ function SignUpForm({ onSwitch }) {
 
     const validate = () => {
         const e = {};
-        if (!name.trim()) e.name = "Full name is required.";
-        if (!email) e.email = "Email is required.";
-        else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Enter a valid email.";
-        if (!password) e.password = "Password is required.";
-        else if (password.length < 8) e.password = "Minimum 8 characters.";
-        if (!agreed) e.agreed = "You must accept the terms.";
+        if (!name.trim()) e.name = "Vui lòng nhập họ tên.";
+        if (!email) e.email = "Vui lòng nhập email.";
+        else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Email không hợp lệ.";
+        if (!password) e.password = "Vui lòng nhập mật khẩu.";
+        else if (password.length < 8) e.password = "Tối thiểu 8 ký tự.";
+        if (!agreed) e.agreed = "Bạn cần đồng ý với điều khoản.";
         return e;
     };
 
@@ -329,8 +329,8 @@ function SignUpForm({ onSwitch }) {
     return (
         <form onSubmit={handleSubmit} className="space-y-4">
             <InputField
-                label="Full Name"
-                placeholder="John Doe"
+                label="Họ và tên"
+                placeholder="Nguyễn Văn A"
                 icon={<UserIcon />}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
@@ -338,9 +338,9 @@ function SignUpForm({ onSwitch }) {
             />
 
             <InputField
-                label="Email Address"
+                label="Email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="ban@example.com"
                 icon={<MailIcon />}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -349,9 +349,9 @@ function SignUpForm({ onSwitch }) {
 
             <div className="space-y-1.5">
                 <InputField
-                    label="Password"
+                    label="Mật khẩu"
                     type={showPwd ? "text" : "password"}
-                    placeholder="Min. 8 characters"
+                    placeholder="Tối thiểu 8 ký tự"
                     icon={<LockIcon />}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
@@ -380,16 +380,16 @@ function SignUpForm({ onSwitch }) {
                     >
                         {agreed && <CheckIcon />}
                     </button>
-                    <span className="text-xs text-gray-500 leading-relaxed">
-                        I agree to the{" "}
+                    <span className="text-xs text-gray-500 leading-relaxed text-vi">
+                        Tôi đồng ý với{" "}
                         <a href="https://example.com/terms" target="_blank" rel="noreferrer"
                             className="font-bold text-blue-600 hover:underline">
-                            Terms of Service
+                            Điều khoản dịch vụ
                         </a>{" "}
-                        and{" "}
+                        và{" "}
                         <a href="https://example.com/privacy" target="_blank" rel="noreferrer"
                             className="font-bold text-blue-600 hover:underline">
-                            Privacy Policy
+                            Chính sách bảo mật
                         </a>
                     </span>
                 </label>
@@ -414,16 +414,16 @@ function SignUpForm({ onSwitch }) {
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                     </svg>
                 ) : success ? (
-                    <><CheckIcon /> Account Created!</>
+                    <><CheckIcon /> Tạo tài khoản thành công!</>
                 ) : (
-                    "Create Account"
+                    "Tạo tài khoản"
                 )}
             </button>
 
             {/* Divider */}
             <div className="flex items-center gap-3">
                 <div className="flex-1 h-px bg-gray-100" />
-                <span className="text-xs text-gray-400 font-medium">or continue with</span>
+                <span className="text-xs text-gray-400 font-medium text-vi">hoặc tiếp tục với</span>
                 <div className="flex-1 h-px bg-gray-100" />
             </div>
 
@@ -431,20 +431,20 @@ function SignUpForm({ onSwitch }) {
             <button
                 type="button"
                 onClick={() => googleLogin()}
-                className="w-full py-2.5 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-sm font-bold text-gray-700 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98]"
+                className="w-full py-2.5 rounded-xl border-2 border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-sm font-bold text-gray-700 flex items-center justify-center gap-2.5 transition-all active:scale-[0.98] text-vi"
             >
-                <GoogleIcon /> Sign up with Google
+                <GoogleIcon /> Đăng ký bằng Google
             </button>
 
             {/* Switch */}
-            <p className="text-center text-xs text-gray-500">
-                Already have an account?{" "}
+            <p className="text-center text-xs text-gray-500 text-vi">
+                Đã có tài khoản?{" "}
                 <button
                     type="button"
                     onClick={onSwitch}
                     className="font-black text-blue-600 hover:text-blue-800 hover:underline transition-colors"
                 >
-                    Sign in
+                    Đăng nhập
                 </button>
             </p>
         </form>
@@ -457,7 +457,7 @@ export default function Auth() {
     const isSignIn = mode === "signin";
 
     return (
-        <main className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-10">
+        <main lang="vi" className="min-h-screen bg-gray-50 flex flex-col items-center justify-center px-4 py-10">
 
             {/* Logo */}
             <Link to="/" className="mb-6 select-none">
@@ -473,8 +473,8 @@ export default function Auth() {
                 {/* Tab toggle */}
                 <div className="flex border-b border-gray-100">
                     {[
-                        { label: "Sign In", value: "signin" },
-                        { label: "Create Account", value: "signup" },
+                        { label: "Đăng nhập", value: "signin" },
+                        { label: "Tạo tài khoản", value: "signup" },
                     ].map((tab) => (
                         <button
                             key={tab.value}
@@ -494,13 +494,13 @@ export default function Auth() {
                 <div className="px-6 py-7">
                     {/* Heading */}
                     <div className="mb-6">
-                        <h1 className="text-xl font-black text-gray-900">
-                            {isSignIn ? "Welcome back 👋" : "Create your account"}
+                        <h1 className="text-xl font-black text-gray-900 text-vi">
+                            {isSignIn ? "Chào mừng trở lại 👋" : "Tạo tài khoản mới"}
                         </h1>
-                        <p className="text-xs text-gray-400 mt-1">
+                        <p className="text-xs text-gray-400 mt-1 text-vi">
                             {isSignIn
-                                ? "Sign in to access your orders, wishlist and more."
-                                : "Join Snapcart and start shopping smarter today."}
+                                ? "Đăng nhập để xem đơn hàng, danh sách yêu thích và nhiều hơn nữa."
+                                : "Tham gia Snapcart và mua sắm thông minh hơn ngay hôm nay."}
                         </p>
                     </div>
 
@@ -515,8 +515,8 @@ export default function Auth() {
             </div>
 
             {/* Footer note */}
-            <p className="mt-6 text-xs text-gray-400 text-center">
-                © {new Date().getFullYear()} Snapcart. All rights reserved.
+            <p className="mt-6 text-xs text-gray-400 text-center text-vi">
+                © {new Date().getFullYear()} Snapcart. Bảo lưu mọi quyền.
             </p>
 
             <style>{`

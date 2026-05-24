@@ -48,7 +48,7 @@ public class UserService {
 
     private User getUser(Long userId) {
         return userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với id: " + userId));
     }
 
     private UserProfileResponse toResponse(User user) {

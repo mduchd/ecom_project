@@ -2,6 +2,27 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  html {
+    font-family: "Noto Sans", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    letter-spacing: normal;
+  }
+
+  select,
+  option {
+    font-family: inherit;
+    letter-spacing: normal;
+    text-transform: none;
+  }
+}
+
+@layer utilities {
+  .text-vi {
+    letter-spacing: normal !important;
+    text-transform: none !important;
+  }
+}
+
 @layer utilities {
   @keyframes toast-in {
     0% { transform: translateX(100%) scale(0.5); opacity: 0; }

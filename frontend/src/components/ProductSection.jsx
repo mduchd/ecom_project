@@ -189,7 +189,7 @@ const PRODUCTS = {
 
 // ── ProductSection ───────────────────────────────────────────────────────────
 export default function ProductSection({
-    title = "Best Seller",
+    title = "Bán chạy",
     tabs = TABS,
     productsMap = PRODUCTS,
     viewAllHref = "#",
@@ -202,12 +202,12 @@ export default function ProductSection({
 
             {/* Section header */}
             <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-black text-gray-900 tracking-tight">{title}</h2>
+                <h2 className="text-xl font-black text-gray-900 tracking-tight text-vi">{title}</h2>
                 <a
                     href={viewAllHref || "#"}
-                    className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                    className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors text-vi"
                 >
-                    VIEW ALL
+                    Xem tất cả
                 </a>
             </div>
             {/* Tab pills */}
@@ -240,7 +240,7 @@ export default function ProductSection({
                         <svg className="w-12 h-12 mb-3 opacity-30" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0H4" />
                         </svg>
-                        <p className="text-sm font-semibold">No products in this category yet.</p>
+                        <p className="text-sm font-semibold text-vi">Chưa có sản phẩm trong danh mục này.</p>
                     </div>
                 )
             }

@@ -1,5 +1,5 @@
 import { useState, useEffect} from "react";
-import { useNavigate , useParams} from "react-router-dom";
+import { useNavigate , useParams, Link } from "react-router-dom";
 import GioHang from "./GioHang.jsx";
 import SPLienQuan from "../components/SanPhamLienQuan.jsx";
 import BannerSp from "../components/BannerSP.jsx";
@@ -40,7 +40,7 @@ export default function ChiTietSP() {
   const getVersions = (prod) => {
     if (!prod) return ["Tiêu chuẩn", "Nâng cấp", "Cao cấp"];
     if (prod.category === "Laptops" || prod.category === "Computers") return ["8GB RAM / 256GB SSD", "16GB RAM / 512GB SSD", "32GB RAM / 1TB SSD"];
-    if (prod.category === "Cameras") return ["Body Only", "Kèm Lens Kit", "Bản Creator (Full PK)"];
+    if (prod.category === "Cameras") return ["Chỉ thân máy", "Kèm Lens Kit", "Bản Creator (Full PK)"];
     return ["Bản Thường", "Bản Plus", "Bản Pro"];
   };
   const version = getVersions(sanPhamHienTai);
@@ -155,7 +155,7 @@ export default function ChiTietSP() {
               <img 
                 src={activeImg} 
                 className="w-full h-full object-contain transition-all duration-300" 
-                alt="Product" 
+                alt="Sản phẩm" 
               />
             )}
           </div>
@@ -190,9 +190,9 @@ export default function ChiTietSP() {
           {/* TITLE & DESCRIPTION */}
           <div>
             <div className="flex items-center gap-2 mb-2">
-              <span className="bg-blue-600 text-white text-[10px] sm:text-xs font-black px-3 py-1 rounded-md uppercase tracking-wider">{sanPhamHienTai?.category}</span>
+              <span className="bg-blue-600 text-white text-[10px] sm:text-xs font-black px-3 py-1 rounded-md text-vi">{sanPhamHienTai?.category}</span>
               <span className="text-amber-500 text-sm font-bold flex items-center gap-1">⭐ {sanPhamHienTai?.rating} <span className="text-gray-400 text-xs">({sanPhamHienTai?.reviews} đánh giá)</span></span>
-              {sanPhamHienTai?.isNew && <span className="bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded-md uppercase">Mới</span>}
+              {sanPhamHienTai?.isNew && <span className="bg-emerald-500 text-white text-[10px] font-black px-2 py-1 rounded-md text-vi">Mới</span>}
             </div>
             <h1 className="text-3xl sm:text-4xl font-black text-gray-900 tracking-tight leading-tight">{sanPhamHienTai?.name}</h1>
             
@@ -215,7 +215,7 @@ export default function ChiTietSP() {
           {/* COLOR */}
           <div className="flex flex-col gap-6 mt-4">
               <div>
-                <h2 className="font-black text-gray-900 uppercase text-sm tracking-widest mb-3">Phiên bản</h2>
+                <h2 className="font-black text-gray-900 text-sm mb-3 text-vi">Phiên bản</h2>
                 <div className="grid grid-cols-3 gap-3">
                 {version.map((item, index) =>(
                   <div 
@@ -234,7 +234,7 @@ export default function ChiTietSP() {
               </div>
 
               <div>
-                <span className="font-black text-gray-900 uppercase text-sm tracking-widest mb-3 block">Chọn Màu</span>
+                <span className="font-black text-gray-900 text-sm mb-3 block text-vi">Chọn màu</span>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {mausac.map((color, index) => {
                     const isSelected = selectedID === index;
@@ -287,7 +287,7 @@ export default function ChiTietSP() {
                 <FiGift size={22} className="text-red-500 "/>
               <p className="font-semibold text-lg">Khuyến mãi đi kèm</p>
               </div>
-              <a href="/" className="text-red-500 font-semibold text-sm">Xem tất cả voucher</a>
+              <Link to="/shop" className="text-red-500 font-semibold text-sm text-vi hover:underline">Xem tất cả voucher</Link>
             </div>
             {km.map((item, index) =>(
               <div key={index} className="flex gap-6">

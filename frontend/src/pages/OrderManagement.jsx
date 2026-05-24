@@ -93,13 +93,13 @@ export default function OrderManagement() {
                   <td className="px-6 py-5 font-black text-blue-600">#{order.id}</td>
                   <td className="px-4 py-5">
                     <p className="font-bold text-gray-900">{order.receiverName || "Khách hàng"}</p>
-                    <p className="text-xs text-gray-400">{order.phoneNumber || "No phone"}</p>
+                    <p className="text-xs text-gray-400">{order.phoneNumber || "Chưa có SĐT"}</p>
                   </td>
                   <td className="px-4 py-5 min-w-64">
                     <p className="text-sm font-medium text-gray-700 line-clamp-2">
-                      {order.items?.map((item) => `${item.productName} x${item.quantity}`).join(", ") || "No items"}
+                      {order.items?.map((item) => `${item.productName} x${item.quantity}`).join(", ") || "Không có sản phẩm"}
                     </p>
-                    <p className="text-xs text-gray-400">{order.shippingAddress || "No address"}</p>
+                    <p className="text-xs text-gray-400">{order.shippingAddress || "Chưa có địa chỉ"}</p>
                   </td>
                   <td className="px-4 py-5 text-right font-black text-gray-900">
                     ${Number(order.total || 0).toLocaleString()}

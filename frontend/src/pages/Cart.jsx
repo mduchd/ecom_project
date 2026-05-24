@@ -4,9 +4,9 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { calculateDiscount } from "../utils/orderPricing.js";
 
 const VALID_COUPONS = {
-    SAVE10: { type: "percent", value: 10, label: "10% off" },
-    FLAT50: { type: "fixed", value: 50, label: "$50 off" },
-    TECH20: { type: "percent", value: 20, label: "20% off" },
+    SAVE10: { type: "percent", value: 10, label: "Giảm 10%" },
+    FLAT50: { type: "fixed", value: 50, label: "Giảm $50" },
+    TECH20: { type: "percent", value: 20, label: "Giảm 20%" },
 };
 
 const FREE_SHIPPING_THRESHOLD = 399;
@@ -77,10 +77,10 @@ function Breadcrumb() {
     return (
         <nav className="flex items-center gap-1.5 text-xs text-gray-500">
             <a href="/" className="flex items-center gap-1 hover:text-blue-600 transition-colors font-medium">
-                <HomeIcon /> Home
+                <HomeIcon /> Trang chủ
             </a>
             <span className="text-gray-300">/</span>
-            <span className="text-blue-600 font-semibold">Shopping Cart</span>
+            <span className="text-blue-600 font-semibold text-vi">Giỏ hàng</span>
         </nav>
     );
 }
@@ -132,13 +132,13 @@ function CartItem({ item, onQtyChange, onRemove }) {
                 {/* Name + remove */}
                 <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                        <p className="text-xs text-blue-500 font-bold uppercase tracking-wide mb-0.5">
+                        <p className="text-xs text-blue-500 font-bold text-vi mb-0.5">
                             {item.category}
                         </p>
                         <h3 className="text-sm font-bold text-gray-800 line-clamp-2 leading-snug">
                             {item.name} {item.variant && `- ${item.variant}`} {item.color && `(${item.color})`}
                         </h3>
-                        <p className="text-[11px] text-gray-400 mt-0.5">Mã SP: {item.cartId}</p>
+                        <p className="text-[11px] text-gray-400 mt-0.5 text-vi">Mã SP: {item.cartId}</p>
                     </div>
                     <button
                         onClick={() => onRemove(item.cartId)}
@@ -174,13 +174,13 @@ function EmptyCart() {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
             </div>
-            <h3 className="text-lg font-black text-gray-700 mb-2">Your cart is empty</h3>
-            <p className="text-sm text-gray-400 mb-6">Looks like you haven't added anything yet.</p>
+            <h3 className="text-lg font-black text-gray-700 mb-2 text-vi">Giỏ hàng của bạn đang trống</h3>
+            <p className="text-sm text-gray-400 mb-6 text-vi">Hãy thêm sản phẩm yêu thích để tiếp tục mua sắm.</p>
             <Link
                 to="/shop"
-                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-md shadow-blue-100 transition-all active:scale-95"
+                className="inline-flex items-center gap-2 px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl shadow-md shadow-blue-100 transition-all active:scale-95 text-vi"
             >
-                <CartIcon /> Start Shopping
+                <CartIcon /> Mua sắm ngay
             </Link>
         </div>
     );
@@ -202,7 +202,7 @@ function CouponInput({ applied, onApply, onRemove }) {
                 onApply({ code: code.trim().toUpperCase(), ...coupon });
                 setCode("");
             } else {
-                setError("Invalid coupon code. Try SAVE10, FLAT50 or TECH20.");
+                setError("Mã giảm giá không hợp lệ. Thử SAVE10, FLAT50 hoặc TECH20.");
             }
             setLoading(false);
         }, 600);
@@ -238,8 +238,8 @@ function CouponInput({ applied, onApply, onRemove }) {
                         value={code}
                         onChange={(e) => { setCode(e.target.value.toUpperCase()); setError(""); }}
                         onKeyDown={(e) => e.key === "Enter" && handleApply()}
-                        placeholder="Enter coupon code"
-                        className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all placeholder-gray-400 font-medium tracking-wide"
+                        placeholder="Nhập mã giảm giá"
+                        className="w-full pl-9 pr-3 py-2.5 text-sm border border-gray-200 rounded-xl outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all placeholder-gray-400 font-medium text-vi"
                     />
                 </div>
                 <button
@@ -252,15 +252,15 @@ function CouponInput({ applied, onApply, onRemove }) {
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
                         </svg>
-                    ) : "Apply"}
+                    ) : "Áp dụng"}
                 </button>
             </div>
             {error && (
-                <p className="text-xs text-red-500 font-medium flex items-center gap-1">
+                <p className="text-xs text-red-500 font-medium flex items-center gap-1 text-vi">
                     <XIcon /> {error}
                 </p>
             )}
-            <p className="text-[11px] text-gray-400">Try: <span className="font-mono font-bold">SAVE10</span>, <span className="font-mono font-bold">FLAT50</span>, <span className="font-mono font-bold">TECH20</span></p>
+            <p className="text-[11px] text-gray-400 text-vi">Gợi ý: <span className="font-mono font-bold">SAVE10</span>, <span className="font-mono font-bold">FLAT50</span>, <span className="font-mono font-bold">TECH20</span></p>
         </div>
     );
 }
@@ -295,8 +295,8 @@ function OrderSummary({ items }) {
 
             {/* Header */}
             <div className="px-5 py-4 border-b border-gray-100 bg-gray-50">
-                <h2 className="text-base font-black text-gray-800">Order Summary</h2>
-                <p className="text-xs text-gray-400 mt-0.5">{items.length} item{items.length !== 1 ? "s" : ""}</p>
+                <h2 className="text-base font-black text-gray-800 text-vi">Tóm tắt đơn hàng</h2>
+                <p className="text-xs text-gray-400 mt-0.5 text-vi">{items.length} sản phẩm</p>
             </div>
 
             <div className="px-5 py-5 space-y-4">
@@ -304,8 +304,8 @@ function OrderSummary({ items }) {
                 {/* Free shipping progress */}
                 {subtotal < FREE_SHIPPING_THRESHOLD && (
                     <div className="bg-blue-50 rounded-xl p-3.5 space-y-2">
-                        <p className="text-xs font-bold text-blue-700">
-                            Add <span className="text-blue-900">${remaining.toLocaleString()}</span> more for FREE shipping! 🚚
+                        <p className="text-xs font-bold text-blue-700 text-vi">
+                            Thêm <span className="text-blue-900">${remaining.toLocaleString()}</span> nữa để được miễn phí vận chuyển! 🚚
                         </p>
                         <div className="w-full bg-blue-100 rounded-full h-1.5 overflow-hidden">
                             <div
@@ -318,28 +318,28 @@ function OrderSummary({ items }) {
                 {subtotal >= FREE_SHIPPING_THRESHOLD && (
                     <div className="bg-emerald-50 rounded-xl p-3.5 flex items-center gap-2 text-emerald-700">
                         <CheckCircleIcon />
-                        <p className="text-xs font-bold">You've unlocked FREE shipping! 🎉</p>
+                        <p className="text-xs font-bold text-vi">Bạn đã được miễn phí vận chuyển! 🎉</p>
                     </div>
                 )}
 
                 {/* Line items */}
                 <div className="space-y-2.5">
                     <div className="flex justify-between text-sm">
-                        <span className="text-gray-500 font-medium">Subtotal</span>
+                        <span className="text-gray-500 font-medium text-vi">Tạm tính</span>
                         <span className="font-bold text-gray-800">${subtotal.toLocaleString()}</span>
                     </div>
 
                     <div className="flex justify-between text-sm">
-                        <span className="text-gray-500 font-medium">Shipping</span>
+                        <span className="text-gray-500 font-medium text-vi">Phí vận chuyển</span>
                         <span className={`font-bold ${shipping === 0 ? "text-emerald-600" : "text-gray-800"}`}>
-                            {shipping === 0 ? "FREE" : `$${shipping}`}
+                            {shipping === 0 ? "Miễn phí" : `$${shipping}`}
                         </span>
                     </div>
 
                     {coupon && (
                         <div className="flex justify-between text-sm">
-                            <span className="text-emerald-600 font-medium flex items-center gap-1">
-                                <GiftIcon /> Discount ({coupon.code})
+                            <span className="text-emerald-600 font-medium flex items-center gap-1 text-vi">
+                                <GiftIcon /> Giảm giá ({coupon.code})
                             </span>
                             <span className="font-bold text-emerald-600">-${discount.toLocaleString()}</span>
                         </div>
@@ -351,8 +351,8 @@ function OrderSummary({ items }) {
 
                 {/* Coupon */}
                 <div>
-                    <p className="text-xs font-bold text-gray-600 mb-2 flex items-center gap-1.5">
-                        <TagIcon /> Coupon Code
+                    <p className="text-xs font-bold text-gray-600 mb-2 flex items-center gap-1.5 text-vi">
+                        <TagIcon /> Mã giảm giá
                     </p>
                     <CouponInput
                         applied={coupon}
@@ -367,31 +367,31 @@ function OrderSummary({ items }) {
                 {/* Total */}
                 <div className="flex justify-between items-end">
                     <div>
-                        <span className="text-sm font-bold text-gray-600">Total</span>
-                        <p className="text-[11px] text-gray-400">Incl. taxes & fees</p>
+                        <span className="text-sm font-bold text-gray-600 text-vi">Tổng cộng</span>
+                        <p className="text-[11px] text-gray-400 text-vi">Đã bao gồm thuế & phí</p>
                     </div>
                     <span className="text-2xl font-black text-blue-600">${total.toLocaleString()}</span>
                 </div>
 
                 {/* Checkout button */}
                 {checkedOut ? (
-                    <div className="w-full py-3.5 rounded-xl bg-emerald-500 text-white text-sm font-black flex items-center justify-center gap-2">
-                        <CheckCircleIcon /> Order Placed!
+                    <div className="w-full py-3.5 rounded-xl bg-emerald-500 text-white text-sm font-black flex items-center justify-center gap-2 text-vi">
+                        <CheckCircleIcon /> Đặt hàng thành công!
                     </div>
                 ) : (
                     <Link
                         to="/checkout"
                         state={{ couponCode: coupon?.code || "" }}
-                        className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-blue-100 transition-all duration-150"
+                        className="w-full py-3.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-sm font-black flex items-center justify-center gap-2 shadow-lg shadow-blue-100 transition-all duration-150 text-vi"
                     >
-                        Proceed to Checkout <ChevronRight />
+                        Tiến hành thanh toán <ChevronRight />
                     </Link>
                 )}
 
                 {/* Security note */}
                 <div className="flex items-center justify-center gap-1.5 text-gray-400">
                     <LockIcon />
-                    <span className="text-[11px] font-medium">Secure checkout — SSL encrypted</span>
+                    <span className="text-[11px] font-medium text-vi">Thanh toán an toàn — mã hóa SSL</span>
                 </div>
 
                 {/* Payment icons */}
@@ -412,7 +412,7 @@ export default function Cart() {
     const { cart: items, updateCartQty, removeFromCart, clearCart } = useAuth();
 
     return (
-        <main className="min-h-screen bg-gray-50">
+        <main lang="vi" className="min-h-screen bg-gray-50">
             <div className="max-w-[1280px] mx-auto px-4 sm:px-6 py-6 space-y-5">
 
                 {/* Breadcrumb */}
@@ -421,8 +421,8 @@ export default function Cart() {
                 {/* Page title */}
                 <div className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight">
-                            Shopping Cart
+                        <h1 className="text-2xl sm:text-3xl font-black text-gray-900 tracking-tight text-vi">
+                            Giỏ hàng
                         </h1>
                         <div className="flex gap-1 mt-1.5">
                             <div className="h-1 w-10 rounded-full bg-blue-600" />
@@ -432,9 +432,9 @@ export default function Cart() {
                     {items.length > 0 && (
                         <button
                             onClick={clearCart}
-                            className="text-xs text-red-400 hover:text-red-600 font-bold flex items-center gap-1.5 transition-colors"
+                            className="text-xs text-red-400 hover:text-red-600 font-bold flex items-center gap-1.5 transition-colors text-vi"
                         >
-                            <TrashIcon /> Clear All
+                            <TrashIcon /> Xóa tất cả
                         </button>
                     )}
                 </div>
@@ -449,11 +449,11 @@ export default function Cart() {
                         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
 
                             {/* List header */}
-                            <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-gray-50 border-b border-gray-100 text-xs font-black text-gray-400 uppercase tracking-wider">
-                                <span>Product</span>
-                                <span>Unit Price</span>
-                                <span>Quantity</span>
-                                <span>Total</span>
+                            <div className="hidden sm:grid grid-cols-[2fr_1fr_1fr_1fr_auto] gap-4 px-5 py-3 bg-gray-50 border-b border-gray-100 text-xs font-black text-gray-400">
+                                <span className="text-vi">Sản phẩm</span>
+                                <span className="text-vi">Đơn giá</span>
+                                <span className="text-vi">Số lượng</span>
+                                <span className="text-vi">Thành tiền</span>
                                 <span></span>
                             </div>
 
@@ -471,14 +471,14 @@ export default function Cart() {
 
                             {/* Footer */}
                             <div className="px-5 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between gap-3 flex-wrap">
-                                <Link to="/shop" className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
+                                <Link to="/shop" className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors text-vi">
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                     </svg>
-                                    Continue Shopping
+                                    Tiếp tục mua sắm
                                 </Link>
-                                <div className="text-sm text-gray-500">
-                                    {items.length} item{items.length !== 1 ? "s" : ""} ·{" "}
+                                <div className="text-sm text-gray-500 text-vi">
+                                    {items.length} sản phẩm ·{" "}
                                     <span className="font-black text-gray-800">
                                         ${items.reduce((s, i) => s + i.price * i.qty, 0).toLocaleString()}
                                     </span>

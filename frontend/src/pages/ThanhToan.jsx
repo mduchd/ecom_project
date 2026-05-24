@@ -48,7 +48,7 @@ export default function ThanhToan() {
   const appliedCouponCode = orderQuote?.couponCode ?? couponCode;
   const grandTotal = Number(orderQuote?.total ?? Math.max(subtotal + shipping + taxAmount - discount, 0));
   const qrTotal = paymentAmount ?? grandTotal;
-  const qrUrl = `https://qr.sepay.vn/img?bank=Vietcombank&acc=9339582134&template=compact&amount=${Math.round(qrTotal)}&des=ThanhToanCart`;
+  const qrUrl = `https://qr.sepay.vn/img?bank=Vietcombank&acc=9339582134&template=compact&amount=${Math.round(qrTotal)}&des=${encodeURIComponent("Thanh toán giỏ hàng")}`;
 
   const paymentMethods = [
     { id: "momo", icon: FaWallet, label: "Ví MoMo" },
@@ -134,56 +134,56 @@ export default function ThanhToan() {
   };
 
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div lang="vi" className="bg-gray-50 min-h-screen">
       <main className="max-w-7xl mx-auto px-4 sm:px-8 py-6 grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-8 bg-white shadow-sm border border-gray-100">
         <div className="flex flex-col gap-4">
-          <h1 className="text-3xl font-semibold">Secure Checkout</h1>
+          <h1 className="text-3xl font-semibold text-vi">Thanh toán</h1>
 
           <section className="bg-white p-4 rounded-lg flex flex-col gap-4 border border-gray-200">
             <div className="flex items-center gap-4">
               <FaShippingFast className="text-xl text-blue-600" />
-              <h2 className="text-2xl">Delivery Information</h2>
+              <h2 className="text-2xl text-vi">Thông tin giao hàng</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <label className="flex flex-col gap-2">
-                <span className="font-bold">Full Name</span>
+                <span className="font-bold text-vi">Họ và tên</span>
                 <input
                   value={delivery.receiverName}
                   onChange={(event) => updateDelivery("receiverName", event.target.value)}
                   placeholder="Nhập tên của bạn..."
-                  className="h-10 w-full border border-gray-200 rounded-lg p-2"
+                  className="h-10 w-full border border-gray-200 rounded-lg p-2 text-vi"
                 />
               </label>
 
               <label className="flex flex-col gap-2">
-                <span className="font-bold">Phone Number</span>
+                <span className="font-bold text-vi">Số điện thoại</span>
                 <input
                   value={delivery.phoneNumber}
                   onChange={(event) => updateDelivery("phoneNumber", event.target.value)}
                   placeholder="Nhập số điện thoại..."
-                  className="h-10 w-full border border-gray-200 rounded-lg p-2"
+                  className="h-10 w-full border border-gray-200 rounded-lg p-2 text-vi"
                 />
               </label>
             </div>
 
             <label className="flex flex-col gap-2">
-              <span className="font-bold">Shipping Address</span>
+              <span className="font-bold text-vi">Địa chỉ giao hàng</span>
               <input
                 value={delivery.shippingAddress}
                 onChange={(event) => updateDelivery("shippingAddress", event.target.value)}
                 placeholder="Nhập địa chỉ nhận hàng..."
-                className="h-10 w-full border border-gray-200 rounded-lg p-2"
+                className="h-10 w-full border border-gray-200 rounded-lg p-2 text-vi"
               />
             </label>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <label className="flex flex-col gap-2">
-                <span className="font-bold">City</span>
+                <span className="font-bold text-vi">Thành phố</span>
                 <select
                   value={delivery.city}
                   onChange={(event) => updateDelivery("city", event.target.value)}
-                  className="h-10 w-full border border-gray-200 rounded-lg p-2"
+                  className="h-10 w-full border border-gray-200 rounded-lg p-2 text-vi"
                 >
                   <option value="">Chọn</option>
                   <option value="Hà Nội">Hà Nội</option>
@@ -193,12 +193,12 @@ export default function ThanhToan() {
               </label>
 
               <label className="flex flex-col gap-2">
-                <span className="font-bold">Postal Code</span>
+                <span className="font-bold text-vi">Mã bưu chính</span>
                 <input
                   value={delivery.postalCode}
                   onChange={(event) => updateDelivery("postalCode", event.target.value)}
                   placeholder="Nhập mã bưu chính..."
-                  className="h-10 w-full border border-gray-200 rounded-lg p-2"
+                  className="h-10 w-full border border-gray-200 rounded-lg p-2 text-vi"
                 />
               </label>
             </div>
@@ -207,7 +207,7 @@ export default function ThanhToan() {
           <section className="bg-white flex flex-col gap-4 p-4 rounded-lg border border-gray-200">
             <div className="flex items-center gap-4">
               <FaWallet className="text-xl text-blue-600" />
-              <h2 className="text-2xl">Payment Method</h2>
+              <h2 className="text-2xl text-vi">Phương thức thanh toán</h2>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -219,7 +219,7 @@ export default function ThanhToan() {
                   className={`p-4 w-full border ${selectedMethod === item.id ? "border-blue-600 bg-blue-50 text-blue-700" : "border-gray-200 bg-white text-gray-700"} flex flex-col justify-center items-center gap-2 hover:border-blue-400 rounded-xl hover:shadow-md active:scale-95 transition-all duration-200`}
                 >
                   <item.icon className={`text-3xl ${selectedMethod === item.id ? "text-blue-600" : "text-gray-400"}`} />
-                  <span className="font-bold text-sm text-center">{item.label}</span>
+                  <span className="font-bold text-sm text-center text-vi">{item.label}</span>
                 </button>
               ))}
             </div>
@@ -227,20 +227,20 @@ export default function ThanhToan() {
             <div className="mt-2 p-4 bg-gray-50 border border-gray-100 rounded-lg">
               {selectedMethod === "momo" && (
                 <div className="flex flex-col items-center gap-2 text-center text-gray-600">
-                  <p className="font-bold text-pink-600 text-lg">Mở ứng dụng MoMo để quét mã QR</p>
-                  <p className="text-sm">Mã QR thanh toán sẽ hiển thị sau khi bạn nhấn nút PLACE ORDER bên cạnh.</p>
+                  <p className="font-bold text-pink-600 text-lg text-vi">Mở ứng dụng MoMo để quét mã QR</p>
+                  <p className="text-sm text-vi">Mã QR thanh toán sẽ hiển thị sau khi bạn nhấn nút đặt hàng bên cạnh.</p>
                 </div>
               )}
               {selectedMethod === "bank" && (
                 <div className="flex flex-col items-center gap-2 text-center text-gray-600">
-                  <p className="font-bold text-blue-600 text-lg">Chuyển khoản ngân hàng Vietcombank</p>
-                  <p className="text-sm">Quét mã QR chuyển khoản sau khi đơn hàng được tạo thành công.</p>
+                  <p className="font-bold text-blue-600 text-lg text-vi">Chuyển khoản ngân hàng Vietcombank</p>
+                  <p className="text-sm text-vi">Quét mã QR chuyển khoản sau khi đơn hàng được tạo thành công.</p>
                 </div>
               )}
               {selectedMethod === "cod" && (
                 <div className="flex flex-col items-center gap-2 text-center text-gray-600">
-                  <p className="font-bold text-emerald-600 text-lg">Thanh toán bằng tiền mặt</p>
-                  <p className="text-sm">Bạn sẽ thanh toán trực tiếp cho nhân viên giao hàng sau khi kiểm tra sản phẩm.</p>
+                  <p className="font-bold text-emerald-600 text-lg text-vi">Thanh toán bằng tiền mặt</p>
+                  <p className="text-sm text-vi">Bạn sẽ thanh toán trực tiếp cho nhân viên giao hàng sau khi kiểm tra sản phẩm.</p>
                 </div>
               )}
             </div>
@@ -248,7 +248,7 @@ export default function ThanhToan() {
         </div>
 
         <aside className="w-full flex flex-col p-5 bg-white rounded-lg gap-3 border border-gray-200 h-fit">
-          <span className="font-semibold text-2xl">Order Summary</span>
+          <span className="font-semibold text-2xl text-vi">Tóm tắt đơn hàng</span>
 
           <div className="flex flex-col gap-4 max-h-[350px] overflow-y-auto pr-2">
             {cart.map((item) => (
@@ -256,8 +256,8 @@ export default function ThanhToan() {
                 <img src={item.image} alt={item.name} className="w-20 h-20 object-cover bg-gray-100 rounded-lg" />
                 <div className="ml-5 flex flex-col justify-center gap-1">
                   <span className="font-bold text-gray-800 text-[15px]">{item.name}</span>
-                  <p className="text-gray-500 text-[12px] font-medium">
-                    Qty: {item.qty} {item.variant && `| ${item.variant}`} {item.color && `| ${item.color}`}
+                  <p className="text-gray-500 text-[12px] font-medium text-vi">
+                    SL: {item.qty} {item.variant && `| ${item.variant}`} {item.color && `| ${item.color}`}
                   </p>
                   <span className="font-semibold text-[15px]">${(item.price * item.qty)?.toLocaleString()}</span>
                 </div>
@@ -268,25 +268,25 @@ export default function ThanhToan() {
           <div className="h-0 w-full border-t border-gray-300 my-2" />
 
           <div className="flex justify-between">
-            <span className="font-semibold text-gray-600">Subtotal</span>
+            <span className="font-semibold text-gray-600 text-vi">Tạm tính</span>
             <span className="font-semibold">${subtotal.toLocaleString()}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold text-gray-600">Shipping</span>
-            <span className="font-semibold">{shipping === 0 ? "FREE" : `$${shipping}`}</span>
+            <span className="font-semibold text-gray-600 text-vi">Phí vận chuyển</span>
+            <span className="font-semibold">{shipping === 0 ? "Miễn phí" : `$${shipping}`}</span>
           </div>
           {discount > 0 && (
             <div className="flex justify-between">
-              <span className="font-semibold text-emerald-600">Discount {appliedCouponCode ? `(${appliedCouponCode})` : ""}</span>
+              <span className="font-semibold text-emerald-600 text-vi">Giảm giá {appliedCouponCode ? `(${appliedCouponCode})` : ""}</span>
               <span className="font-semibold text-emerald-600">-${discount.toLocaleString()}</span>
             </div>
           )}
           <div className="flex justify-between">
-            <span className="font-semibold text-gray-600">Tax</span>
+            <span className="font-semibold text-gray-600 text-vi">Thuế</span>
             <span className="font-semibold">${taxAmount.toLocaleString()}</span>
           </div>
           <div className="flex justify-between items-center mt-2 border-t border-gray-200 pt-3">
-            <span className="text-gray-500 font-semibold">Total</span>
+            <span className="text-gray-500 font-semibold text-vi">Tổng cộng</span>
             <span className="font-black text-2xl text-blue-600">${grandTotal.toLocaleString()}</span>
           </div>
 
@@ -296,8 +296,8 @@ export default function ThanhToan() {
             disabled={placingOrder}
             className={`w-full flex items-center justify-center gap-2 border p-3 rounded-xl shadow-lg active:scale-95 transition-all duration-300 cursor-pointer mt-2 disabled:opacity-60 disabled:cursor-not-allowed ${selectedMethod === "cod" ? "bg-emerald-600 hover:bg-emerald-700" : "bg-blue-600 hover:bg-blue-700"}`}
           >
-            <span className="text-white font-bold text-xl tracking-widest">
-              {placingOrder ? "PLACING..." : selectedMethod === "cod" ? "PLACE ORDER" : "PLACE ORDER & PAY"}
+            <span className="text-white font-bold text-xl tracking-normal text-vi">
+              {placingOrder ? "Đang xử lý..." : selectedMethod === "cod" ? "Đặt hàng" : "Đặt hàng & thanh toán"}
             </span>
             <FaArrowRight className="text-white" />
           </button>
@@ -319,11 +319,11 @@ export default function ThanhToan() {
                   {selectedMethod === "momo" ? <FaWallet className="text-3xl" /> : <FaMoneyCheckAlt className="text-3xl" />}
                 </div>
               </div>
-              <h3 className="text-xl font-black text-gray-900 mb-1">Quét mã QR để thanh toán</h3>
-              <p className="text-sm text-gray-500 mb-6">Mở ứng dụng {selectedMethod === "momo" ? "MoMo" : "Ngân hàng"} để quét mã bên dưới</p>
+              <h3 className="text-xl font-black text-gray-900 mb-1 text-vi">Quét mã QR để thanh toán</h3>
+              <p className="text-sm text-gray-500 mb-6 text-vi">Mở ứng dụng {selectedMethod === "momo" ? "MoMo" : "Ngân hàng"} để quét mã bên dưới</p>
 
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex justify-center mb-6">
-                <img src={qrUrl} alt="QR Code" className="w-56 h-auto mix-blend-multiply" />
+                <img src={qrUrl} alt="Mã QR thanh toán" className="w-56 h-auto mix-blend-multiply" />
               </div>
 
               <div className="flex flex-col gap-2">
@@ -333,13 +333,13 @@ export default function ThanhToan() {
                     toast.success("Đặt hàng thành công! Cảm ơn bạn đã mua hàng.");
                     setTimeout(() => navigate("/"), 1200);
                   }}
-                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors"
+                  className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors text-vi"
                 >
                   Đã hoàn tất thanh toán
                 </button>
                 <button
                   onClick={() => setShowQR(false)}
-                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors"
+                  className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors text-vi"
                 >
                   Hủy thanh toán
                 </button>

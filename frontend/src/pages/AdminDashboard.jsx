@@ -57,10 +57,10 @@ export default function AdminDashboard() {
   const chartData = monthlyRevenue.map(rev => (rev / maxMonthlyRev) * 100);
 
   const stats = [
-    { label: "Doanh Thu (Đã giao)", value: formatPrice(totalRevenueNum), icon: FaChartLine, color: "bg-blue-600", trend: "+12.5%" },
-    { label: "Tổng Đơn Hàng", value: totalOrdersCount.toString(), icon: FaBox, color: "bg-purple-600", trend: "+5.2%" },
-    { label: "Đơn Chờ Duyệt", value: pendingOrdersCount.toString(), icon: FaBell, color: "bg-orange-600", trend: "Hot" },
-    { label: "Sản Phẩm", value: "156", icon: FaDolly, color: "bg-emerald-600", trend: "+2.1%" },
+    { label: "Doanh thu (đã giao)", value: formatPrice(totalRevenueNum), icon: FaChartLine, color: "bg-blue-600", trend: "+12.5%" },
+    { label: "Tổng đơn hàng", value: totalOrdersCount.toString(), icon: FaBox, color: "bg-purple-600", trend: "+5.2%" },
+    { label: "Đơn chờ duyệt", value: pendingOrdersCount.toString(), icon: FaBell, color: "bg-orange-600", trend: "Hot" },
+    { label: "Sản phẩm", value: "156", icon: FaDolly, color: "bg-emerald-600", trend: "+2.1%" },
   ];
 
   return (
@@ -138,7 +138,7 @@ export default function AdminDashboard() {
                       </div>
                       <span className="text-emerald-600 font-black text-sm bg-emerald-50 px-2 py-1 rounded-lg">{stat.trend}</span>
                     </div>
-                    <p className="text-gray-400 font-bold text-sm uppercase tracking-wider">{stat.label}</p>
+                    <p className="text-gray-400 font-bold text-sm text-vi">{stat.label}</p>
                     <h3 className="text-2xl font-black text-gray-900 mt-1">{stat.value}</h3>
                   </div>
                 ))}

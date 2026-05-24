@@ -48,8 +48,8 @@ export default function SPLienQuan({category, currentId , onSelectProduct}){
             
            
                 <div className="flex items-center justify-between">
-                    <h2 className="text-xl font-semibold text-gray-600 mb-4">Sản Phẩm Tương Tự</h2>
-                    <a href="#" className="text-xl font-semibold text-gray-600">View All</a>
+                    <h2 className="text-xl font-semibold text-gray-600 mb-4 text-vi">Sản phẩm tương tự</h2>
+                    <Link to="/shop" className="text-xl font-semibold text-gray-600 text-vi hover:text-blue-600 transition-colors">Xem tất cả</Link>
                 </div>
                 <div className=" gap-4 grid gid-cols-2 md:grid-cols-3 
                     lg:grid-cols-5 mt-4">

@@ -14,18 +14,18 @@ import java.util.List;
 @Setter
 public class OrderCreateRequest {
     @Valid
-    @NotEmpty
+    @NotEmpty(message = "Đơn hàng phải có ít nhất một sản phẩm")
     private List<OrderItemRequest> items;
 
     private String couponCode;
 
-    @NotBlank(message = "Receiver name is required")
+    @NotBlank(message = "Vui lòng nhập họ tên người nhận")
     private String receiverName;
 
-    @NotBlank(message = "Phone number is required")
+    @NotBlank(message = "Vui lòng nhập số điện thoại")
     private String phoneNumber;
 
-    @NotBlank(message = "Shipping address is required")
+    @NotBlank(message = "Vui lòng nhập địa chỉ giao hàng")
     private String shippingAddress;
 
     private String city;

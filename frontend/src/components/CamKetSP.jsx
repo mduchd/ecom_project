@@ -7,8 +7,8 @@ export default function Camket(){
     const camket = [
         {ic: MdMobileFriendly, vl: "Mới, đầy đủ phụ kiện từ NSX"},
         {ic: BiCheckShield, vl: "Bảo hành 12 tháng chính hãng 1 đổi 1 trong 12 ngày nếu có lỗi phần cứng từ NSX"},
-        {ic: FaMicrochip, vl: "Tai nghe\nTài liệu hướng dẫn\nCáp sạc "},
-        {ic: FaTags, vl: "Giá sản phẩn đã bao gồm thuế VAT"},
+        {ic: FaMicrochip, vl: "tài nghe\nTài liệu hướng dẫn\nCáp sạc "},
+        {ic: FaTags, vl: "Giá sản phẩm đã bao gồm thuế VAT"},
     ]
     return(
         <div className="w-full  p-1 ">

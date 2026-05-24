@@ -35,7 +35,7 @@ public class OrderService {
     @Transactional
     public OrderResponse createOrder(Long userId, OrderCreateRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với id: " + userId));
         OrderResponse quote = calculateQuote(toQuoteRequest(request));
 
         Order order = new Order();
@@ -56,9 +56,9 @@ public class OrderService {
 
         for (OrderItemRequest itemRequest : request.getItems()) {
             Product product = productRepository.findById(itemRequest.getProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + itemRequest.getProductId()));
+                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với id: " + itemRequest.getProductId()));
             if (product.getStockQuantity() == null || product.getStockQuantity() < itemRequest.getQuantity()) {
-                throw new IllegalArgumentException("Insufficient stock for product: " + product.getName());
+                throw new IllegalArgumentException("Không đủ hàng cho sản phẩm: " + product.getName());
             }
             product.setStockQuantity(product.getStockQuantity() - itemRequest.getQuantity());
             productRepository.save(product);
@@ -79,7 +79,7 @@ public class OrderService {
     @Transactional(readOnly = true)
     public List<OrderResponse> getOrdersForUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found with id: " + userId));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với id: " + userId));
         return orderRepository.findByUserOrderByCreatedAtDesc(user).stream()
                 .map(this::toResponse)
                 .toList();
@@ -95,14 +95,14 @@ public class OrderService {
     @Transactional
     public OrderResponse updateStatus(Long orderId, OrderStatus status) {
         Order order = orderRepository.findById(orderId)
-                .orElseThrow(() -> new IllegalArgumentException("Order not found with id: " + orderId));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng với id: " + orderId));
         order.setStatus(status);
         return toResponse(orderRepository.save(order));
     }
 
     private OrderResponse calculateQuote(OrderQuoteRequest request) {
         if (request.getItems() == null || request.getItems().isEmpty()) {
-            throw new IllegalArgumentException("Order must contain at least one item");
+            throw new IllegalArgumentException("Đơn hàng phải có ít nhất một sản phẩm");
         }
 
         List<OrderItemResponse> items = request.getItems().stream()
@@ -175,7 +175,7 @@ public class OrderService {
     private OrderItemResponse toQuoteItem(OrderItemRequest itemRequest) {
         validateQuantity(itemRequest);
         Product product = productRepository.findById(itemRequest.getProductId())
-                .orElseThrow(() -> new IllegalArgumentException("Product not found with id: " + itemRequest.getProductId()));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với id: " + itemRequest.getProductId()));
         BigDecimal lineTotal = product.getPrice().multiply(BigDecimal.valueOf(itemRequest.getQuantity()));
 
         return new OrderItemResponse(
@@ -188,7 +188,7 @@ public class OrderService {
 
     private void validateQuantity(OrderItemRequest itemRequest) {
         if (itemRequest.getQuantity() == null || itemRequest.getQuantity() < 1) {
-            throw new IllegalArgumentException("Quantity must be greater than 0");
+            throw new IllegalArgumentException("Số lượng phải lớn hơn 0");
         }
     }
 
@@ -198,7 +198,7 @@ public class OrderService {
         }
         String normalized = couponCode.trim().toUpperCase(Locale.ROOT);
         if (!normalized.equals("SAVE10") && !normalized.equals("TECH20") && !normalized.equals("FLAT50")) {
-            throw new IllegalArgumentException("Invalid coupon code: " + normalized);
+            throw new IllegalArgumentException("Mã giảm giá không hợp lệ: " + normalized);
         }
         return normalized;
     }
@@ -211,7 +211,7 @@ public class OrderService {
             case "SAVE10" -> subtotal.multiply(new BigDecimal("0.10"));
             case "TECH20" -> subtotal.multiply(new BigDecimal("0.20"));
             case "FLAT50" -> new BigDecimal("50");
-            default -> throw new IllegalArgumentException("Invalid coupon code: " + couponCode);
+            default -> throw new IllegalArgumentException("Mã giảm giá không hợp lệ: " + couponCode);
         };
         return discount.min(subtotal).setScale(0, RoundingMode.HALF_UP);
     }

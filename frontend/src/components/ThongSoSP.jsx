@@ -30,7 +30,7 @@ export default function ThongSo({ product }){
         <div className="flex flex-col gap-4 mt-8 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
             <div className="flex items-center gap-3 mb-2">
                <div className="w-1.5 h-6 bg-blue-600 rounded-full"></div>
-               <h2 className="font-black text-xl text-gray-900 uppercase tracking-tight">Thông số kỹ thuật</h2>
+               <h2 className="font-black text-xl text-gray-900 text-vi">Thông số kỹ thuật</h2>
             </div>
             <div className="w-full border border-gray-100 overflow-hidden rounded-xl bg-gray-50/50 transition-all duration-300">
                 {(expanded ? thongso : thongso.slice(0, 4)).map((item, index) => (
