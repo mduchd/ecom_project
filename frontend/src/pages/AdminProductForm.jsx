@@ -176,12 +176,12 @@ export default function AdminProductForm() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Price ($) <span className="text-red-500">*</span></label>
-                                    <input required type="number" name="price" value={formData.price} onChange={handleChange} min="0" step="0.01" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" />
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Price (VND) <span className="text-red-500">*</span></label>
+                                    <input required type="number" name="price" value={formData.price} onChange={handleChange} min="0" step="1" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Discount Price ($)</label>
-                                    <input type="number" name="discountPrice" value={formData.discountPrice} onChange={handleChange} min="0" step="0.01" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" placeholder="Original price" />
+                                    <label className="block text-sm font-bold text-gray-700 mb-1.5">Discount Price (VND)</label>
+                                    <input type="number" name="discountPrice" value={formData.discountPrice} onChange={handleChange} min="0" step="1" className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" placeholder="Original price" />
                                 </div>
                                 <div>
                                     <label className="block text-sm font-bold text-gray-700 mb-1.5">Stock Quantity <span className="text-red-500">*</span></label>

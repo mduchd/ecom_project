@@ -1,5 +1,5 @@
-﻿import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
 import {
     FaPhoneAlt,
@@ -17,6 +17,8 @@ import {
     FaCamera,
     FaHeadphones,
     FaTabletAlt,
+    FaThLarge,
+    FaMapMarkerAlt,
 } from "react-icons/fa";
 
 const CATEGORIES = [
@@ -117,60 +119,146 @@ function Logo() {
     );
 }
 
-function SearchBar() {
-    const [category, setCategory] = useState(CATEGORIES[0].label);
-    const [catOpen, setCatOpen] = useState(false);
-    const [query, setQuery] = useState("");
-    const selectedCatObj = CATEGORIES.find((cat) => cat.label === category) || CATEGORIES[0];
+function CategoryDropdown() {
+    const [open, setOpen] = useState(false);
+    const dropdownRef = useRef(null);
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    const handleSelectCategory = (catLabel) => {
+        setOpen(false);
+        if (catLabel === "Tất cả danh mục") {
+            navigate("/shop");
+        } else {
+            navigate(`/shop?category=${encodeURIComponent(catLabel)}`);
+        }
+    };
 
     return (
-        <div className="flex-1 max-w-2xl mx-4 lg:mx-8">
-            <div className="flex h-11 rounded-xl overflow-hidden border-2 border-blue-600 shadow-sm focus-within:shadow-md focus-within:border-blue-700 transition-all duration-200 bg-white">
-                <div className="relative hidden sm:flex">
-                    <button
-                        onClick={() => setCatOpen(!catOpen)}
-                        className="flex items-center gap-1.5 px-3 lg:px-4 bg-gray-50 hover:bg-gray-100 text-gray-700 text-xs font-semibold border-r border-gray-200 whitespace-nowrap transition-colors h-full"
-                        type="button"
-                    >
-                        <span className="flex items-center max-w-[120px] truncate">
-                            {selectedCatObj.icon}
-                            <span className="ml-1 truncate">{selectedCatObj.label}</span>
-                        </span>
-                        <FaChevronDown className={`w-3 h-3 transition-transform duration-200 flex-shrink-0 ${catOpen ? "rotate-180" : ""}`} />
-                    </button>
-                    {catOpen && (
-                        <ul className="absolute top-full left-0 mt-1 bg-white border border-gray-100 rounded-xl shadow-xl z-50 w-52 max-h-72 overflow-y-auto">
-                            {CATEGORIES.map((cat) => (
-                                <li key={cat.label}>
-                                    <button
-                                        onClick={() => {
-                                            setCategory(cat.label);
-                                            setCatOpen(false);
-                                        }}
-                                        className={`flex items-center w-full text-left px-4 py-2 text-sm hover:bg-blue-50 hover:text-blue-700 transition-colors ${
-                                            category === cat.label ? "bg-blue-50 text-blue-700 font-semibold" : "text-gray-600"
-                                        }`}
-                                    >
-                                        {cat.icon}
-                                        <span className="ml-1 truncate">{cat.label}</span>
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    )}
+        <div className="relative hidden md:block" ref={dropdownRef}>
+            <button
+                onClick={() => setOpen(!open)}
+                className="flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all select-none border border-blue-100"
+            >
+                <FaThLarge className="w-3.5 h-3.5" />
+                <span>Danh mục</span>
+                <FaChevronDown className={`w-2.5 h-2.5 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+            </button>
+            {open && (
+                <div className="absolute top-full left-0 mt-2 w-56 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 py-2.5 overflow-hidden animate-fadeIn">
+                    {CATEGORIES.map((cat) => (
+                        <button
+                            key={cat.label}
+                            onClick={() => handleSelectCategory(cat.label)}
+                            className="flex items-center w-full text-left px-4 py-2 text-xs text-gray-700 font-bold hover:bg-blue-50 hover:text-blue-700 transition-colors"
+                        >
+                            {cat.icon}
+                            <span className="ml-2 truncate">{cat.label}</span>
+                        </button>
+                    ))}
                 </div>
+            )}
+        </div>
+    );
+}
+
+const PROVINCES = [
+    "Hồ Chí Minh",
+    "Hà Nội",
+    "Đà Nẵng",
+    "Hải Phòng",
+    "Cần Thơ",
+    "Bình Dương",
+    "Đồng Nai"
+];
+
+function RegionDropdown() {
+    const [open, setOpen] = useState(false);
+    const [selectedProvince, setSelectedProvince] = useState("Hồ Chí Minh");
+    const dropdownRef = useRef(null);
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => document.removeEventListener("mousedown", handleClickOutside);
+    }, []);
+
+    return (
+        <div className="relative hidden lg:block" ref={dropdownRef}>
+            <button
+                onClick={() => setOpen(!open)}
+                className="flex items-center gap-1.5 bg-gray-50 hover:bg-gray-100 text-gray-700 font-bold text-xs px-3.5 py-2.5 rounded-xl transition-all select-none border border-gray-200/60 text-left leading-tight min-w-[130px]"
+            >
+                <FaMapMarkerAlt className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
+                <div className="truncate">
+                    <p className="text-[9px] text-gray-400 font-medium">Xem giá tại</p>
+                    <p className="text-[11px] font-bold text-gray-700 truncate">{selectedProvince}</p>
+                </div>
+                <FaChevronDown className={`w-2.5 h-2.5 ml-auto text-gray-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+            </button>
+            {open && (
+                <div className="absolute top-full left-0 mt-2 w-48 bg-white border border-gray-100 rounded-2xl shadow-xl z-50 py-2 overflow-hidden animate-fadeIn">
+                    {PROVINCES.map((prov) => (
+                        <button
+                            key={prov}
+                            onClick={() => {
+                                setSelectedProvince(prov);
+                                setOpen(false);
+                            }}
+                            className={`block w-full text-left px-4 py-2.5 text-xs font-bold transition-colors ${
+                                selectedProvince === prov
+                                    ? "bg-blue-50 text-blue-700"
+                                    : "text-gray-600 hover:bg-gray-50 hover:text-blue-600"
+                            }`}
+                        >
+                            {prov}
+                        </button>
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
+
+function SearchBar() {
+    const [query, setQuery] = useState("");
+    const navigate = useNavigate();
+
+    const handleSearch = (e) => {
+        e.preventDefault();
+        if (query.trim()) {
+            navigate(`/shop?search=${encodeURIComponent(query.trim())}`);
+        }
+    };
+
+    return (
+        <form onSubmit={handleSearch} className="flex-1 max-w-lg mx-2 lg:mx-4">
+            <div className="flex h-11 rounded-xl overflow-hidden border-2 border-blue-600 shadow-sm focus-within:shadow-md focus-within:border-blue-700 transition-all duration-200 bg-white">
                 <input
                     type="text"
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     placeholder="Tìm kiếm sản phẩm..."
-                    className="flex-1 px-4 text-sm text-gray-700 placeholder-gray-400 outline-none bg-white"
+                    className="flex-1 px-4 text-xs font-medium text-gray-700 placeholder-gray-400 outline-none bg-white"
                 />
-                <button className="px-4 lg:px-5 bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-colors duration-150 flex-shrink-0">
-                    <FaSearch className="w-5 h-5" />
+                <button type="submit" className="px-4 lg:px-5 bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center transition-colors duration-150 flex-shrink-0">
+                    <FaSearch className="w-4 h-4" />
                 </button>
             </div>
-        </div>
+        </form>
     );
 }
 
@@ -202,7 +290,7 @@ function UserActions({ cartCount, cartTotal }) {
                 </div>
                 <div id="cart-icon" className="leading-tight hidden lg:block">
                     <p className="text-[10px] text-gray-400 font-medium">Giỏ hàng</p>
-                    <p className="text-xs font-bold text-gray-800">${cartTotal}</p>
+                    <p className="text-xs font-bold text-gray-800">{cartTotal}đ</p>
                 </div>
             </Link>
         </div>
@@ -314,7 +402,8 @@ export default function Header() {
                         </button>
 
                         <Logo />
-                        <DesktopNav />
+                        <CategoryDropdown />
+                        <RegionDropdown />
                         <SearchBar />
                         <UserActions cartCount={cartCount} cartTotal={cartTotal} />
                     </div>

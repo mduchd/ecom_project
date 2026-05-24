@@ -4,6 +4,10 @@ import { useParams, Link } from "react-router-dom";
 import { getProductById } from "../services/productService";
 import { useAuth } from "../context/AuthContext.jsx";
 import { FaHome, FaShoppingCart, FaHeart, FaRegHeart, FaCheck, FaStar, FaArrowLeft, FaSync, FaShieldAlt, FaTruck, FaExclamationTriangle } from "react-icons/fa";
+import { FiGift } from "react-icons/fi";
+import SPLienQuan from "../components/SanPhamLienQuan.jsx";
+import Camket from "../components/CamKetSP.jsx";
+import DanhGia from "../components/DanhGia.jsx";
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 const HomeIcon = () => <FaHome className="w-3.5 h-3.5" />;
@@ -117,8 +121,6 @@ function TrustBadges() {
     );
 }
 
-// ── Specifications Parser ────────────────────────────────────────────────────
-// specifications có thể là String dài, hoặc đã là Array từ backend
 // ── Specifications Parser ────────────────────────────────────────────────────
 // specifications có thể là String dài, hoặc đã là Array từ backend
 function SpecificationsTable({ specs }) {
@@ -366,16 +368,16 @@ function ProductInfo({ product, onAddToCart }) {
             {/* Price block */}
             <div className="flex items-end gap-3 flex-wrap">
                 <span className="text-4xl font-black text-blue-600">
-                    ${Number(price).toLocaleString()}
+                    {Number(price).toLocaleString()}đ
                 </span>
                 {discountPrice && discountPrice > price && (
                     <div className="flex flex-col mb-1">
                         <span className="text-sm text-gray-400 line-through font-medium">
-                            ${Number(discountPrice).toLocaleString()}
+                            {Number(discountPrice).toLocaleString()}đ
                         </span>
                         {savedPrice && (
                             <span className="text-xs font-bold text-red-500">
-                                Save ${savedPrice.toLocaleString()}
+                                Tiết kiệm {savedPrice.toLocaleString()}đ
                             </span>
                         )}
                     </div>
@@ -413,7 +415,7 @@ function ProductInfo({ product, onAddToCart }) {
                         <span className="text-sm text-gray-500 font-medium">
                             Total:{" "}
                             <span className="font-black text-gray-900">
-                                ${(Number(price) * qty).toLocaleString()}
+                                {(Number(price) * qty).toLocaleString()}đ
                             </span>
                         </span>
                     </div>
@@ -457,6 +459,33 @@ function ProductInfo({ product, onAddToCart }) {
 
             {/* Trust badges */}
             <TrustBadges />
+
+            {/* Promotions block */}
+            <div className="border w-full h-auto p-4 bg-green-50/50 rounded-2xl border-yellow-300/50 flex flex-col gap-3 shadow-sm">
+                <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                        <FiGift className="text-red-500 w-5 h-5 animate-bounce"/>
+                        <p className="font-black text-sm text-gray-800 uppercase tracking-wider">Khuyến mãi đi kèm</p>
+                    </div>
+                </div>
+                {[
+                    "Trả góp 0% lãi suất, tối đa 9 tháng qua thẻ tín dụng.",
+                    "Giảm 1.000.000đ khi mua kèm combo điện thoại + phụ kiện chính hãng.",
+                    "Giảm thêm 10% cho các sản phẩm công nghệ đi kèm."
+                ].map((vl, index) => (
+                    <div key={index} className="flex gap-3 items-start">
+                        <div className="w-5 h-5 flex-shrink-0 rounded-full bg-green-200 flex items-center justify-center font-bold text-xs text-green-800 border border-green-300">
+                            {index + 1}
+                        </div>
+                        <p className="text-xs text-gray-700 font-semibold leading-relaxed">{vl}</p>
+                    </div>
+                ))}
+            </div>
+
+            {/* Commitments (Camket) */}
+            <div className="w-full">
+                <Camket />
+            </div>
 
             {/* Meta info */}
             <div className="flex flex-col gap-1.5 text-xs text-gray-500 pt-1">
@@ -580,6 +609,12 @@ export default function ProductDetail() {
 
                         {/* Detail tabs */}
                         <DetailTabs product={product} />
+
+                        {/* Related Products */}
+                        <SPLienQuan category={product.category} currentId={product.id} />
+
+                        {/* Reviews & Ratings */}
+                        <DanhGia sanPhamHienTai={product} />
                     </>
                 )}
             </div>

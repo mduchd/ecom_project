@@ -1,4 +1,4 @@
-﻿import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa";
 
@@ -89,7 +89,7 @@ const SMALL_BANNERS = [
     id: 4,
     brand: "Canon",
     title: "EOS R50\nMáy ảnh mirrorless",
-    btnText: "Từ $995",
+    btnText: "Từ 24.000.000đ",
     bg: "bg-gradient-to-br from-zinc-900 to-black border border-zinc-800",
     textColor: "text-white",
     btnColor: "bg-yellow-400 hover:bg-yellow-500 text-gray-900",

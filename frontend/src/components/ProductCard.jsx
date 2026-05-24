@@ -52,6 +52,7 @@ export default function ProductCard({ product }) {
         e.preventDefault();
         setWished(!wished);
     };
+
     return (
         <Link to={`/product/${product.id}`} className="group relative bg-white border border-gray-100 rounded-2xl overflow-hidden shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer flex flex-col">
 
@@ -63,13 +64,7 @@ export default function ProductCard({ product }) {
                 <HeartIcon filled={wished} />
             </button>
 
-            {/* NEW badge - Bỏ qua vì backend không trả về, ẩn đi để tránh báo lỗi */}
-            {/* {product.isNew && ... } */}
-
-            {/* Installment badge - Bỏ qua */}
-            {/* {product.badge && ... } */}
-
-            {/* Product Image - Sửa thành imageUrl */}
+            {/* Product Image */}
             <div className="relative h-44 bg-gray-50 flex items-center justify-center p-4 overflow-hidden mt-5">
                 <img
                     src={product.imageUrl}
@@ -81,29 +76,27 @@ export default function ProductCard({ product }) {
             {/* Info */}
             <div className="flex flex-col flex-1 px-3.5 pb-3.5 pt-2.5 gap-1.5">
 
-                {/* Status label - Bỏ qua */}
-
                 {/* Product name */}
                 <h3 className="text-sm font-semibold text-gray-800 line-clamp-2 leading-snug min-h-[2.5rem]">
                     {product.name}
                 </h3>
 
-                {/* Stars - Hiển thị an toàn nếu có */}
+                {/* Stars */}
                 <StarRating rating={product.rating} reviews={product.reviews} />
 
-                {/* Price - Sửa oldPrice thành discountPrice */}
+                {/* Price */}
                 <div className="flex items-baseline gap-2 mt-0.5">
                     <span className="text-base font-black text-gray-900">
-                        ${product.price?.toLocaleString()}
+                        {product.price?.toLocaleString()}đ
                     </span>
                     {product.discountPrice && (
                         <span className="text-xs text-gray-400 line-through">
-                            ${product.discountPrice.toLocaleString()}
+                            {product.discountPrice.toLocaleString()}đ
                         </span>
                     )}
                 </div>
 
-                {/* Stock - Sửa logic inStock thành kiểm tra isAvailable */}
+                {/* Stock */}
                 <div className="flex items-center gap-1.5">
                     <span className={`w-1.5 h-1.5 rounded-full ${isAvailable ? "bg-emerald-500" : "bg-red-400"}`} />
                     <span className={`text-[11px] font-medium ${isAvailable ? "text-emerald-600" : "text-red-400"}`}>
@@ -111,7 +104,7 @@ export default function ProductCard({ product }) {
                     </span>
                 </div>
 
-                {/* Add to Cart - Sửa logic disable nút */}
+                {/* Add to Cart */}
                 <button
                     onClick={handleAddToCart}
                     disabled={!isAvailable}

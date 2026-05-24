@@ -5,12 +5,12 @@ import { useAuth } from "../context/AuthContext.jsx";
 import { FaTrash, FaTag, FaShoppingCart, FaLock, FaChevronRight, FaHome, FaCheckCircle, FaTimes, FaGift, FaSpinner, FaCheck, FaArrowLeft, FaTruck } from "react-icons/fa";
 
 const VALID_COUPONS = {
-    SAVE10: { type: "percent", value: 10, label: "10% off" },
-    FLAT50: { type: "fixed", value: 50, label: "$50 off" },
-    TECH20: { type: "percent", value: 20, label: "20% off" },
+    SAVE10: { type: "percent", value: 10, label: "10% giảm" },
+    FLAT50: { type: "fixed", value: 50000, label: "Giảm 50.000đ" },
+    TECH20: { type: "percent", value: 20, label: "20% giảm" },
 };
 
-const FREE_SHIPPING_THRESHOLD = 399;
+const FREE_SHIPPING_THRESHOLD = 2000000;
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 const TrashIcon = () => <FaTrash className="w-4 h-4" />;
@@ -103,12 +103,12 @@ function CartItem({ item, onQtyChange, onRemove }) {
                 <div className="flex items-center justify-between flex-wrap gap-2">
                     <div className="flex items-center gap-3">
                         <span className="text-sm text-gray-500 font-medium">
-                            ${item.price?.toLocaleString()} ×
+                            {item.price?.toLocaleString()}đ ×
                         </span>
                         <QtyControl value={item.qty} onChange={(v) => onQtyChange(item.cartId, v)} />
                     </div>
                     <span className="text-base font-black text-gray-900">
-                        ${lineTotal?.toLocaleString()}
+                        {lineTotal?.toLocaleString()}đ
                     </span>
                 </div>
             </div>
@@ -243,7 +243,7 @@ function OrderSummary({ items }) {
                 {subtotal < FREE_SHIPPING_THRESHOLD && (
                     <div className="bg-blue-50 rounded-xl p-3.5 space-y-2">
                         <p className="text-xs font-bold text-blue-700 flex items-center gap-1">
-                            Add <span className="text-blue-900">${remaining.toLocaleString()}</span> more for FREE shipping! <FaTruck className="text-blue-700" />
+                            Mua thêm <span className="text-blue-900">{remaining.toLocaleString()}đ</span> để được miễn phí vận chuyển! <FaTruck className="text-blue-700" />
                         </p>
                         <div className="w-full bg-blue-100 rounded-full h-1.5 overflow-hidden">
                             <div
@@ -256,30 +256,30 @@ function OrderSummary({ items }) {
                 {subtotal >= FREE_SHIPPING_THRESHOLD && (
                     <div className="bg-emerald-50 rounded-xl p-3.5 flex items-center gap-2 text-emerald-700">
                         <CheckCircleIcon />
-                        <p className="text-xs font-bold">You've unlocked FREE shipping! 🎉</p>
+                        <p className="text-xs font-bold">Bạn đã mở khóa MIỄN PHÍ vận chuyển! 🎉</p>
                     </div>
                 )}
 
                 {/* Line items */}
                 <div className="space-y-2.5">
                     <div className="flex justify-between text-sm">
-                        <span className="text-gray-500 font-medium">Subtotal</span>
-                        <span className="font-bold text-gray-800">${subtotal.toLocaleString()}</span>
+                        <span className="text-gray-500 font-medium">Tạm tính</span>
+                        <span className="font-bold text-gray-800">{subtotal.toLocaleString()}đ</span>
                     </div>
 
                     <div className="flex justify-between text-sm">
-                        <span className="text-gray-500 font-medium">Shipping</span>
+                        <span className="text-gray-500 font-medium">Phí vận chuyển</span>
                         <span className={`font-bold ${shipping === 0 ? "text-emerald-600" : "text-gray-800"}`}>
-                            {shipping === 0 ? "FREE" : `$${shipping}`}
+                            {shipping === 0 ? "MIỄN PHÍ" : `${shipping.toLocaleString()}đ`}
                         </span>
                     </div>
 
                     {coupon && (
                         <div className="flex justify-between text-sm">
                             <span className="text-emerald-600 font-medium flex items-center gap-1">
-                                <GiftIcon /> Discount ({coupon.code})
+                                <GiftIcon /> Giảm giá ({coupon.code})
                             </span>
-                            <span className="font-bold text-emerald-600">-${discount.toLocaleString()}</span>
+                            <span className="font-bold text-emerald-600">-{discount.toLocaleString()}đ</span>
                         </div>
                     )}
                 </div>
@@ -305,10 +305,10 @@ function OrderSummary({ items }) {
                 {/* Total */}
                 <div className="flex justify-between items-end">
                     <div>
-                        <span className="text-sm font-bold text-gray-600">Total</span>
-                        <p className="text-[11px] text-gray-400">Incl. taxes & fees</p>
+                        <span className="text-sm font-bold text-gray-600">Tổng cộng</span>
+                        <p className="text-[11px] text-gray-400">Đã bao gồm thuế & phí</p>
                     </div>
-                    <span className="text-2xl font-black text-blue-600">${total.toLocaleString()}</span>
+                    <span className="text-2xl font-black text-blue-600">{total.toLocaleString()}đ</span>
                 </div>
 
                 {/* Checkout button */}
@@ -409,12 +409,12 @@ export default function Cart() {
                             <div className="px-5 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between gap-3 flex-wrap">
                                 <Link to="/shop" className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-800 transition-colors">
                                     <FaArrowLeft className="w-4 h-4" />
-                                    Continue Shopping
+                                    Tiếp tục mua sắm
                                 </Link>
                                 <div className="text-sm text-gray-500">
-                                    {items.length} item{items.length !== 1 ? "s" : ""} ·{" "}
+                                    {items.length} sản phẩm ·{" "}
                                     <span className="font-black text-gray-800">
-                                        ${items.reduce((s, i) => s + i.price * i.qty, 0).toLocaleString()}
+                                        {items.reduce((s, i) => s + i.price * i.qty, 0).toLocaleString()}đ
                                     </span>
                                 </div>
                             </div>

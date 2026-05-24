@@ -3,35 +3,31 @@ import { FaTruck, FaHeadphones, FaShieldAlt, FaUndo } from "react-icons/fa";
 const SERVICES = [
     {
         id: 1,
-        icon: <FaTruck className="w-6 h-6" />,
+        icon: <FaTruck className="w-7 h-7" />,
         title: "Miễn phí vận chuyển",
-        subtitle: "Cho đơn hàng từ $399",
+        subtitle: "Cho đơn hàng từ 10.000.000đ",
         color: "text-blue-600",
-        bg: "bg-blue-50",
     },
     {
         id: 2,
-        icon: <FaHeadphones className="w-6 h-6" />,
+        icon: <FaHeadphones className="w-7 h-7" />,
         title: "Hỗ trợ 24/7",
         subtitle: "Hỗ trợ tận tâm mọi lúc",
         color: "text-emerald-600",
-        bg: "bg-emerald-50",
     },
     {
         id: 3,
-        icon: <FaShieldAlt className="w-6 h-6" />,
+        icon: <FaShieldAlt className="w-7 h-7" />,
         title: "Thanh toán an toàn",
         subtitle: "Giao dịch được bảo vệ 100%",
         color: "text-purple-600",
-        bg: "bg-purple-50",
     },
     {
         id: 4,
-        icon: <FaUndo className="w-6 h-6" />,
+        icon: <FaUndo className="w-7 h-7" />,
         title: "Cam kết hoàn tiền",
         subtitle: "Đổi trả dễ dàng trong 30 ngày",
         color: "text-yellow-600",
-        bg: "bg-yellow-50",
     },
 ];
 
@@ -44,8 +40,8 @@ export default function ServiceBanner() {
                         key={s.id}
                         className="flex items-center gap-3.5 bg-white border border-gray-100 rounded-2xl px-4 py-4 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
                     >
-                        {/* Icon bubble */}
-                        <div className={`flex-shrink-0 w-12 h-12 rounded-xl ${s.bg} ${s.color} flex items-center justify-center`}>
+                        {/* Icon */}
+                        <div className={`flex-shrink-0 ${s.color} flex items-center justify-center`}>
                             {s.icon}
                         </div>
                         {/* Text */}
