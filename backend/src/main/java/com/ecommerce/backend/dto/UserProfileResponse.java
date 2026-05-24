@@ -19,6 +19,7 @@ public class UserProfileResponse {
     private String address;
     private String city;
     private String postalCode;
+    private String provider;
     private List<String> roles;
     private Integer pointsBalance;
     private boolean pointsLocked;

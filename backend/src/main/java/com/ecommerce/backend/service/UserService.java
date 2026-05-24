@@ -2,16 +2,24 @@ package com.ecommerce.backend.service;
 
 import com.ecommerce.backend.dto.AdminUserResponse;
 import com.ecommerce.backend.dto.AdminUserStatsResponse;
+import com.ecommerce.backend.dto.ChangePasswordRequest;
+import com.ecommerce.backend.dto.OrderResponse;
 import com.ecommerce.backend.dto.PagedResponse;
-import com.ecommerce.backend.dto.UserProfileRequest;import com.ecommerce.backend.dto.UserProfileResponse;
+import com.ecommerce.backend.dto.PointTransactionResponse;
+import com.ecommerce.backend.dto.UserProfileRequest;
+import com.ecommerce.backend.dto.UserProfileResponse;
 import com.ecommerce.backend.entity.ERole;
+import com.ecommerce.backend.entity.PointTransaction;
 import com.ecommerce.backend.entity.Role;
 import com.ecommerce.backend.entity.User;
+import com.ecommerce.backend.repository.OrderRepository;
+import com.ecommerce.backend.repository.PointTransactionRepository;
 import com.ecommerce.backend.repository.UserRepository;
 import com.ecommerce.backend.util.PageFetch;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,9 +30,18 @@ import java.util.Set;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final OrderRepository orderRepository;
+    private final PointTransactionRepository pointTransactionRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository,
+                       OrderRepository orderRepository,
+                       PointTransactionRepository pointTransactionRepository,
+                       PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
+        this.pointTransactionRepository = pointTransactionRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -106,6 +123,36 @@ public class UserService {
         return toResponse(userRepository.save(user));
     }
 
+    @Transactional(readOnly = true)
+    public List<OrderResponse> getMyOrders(Long userId) {
+        return orderRepository.findByUserIdOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(OrderResponse::from)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<PointTransactionResponse> getMyPointTransactions(Long userId) {
+        return pointTransactionRepository.findByUserIdWithOrderOrderByCreatedAtDesc(userId)
+                .stream()
+                .map(this::toPointTransactionResponse)
+                .toList();
+    }
+
+    @Transactional
+    public void changePassword(Long userId, ChangePasswordRequest request) {
+        User user = getUser(userId);
+        String provider = user.getProvider() == null ? "local" : user.getProvider();
+        if (!"local".equalsIgnoreCase(provider)) {
+            throw new IllegalArgumentException("Tài khoản Google không sử dụng mật khẩu cục bộ.");
+        }
+        if (user.getPassword() == null || !passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Mật khẩu hiện tại không đúng.");
+        }
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
     private User getUser(Long userId) {
         return userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với id: " + userId));
@@ -133,9 +180,24 @@ public class UserService {
                 user.getAddress(),
                 user.getCity(),
                 user.getPostalCode(),
+                user.getProvider() == null ? "local" : user.getProvider(),
                 roles,
                 user.getPointsBalance() == null ? 0 : user.getPointsBalance(),
                 user.isPointsLocked());
+    }
+
+    private PointTransactionResponse toPointTransactionResponse(PointTransaction transaction) {
+        return new PointTransactionResponse(
+                transaction.getId(),
+                transaction.getUser().getId(),
+                transaction.getUser().getEmail(),
+                transaction.getOrder() == null ? null : transaction.getOrder().getOrderCode(),
+                transaction.getType(),
+                transaction.getPoints(),
+                transaction.getReason(),
+                transaction.getCreatedAt(),
+                transaction.getExpiresAt()
+        );
     }
 
     private AdminUserResponse toAdminResponse(User user) {

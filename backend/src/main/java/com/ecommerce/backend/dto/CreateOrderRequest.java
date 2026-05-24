@@ -19,6 +19,10 @@ public class CreateOrderRequest {
     @Email
     private String customerEmail;
 
+    private String customerPhone;
+
+    private String shippingAddress;
+
     @Valid
     @NotEmpty(message = "Đơn hàng phải có ít nhất một sản phẩm")
     private List<CreateOrderItemRequest> items;

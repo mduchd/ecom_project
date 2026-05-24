@@ -33,6 +33,16 @@ public interface PointTransactionRepository extends JpaRepository<PointTransacti
 
     List<PointTransaction> findByUserIdOrderByCreatedAtDesc(Long userId);
 
+    @Query("""
+            select t
+            from PointTransaction t
+            join fetch t.user
+            left join fetch t.order
+            where t.user.id = :userId
+            order by t.createdAt desc
+            """)
+    List<PointTransaction> findByUserIdWithOrderOrderByCreatedAtDesc(@Param("userId") Long userId);
+
     boolean existsByOrderIdAndType(Long orderId, PointTransactionType type);
 
     @Query("""

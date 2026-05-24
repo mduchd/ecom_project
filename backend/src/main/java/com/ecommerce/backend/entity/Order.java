@@ -31,6 +31,12 @@ public class Order {
     @Column(nullable = false)
     private String customerEmail;
 
+    @Column(length = 32)
+    private String customerPhone;
+
+    @Column(length = 512)
+    private String shippingAddress;
+
     @Column(nullable = false)
     private String productSummary;
 

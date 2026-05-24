@@ -12,6 +12,8 @@ import java.util.List;
 public class OrderTrackingResponse {
     private String orderCode;
     private String customerEmail;
+    private String customerPhone;
+    private String shippingAddress;
     private String productSummary;
     private BigDecimal totalAmount;
     private String paymentMethod;
