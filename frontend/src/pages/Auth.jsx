@@ -80,10 +80,10 @@ function PasswordStrength({ password }) {
 function SignInForm({ onSwitch }) {
     const navigate = useNavigate();
     const { login, loginWithGoogle } = useAuth();
-    const [email, setEmail] = useState("");
+    const [email, setEmail] = useState(() => localStorage.getItem("snapcart_remembered_email") || "");
     const [password, setPassword] = useState("");
     const [showPwd, setShowPwd] = useState(false);
-    const [remember, setRemember] = useState(false);
+    const [remember, setRemember] = useState(() => !!localStorage.getItem("snapcart_remembered_email"));
     const [errors, setErrors] = useState({});
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -129,6 +129,11 @@ function SignInForm({ onSwitch }) {
         setLoading(true);
         try {
             const loggedInUser = await login(email, password);
+            if (remember) {
+                localStorage.setItem("snapcart_remembered_email", email);
+            } else {
+                localStorage.removeItem("snapcart_remembered_email");
+            }
             setSuccess(true);
             const redirectTo = loggedInUser?.role === "admin" ? "/admin/dashboard" : "/";
             setTimeout(() => navigate(redirectTo), 800);

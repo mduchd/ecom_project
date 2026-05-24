@@ -40,7 +40,25 @@ public class Product {
 
     private String imageUrl;
 
+    @Column(columnDefinition = "TEXT")
+    private String subImages;
+
     // Thông số kỹ thuật dạng text, ví dụ: "RAM: 16GB | CPU: Intel i7 | SSD: 512GB"
     @Column(columnDefinition = "TEXT")
     private String specifications;
+
+    // Constructor 10 tham số để tương thích với dữ liệu khởi tạo cũ
+    public Product(Long id, String name, String description, java.math.BigDecimal price, java.math.BigDecimal discountPrice, String category, String brand, Integer stockQuantity, String imageUrl, String specifications) {
+        this.id = id;
+        this.name = name;
+        this.description = description;
+        this.price = price;
+        this.discountPrice = discountPrice;
+        this.category = category;
+        this.brand = brand;
+        this.stockQuantity = stockQuantity;
+        this.imageUrl = imageUrl;
+        this.specifications = specifications;
+        this.subImages = "";
+    }
 }

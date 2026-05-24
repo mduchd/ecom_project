@@ -35,7 +35,8 @@ export function AuthProvider({ children }) {
   const login = async (email, password) => {
     try {
       const response = await api.post("/auth/signin", { username: email, password });
-      const { accessToken, id, username, email: resEmail, roles } = response.data;
+      const { token, accessToken, id, username, email: resEmail, roles, avatar } = response.data;
+      const actualToken = token || accessToken;
       
       const role = roles.includes("ROLE_ADMIN") ? "admin" : "user";
       const loggedInUser = {
@@ -43,16 +44,16 @@ export function AuthProvider({ children }) {
         name: username,
         email: resEmail,
         role: role,
-        avatar: role === "admin" 
+        avatar: avatar || (role === "admin" 
           ? "https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" 
-          : "https://i.pravatar.cc/150?u=" + resEmail,
+          : "https://i.pravatar.cc/150?u=" + resEmail),
         points: role === "admin" ? 0 : Math.floor(Math.random() * 500) + 100,
         favorites: []
       };
       
       setUser(loggedInUser);
       localStorage.setItem("snapcart_user", JSON.stringify(loggedInUser));
-      localStorage.setItem("snapcart_token", accessToken);
+      localStorage.setItem("snapcart_token", actualToken);
       setIsAuthModalOpen(false);
       toast.success("Đăng nhập thành công!");
       return loggedInUser;
@@ -66,7 +67,8 @@ export function AuthProvider({ children }) {
   const loginWithGoogle = async (googleToken) => {
     try {
       const response = await api.post("/auth/google", { token: googleToken });
-      const { accessToken, id, username, email: resEmail, roles } = response.data;
+      const { token, accessToken, id, username, email: resEmail, roles, avatar } = response.data;
+      const actualToken = token || accessToken;
       
       const role = roles.includes("ROLE_ADMIN") ? "admin" : "user";
       const loggedInUser = {
@@ -74,16 +76,16 @@ export function AuthProvider({ children }) {
         name: username,
         email: resEmail,
         role: role,
-        avatar: role === "admin" 
+        avatar: avatar || (role === "admin" 
           ? "https://ui-avatars.com/api/?name=Admin&background=0D8ABC&color=fff" 
-          : "https://i.pravatar.cc/150?u=" + resEmail,
+          : "https://i.pravatar.cc/150?u=" + resEmail),
         points: role === "admin" ? 0 : Math.floor(Math.random() * 500) + 100,
         favorites: []
       };
       
       setUser(loggedInUser);
       localStorage.setItem("snapcart_user", JSON.stringify(loggedInUser));
-      localStorage.setItem("snapcart_token", accessToken);
+      localStorage.setItem("snapcart_token", actualToken);
       setIsAuthModalOpen(false);
       toast.success("Đăng nhập bằng Google thành công!");
       return loggedInUser;

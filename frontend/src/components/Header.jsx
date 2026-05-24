@@ -19,6 +19,10 @@ import {
     FaTabletAlt,
     FaThLarge,
     FaMapMarkerAlt,
+    FaCog,
+    FaShoppingBag,
+    FaSignOutAlt,
+    FaStar,
 } from "react-icons/fa";
 
 const CATEGORIES = [
@@ -313,7 +317,10 @@ function UserActions({ cartCount, cartTotal }) {
                                 <p className="text-xs font-black text-gray-800 truncate">{user.name}</p>
                                 <p className="text-[10px] text-gray-400 truncate">{user.email}</p>
                                 {user.points > 0 && (
-                                    <p className="text-[10px] text-yellow-600 font-bold mt-1">⭐ {user.points} điểm tích lũy</p>
+                                    <div className="flex items-center gap-1 text-[10px] text-yellow-600 font-bold mt-1.5 bg-yellow-50/50 px-2 py-0.5 rounded-lg border border-yellow-100/40 w-fit">
+                                        <FaStar className="w-2.5 h-2.5 text-yellow-500 fill-current" />
+                                        <span>{user.points} điểm tích lũy</span>
+                                    </div>
                                 )}
                             </div>
                             <div className="py-1">
@@ -321,25 +328,28 @@ function UserActions({ cartCount, cartTotal }) {
                                     <Link
                                         to="/admin/dashboard"
                                         onClick={() => setDropdownOpen(false)}
-                                        className="flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                        className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors group"
                                     >
-                                        🛠️ Quản trị hệ thống
+                                        <FaCog className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                                        <span>Quản trị hệ thống</span>
                                     </Link>
                                 )}
                                 <Link
                                     to="/shop"
                                     onClick={() => setDropdownOpen(false)}
-                                    className="flex items-center gap-2.5 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+                                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors group"
                                 >
-                                    🛍️ Mua sắm
+                                    <FaShoppingBag className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                                    <span>Mua sắm</span>
                                 </Link>
                             </div>
                             <div className="border-t border-gray-100 my-1"></div>
                             <button
                                 onClick={handleLogout}
-                                className="flex items-center w-full gap-2.5 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors text-left"
+                                className="flex items-center w-full gap-2 px-4 py-2 text-xs font-bold text-red-600 hover:bg-red-50 transition-colors text-left group"
                             >
-                                🚪 Đăng xuất
+                                <FaSignOutAlt className="w-3.5 h-3.5 text-red-500 group-hover:text-red-700 transition-colors" />
+                                <span>Đăng xuất</span>
                             </button>
                         </div>
                     )}
@@ -451,15 +461,18 @@ function MobileMenu({ open, onClose }) {
                                 </div>
                             </div>
                             {user.points > 0 && (
-                                <p className="text-[10px] text-yellow-600 font-bold mt-2">⭐ {user.points} điểm tích lũy</p>
+                                <div className="flex items-center gap-1 text-[10px] text-yellow-600 font-bold mt-2">
+                                    <FaStar className="w-3 h-3 text-yellow-500 fill-current" />
+                                    <span>{user.points} điểm tích lũy</span>
+                                </div>
                             )}
                             {user.role === "admin" && (
                                 <Link
                                     to="/admin/dashboard"
                                     onClick={onClose}
-                                    className="block mt-2 text-xs font-bold text-blue-600 hover:underline"
+                                    className="flex items-center gap-1.5 mt-2 text-xs font-bold text-blue-600 hover:underline"
                                 >
-                                    🛠️ Quản trị hệ thống
+                                    <FaCog /> Quản trị hệ thống
                                 </Link>
                             )}
                         </div>
@@ -492,9 +505,9 @@ function MobileMenu({ open, onClose }) {
                     {user ? (
                         <button
                             onClick={handleLogout}
-                            className="flex items-center gap-3 text-red-600 hover:text-red-800 transition-colors font-bold text-sm w-full text-left"
+                            className="flex items-center gap-2 text-red-600 hover:text-red-800 transition-colors font-bold text-sm w-full text-left"
                         >
-                            🚪 Đăng xuất
+                            <FaSignOutAlt className="w-4 h-4" /> Đăng xuất
                         </button>
                     ) : (
                         <Link to="/login" onClick={onClose} className="flex items-center gap-3 text-gray-700 hover:text-blue-600 transition-colors">

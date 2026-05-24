@@ -237,18 +237,24 @@ function ErrorState({ message, onRetry }) {
 }
 
 // ── Image Gallery ────────────────────────────────────────────────────────────
-function ImageGallery({ imageUrl, name }) {
+function ImageGallery({ imageUrl, subImages, name }) {
     const [zoomed, setZoomed] = useState(false);
-
-    // Backend hiện chỉ có 1 ảnh — placeholder thêm góc ảnh phụ
-    const thumbs = [
-        imageUrl,
-        imageUrl,
-        imageUrl,
-        imageUrl,
-    ].filter(Boolean);
-
     const [active, setActive] = useState(0);
+
+    // Build the thumbs array from imageUrl and parsed subImages
+    const thumbs = [imageUrl];
+    if (subImages && typeof subImages === "string") {
+        const parsed = subImages.split(",").map(s => s.trim()).filter(Boolean);
+        thumbs.push(...parsed);
+    }
+    const finalThumbs = thumbs.filter(Boolean);
+    const displayThumbs = finalThumbs.length > 0 ? finalThumbs : ["https://via.placeholder.com/600x600?text=No+Image"];
+
+    // Reset active thumbnail and zoom when imageUrl or subImages change
+    useEffect(() => {
+        setActive(0);
+        setZoomed(false);
+    }, [imageUrl, subImages]);
 
     return (
         <div className="flex flex-col gap-3">
@@ -258,7 +264,7 @@ function ImageGallery({ imageUrl, name }) {
                 className="relative rounded-2xl overflow-hidden bg-gray-50 border border-gray-100 shadow-md cursor-zoom-in aspect-square"
             >
                 <img
-                    src={thumbs[active] || "https://via.placeholder.com/600x600?text=No+Image"}
+                    src={displayThumbs[active] || "https://via.placeholder.com/600x600?text=No+Image"}
                     alt={name}
                     className={`w-full h-full object-cover transition-transform duration-500 ${zoomed ? "scale-150" : "scale-100"}`}
                     onError={(e) => { e.target.src = "https://via.placeholder.com/600x600?text=No+Image"; }}
@@ -269,25 +275,27 @@ function ImageGallery({ imageUrl, name }) {
             </div>
 
             {/* Thumbnails */}
-            <div className="grid grid-cols-4 gap-2">
-                {thumbs.map((img, i) => (
-                    <button
-                        key={i}
-                        onClick={() => { setActive(i); setZoomed(false); }}
-                        className={`aspect-square rounded-xl overflow-hidden border-2 transition-all duration-150
-              ${active === i
-                                ? "border-blue-600 shadow-md shadow-blue-100"
-                                : "border-gray-100 hover:border-gray-300"}`}
-                    >
-                        <img
-                            src={img}
-                            alt={`${name} view ${i + 1}`}
-                            className="w-full h-full object-cover"
-                            onError={(e) => { e.target.src = "https://via.placeholder.com/100x100?text=?"; }}
-                        />
-                    </button>
-                ))}
-            </div>
+            {displayThumbs.length > 1 && (
+                <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
+                    {displayThumbs.map((img, i) => (
+                        <button
+                            key={i}
+                            onClick={() => { setActive(i); setZoomed(false); }}
+                            className={`aspect-square rounded-xl overflow-hidden border-2 transition-all duration-150
+                  ${active === i
+                                    ? "border-blue-600 shadow-md shadow-blue-100"
+                                    : "border-gray-100 hover:border-gray-300"}`}
+                        >
+                            <img
+                                src={img}
+                                alt={`${name} view ${i + 1}`}
+                                className="w-full h-full object-cover"
+                                onError={(e) => { e.target.src = "https://via.placeholder.com/100x100?text=?"; }}
+                            />
+                        </button>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
@@ -603,7 +611,7 @@ export default function ProductDetail() {
                     <>
                         {/* 2-column grid */}
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12">
-                            <ImageGallery imageUrl={product.imageUrl} name={product.name} />
+                            <ImageGallery imageUrl={product.imageUrl} subImages={product.subImages} name={product.name} />
                             <ProductInfo product={product} onAddToCart={addToCart} />
                         </div>
 

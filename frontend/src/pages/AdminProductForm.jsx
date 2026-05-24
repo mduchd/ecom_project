@@ -19,7 +19,10 @@ export default function AdminProductForm() {
     const [loading, setLoading] = useState(isEditMode);
     const [saving, setSaving] = useState(false);
     const [uploading, setUploading] = useState(false);
+    const [uploadingSub, setUploadingSub] = useState(false);
     const [error, setError] = useState(null);
+    const [subImagesList, setSubImagesList] = useState([]);
+    const [subImageInputUrl, setSubImageInputUrl] = useState("");
 
     // Data Form khớp chuẩn với Spring Boot Entity
     const [formData, setFormData] = useState({
@@ -32,6 +35,7 @@ export default function AdminProductForm() {
         imageUrl: "",
         description: "",
         specifications: "",
+        subImages: "",
     });
 
     // ── Fetch dữ liệu nếu ở chế độ Edit ──────────────────────────────────────
@@ -50,7 +54,14 @@ export default function AdminProductForm() {
                         imageUrl: data.imageUrl || "",
                         description: data.description || "",
                         specifications: data.specifications || "",
+                        subImages: data.subImages || "",
                     });
+                    if (data.subImages) {
+                        const list = data.subImages.split(",").map(s => s.trim()).filter(Boolean);
+                        setSubImagesList(list);
+                    } else {
+                        setSubImagesList([]);
+                    }
                 } catch (err) {
                     setError("Failed to fetch product details.");
                 } finally {
@@ -83,6 +94,38 @@ export default function AdminProductForm() {
         }
     };
 
+    const handleSubImageUpload = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        setUploadingSub(true);
+        setError(null);
+        try {
+            const uploadedUrls = [];
+            for (const file of files) {
+                const res = await uploadFile(file);
+                if (res?.url) {
+                    uploadedUrls.push(res.url);
+                }
+            }
+            setSubImagesList((prev) => [...prev, ...uploadedUrls]);
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to upload gallery image(s).");
+        } finally {
+            setUploadingSub(false);
+        }
+    };
+
+    const handleAddSubImageUrl = () => {
+        if (!subImageInputUrl.trim()) return;
+        setSubImagesList((prev) => [...prev, subImageInputUrl.trim()]);
+        setSubImageInputUrl("");
+    };
+
+    const handleRemoveSubImage = (indexToRemove) => {
+        setSubImagesList((prev) => prev.filter((_, index) => index !== indexToRemove));
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSaving(true);
@@ -94,6 +137,7 @@ export default function AdminProductForm() {
             price: Number(formData.price),
             discountPrice: formData.discountPrice ? Number(formData.discountPrice) : null,
             stockQuantity: Number(formData.stockQuantity),
+            subImages: subImagesList.join(","),
         };
 
         try {
@@ -244,6 +288,80 @@ export default function AdminProductForm() {
                                     <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => { e.target.src = "https://via.placeholder.com/400?text=Invalid+Image+URL"; }} />
                                 ) : (
                                     <span className="text-sm font-bold text-gray-400">Image Preview</span>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Product Gallery Box */}
+                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-5">
+                            <h2 className="text-base font-black text-gray-800 border-b border-gray-50 pb-3">Product Gallery</h2>
+
+                            {/* File Upload Input */}
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Upload Gallery Images (Multiple)</label>
+                                <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 active:scale-[0.98] text-blue-600 rounded-xl text-sm font-bold cursor-pointer border border-blue-200 border-dashed transition-all">
+                                    <FaUpload className="w-4 h-4" />
+                                    <span>{uploadingSub ? "Uploading..." : "Choose Gallery Images"}</span>
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        multiple
+                                        onChange={handleSubImageUpload} 
+                                        className="hidden" 
+                                        disabled={uploadingSub}
+                                    />
+                                </label>
+                            </div>
+
+                            {/* Or Enter URL */}
+                            <div className="space-y-1.5">
+                                <label className="block text-sm font-bold text-gray-700">Or Add Image URL</label>
+                                <div className="flex gap-2">
+                                    <input 
+                                        type="url" 
+                                        value={subImageInputUrl} 
+                                        onChange={(e) => setSubImageInputUrl(e.target.value)} 
+                                        className="flex-1 px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" 
+                                        placeholder="https://example.com/sub-image.jpg" 
+                                    />
+                                    <button 
+                                        type="button" 
+                                        onClick={handleAddSubImageUrl}
+                                        className="px-4 py-2 bg-gray-800 hover:bg-gray-900 text-white text-sm font-bold rounded-xl active:scale-[0.98] transition-all"
+                                    >
+                                        Add
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Sub Images List Grid */}
+                            <div className="space-y-2">
+                                <label className="block text-sm font-bold text-gray-700">Gallery Preview ({subImagesList.length})</label>
+                                {subImagesList.length > 0 ? (
+                                    <div className="grid grid-cols-3 gap-2">
+                                        {subImagesList.map((imgUrl, index) => (
+                                            <div key={index} className="aspect-square bg-gray-50 rounded-xl border border-gray-150 overflow-hidden relative group shadow-sm">
+                                                <img 
+                                                    src={imgUrl} 
+                                                    alt={`Gallery preview ${index + 1}`} 
+                                                    className="w-full h-full object-cover" 
+                                                    onError={(e) => { e.target.src = "https://via.placeholder.com/150?text=Invalid+URL"; }} 
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={() => handleRemoveSubImage(index)}
+                                                    className="absolute top-1 right-1 w-6 h-6 bg-red-500 hover:bg-red-600 text-white rounded-full flex items-center justify-center text-xs font-bold shadow-md transition-all opacity-90 sm:opacity-0 group-hover:opacity-100"
+                                                    title="Remove Image"
+                                                >
+                                                    &times;
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="py-6 border-2 border-dashed border-gray-100 rounded-xl flex items-center justify-center text-xs font-bold text-gray-400">
+                                        No gallery images added
+                                    </div>
                                 )}
                             </div>
                         </div>
