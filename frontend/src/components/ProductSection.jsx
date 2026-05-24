@@ -5,7 +5,7 @@ import ProductCard from "./ProductCard";
 import { getProducts } from "../services/productService";
 
 export default function ProductSection({
-  title = "Ban chay",
+  title = "Bán chạy",
   viewAllHref = "/shop",
 }) {
   const [products, setProducts] = useState([]);
@@ -51,12 +51,12 @@ export default function ProductSection({
   return (
     <section className="w-full max-w-[1280px] mx-auto px-4 sm:px-6 py-6">
       <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-black text-gray-900 tracking-tight">{title}</h2>
+        <h2 className="text-xl font-black text-gray-900 tracking-tight text-vi">{title}</h2>
         <Link
           to={viewAllHref}
-          className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+          className="text-xs font-bold text-blue-600 hover:text-blue-800 hover:underline transition-colors text-vi"
         >
-          XEM TAT CA
+          Xem tất cả
         </Link>
       </div>
 
@@ -91,7 +91,7 @@ export default function ProductSection({
       ) : (
         <div className="flex flex-col items-center justify-center py-16 text-gray-400">
           <FaInbox className="w-12 h-12 mb-3 opacity-30" />
-          <p className="text-sm font-semibold">Danh muc nay chua co san pham.</p>
+          <p className="text-sm font-semibold text-vi">Danh mục này chưa có sản phẩm.</p>
         </div>
       )}
     </section>

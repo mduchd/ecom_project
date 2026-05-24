@@ -27,7 +27,7 @@ api.interceptors.response.use(
         const message =
             error.response?.data?.message ||
             error.message ||
-            "An unexpected error occurred.";
+            "Đã xảy ra lỗi không mong muốn.";
         console.error("[API Error]", message);
         return Promise.reject(error);
     }

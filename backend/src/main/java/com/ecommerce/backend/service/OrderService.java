@@ -46,14 +46,14 @@ public class OrderService {
 
     public Order updateStatus(Long id, String status) {
         Order existing = orderRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Order not found with id: " + id));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với id: " + id));
         existing.setStatus(status);
         return orderRepository.save(existing);
     }
 
     public Order markPaidByOrderCode(String orderCode) {
         Order existing = orderRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new RuntimeException("Order not found with code: " + orderCode));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với mã: " + orderCode));
 
         String currentStatus = existing.getStatus();
         if (isSameStatus(currentStatus, STATUS_DELIVERED)
@@ -68,7 +68,7 @@ public class OrderService {
 
     public Order getByOrderCode(String orderCode) {
         return orderRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new RuntimeException("Order not found with code: " + orderCode));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với mã: " + orderCode));
     }
 
     private String generateOrderCode() {

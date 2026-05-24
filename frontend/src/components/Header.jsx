@@ -491,7 +491,7 @@ function MobileMenu({ open, onClose }) {
                     ))}
 
                     <div className="border-t border-gray-100 mt-4 pt-4 px-5 space-y-1">
-                        <p className="text-[10px] uppercase tracking-widest text-gray-400 font-bold mb-1">Danh mục</p>
+                        <p className="text-[10px] text-gray-400 font-bold mb-1 text-vi">Danh mục</p>
                         {CATEGORIES.map((cat) => (
                             <button key={cat.label} onClick={() => { onClose(); if (cat.label === "Tất cả danh mục") navigate("/shop"); else navigate(`/shop?category=${encodeURIComponent(cat.label)}`); }} className="flex items-center w-full text-left px-0 py-2 text-sm text-gray-600 hover:text-blue-700 hover:bg-blue-50 rounded transition-colors">
                                 {cat.icon}

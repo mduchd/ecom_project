@@ -12,10 +12,10 @@ import lombok.Setter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItemRequest {
-    @NotNull
+    @NotNull(message = "Mã sản phẩm không được để trống")
     private Long productId;
 
-    @NotNull
-    @Min(1)
+    @NotNull(message = "Số lượng không được để trống")
+    @Min(value = 1, message = "Số lượng phải lớn hơn 0")
     private Integer quantity;
 }

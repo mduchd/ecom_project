@@ -70,7 +70,7 @@ function StatCard({ label, value, icon, colorClass, trend }) {
         <div className={`p-4 rounded-2xl text-white ${colorClass} shadow-lg shadow-gray-200`}>{icon}</div>
         <span className="text-emerald-600 font-black text-sm bg-emerald-50 px-2 py-1 rounded-lg">{trend}</span>
       </div>
-      <p className="text-gray-400 font-bold text-sm uppercase tracking-wider">{label}</p>
+      <p className="text-gray-400 font-bold text-sm text-vi">{label}</p>
       <h3 className="text-2xl font-black text-gray-900 mt-1">{value}</h3>
     </div>
   );
@@ -235,7 +235,7 @@ export default function AdminDashboard() {
       <div className="flex-1 flex overflow-hidden">
         <aside className="w-72 bg-white border-r border-gray-100 hidden lg:flex flex-col p-6 gap-8">
           <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Chính</p>
+            <p className="text-xs font-bold text-gray-400 tracking-widest mb-4 text-vi">Chính</p>
             <nav className="flex flex-col gap-2">
               <button
                 onClick={() => setActiveTab("revenue")}
@@ -257,7 +257,7 @@ export default function AdminDashboard() {
           </div>
 
           <div>
-            <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-4">Theo dõi</p>
+            <p className="text-xs font-bold text-gray-400 tracking-widest mb-4 text-vi">Theo dõi</p>
             <nav className="flex flex-col gap-2">
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-gray-500 bg-gray-50">
                 <FaDolly /> Sản phẩm: {productsLoading ? "..." : productsCount}

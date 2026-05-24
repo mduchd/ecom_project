@@ -6,7 +6,7 @@ export default function Camket(){
     const camket = [
         {ic: MdMobileFriendly, vl: "Mới, đầy đủ phụ kiện từ NSX"},
         {ic: BiCheckShield, vl: "Bảo hành 12 tháng chính hãng 1 đổi 1 trong 12 ngày nếu có lỗi phần cứng từ NSX"},
-        {ic: FaMicrochip, vl: "Tai nghe\nTài liệu hướng dẫn\nCáp sạc "},
+        {ic: FaMicrochip, vl: "tài nghe\nTài liệu hướng dẫn\nCáp sạc "},
         {ic: FaTags, vl: "Giá sản phẩm đã bao gồm thuế VAT"},
     ]
     return(
@@ -20,7 +20,7 @@ export default function Camket(){
                         <div className="w-8 h-8 bg-[#CB1C22] rounded-md flex items-center justify-center text-white mb-2.5">
                             <Icon className="text-lg" />
                         </div>
-                        <p className="whitespace-pre-line font-medium text-sm">{item.vl}</p>
+                        <p className="whitespace-pre-line font-medium text-sm text-vi">{item.vl}</p>
                     </div>
                 )})}
             </div>

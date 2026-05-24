@@ -473,7 +473,7 @@ function ProductInfo({ product, onAddToCart }) {
                 <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <FiGift className="text-red-500 w-5 h-5 animate-bounce"/>
-                        <p className="font-black text-sm text-gray-800 uppercase tracking-wider">Khuyến mãi đi kèm</p>
+                        <p className="font-black text-sm text-gray-800 text-vi">Khuyến mãi đi kèm</p>
                     </div>
                 </div>
                 {[

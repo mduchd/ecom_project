@@ -137,7 +137,7 @@ public class AuthController {
             
             Set<Role> roles = new HashSet<>();
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                    .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                    .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy vai trò người dùng."));
             roles.add(userRole);
             user.setRoles(roles);
             userRepository.save(user);
@@ -208,7 +208,7 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Không thể tự đăng ký quyền quản trị."));
         }
         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy vai trò người dùng."));
         roles.add(userRole);
 
         user.setRoles(roles);

@@ -4,10 +4,14 @@ import ProductCard from "../components/ProductCard";
 import { Link, useSearchParams } from "react-router-dom";
 import { FaHome, FaChevronDown, FaSearch, FaSync, FaExclamationTriangle, FaInbox, FaChevronLeft, FaChevronRight } from "react-icons/fa";
 
+function categoryLabel(category) {
+  return category === "All" ? "Tất cả" : category;
+}
+
 const SORT_OPTIONS = [
-  { label: "Mac dinh", value: "default" },
-  { label: "Gia thap den cao", value: "price_asc" },
-  { label: "Gia cao den thap", value: "price_desc" },
+  { label: "Mặc định", value: "default" },
+  { label: "Giá thấp đến cao", value: "price_asc" },
+  { label: "Giá cao đến thấp", value: "price_desc" },
 ];
 
 const PAGE_SIZE = 8;
@@ -49,11 +53,11 @@ function SelectDropdown({ options, value, onChange }) {
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="appearance-none pl-3 pr-8 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer"
+        className="appearance-none pl-3 pr-8 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-200 rounded-xl hover:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all cursor-pointer text-vi"
       >
         {options.map((opt) =>
           typeof opt === "string"
-            ? <option key={opt} value={opt}>{opt}</option>
+            ? <option key={opt} value={opt}>{categoryLabel(opt)}</option>
             : <option key={opt.value} value={opt.value}>{opt.label}</option>
         )}
       </select>

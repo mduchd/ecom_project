@@ -65,7 +65,7 @@ export default function FlashSale() {
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6 border-b border-white/20 pb-4">
                     <div className="flex items-center gap-2.5 text-white">
                         <FaFire className="w-7 h-7 text-yellow-300 animate-bounce" />
-                        <h2 className="text-xl md:text-2xl font-black uppercase tracking-tight">FLASH SALE GIỜ VÀNG</h2>
+                        <h2 className="text-xl md:text-2xl font-black text-vi">Flash sale giờ vàng</h2>
                     </div>
                     
                     {/* Countdown Timer Boxes */}

@@ -52,7 +52,7 @@ export default function ThanhToan() {
 
   const handlePlaceOrder = () => {
     if (cart.length === 0) {
-      toast.warning("GiềEhàng của bạn đang trống!");
+      toast.warning("Giỏ hàng của bạn đang trống!");
       return;
     }
     
@@ -62,7 +62,7 @@ export default function ThanhToan() {
       return;
     }
     if (!email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-      toast.warning("Vui lòng nhập địa chềEEmail hợp lềE");
+      toast.warning("Vui lòng nhập email hợp lệ");
       setShowEmailModal(true);
       return;
     }
@@ -73,7 +73,7 @@ export default function ThanhToan() {
   const submitOrder = async (email) => {
     try {
       const savedOrder = await createOrder({
-        customerName: user?.name || "Khach hang moi",
+        customerName: user?.name || "Khách hàng mới",
         customerEmail: email,
         productSummary: cart.map(item => item.name).join(", "),
         totalAmount: Math.round(grandTotal),
@@ -82,7 +82,7 @@ export default function ThanhToan() {
 
       api.post("/orders/confirm", {
         email: email,
-        fullName: user?.name || "Khach hang Snapcart",
+        fullName: user?.name || "Khách hàng Snapcart",
         orderId: savedOrder?.orderCode || String(savedOrder?.id || ""),
         totalAmount: Math.round(grandTotal),
         items: cart.map(item => ({
@@ -91,26 +91,26 @@ export default function ThanhToan() {
           price: item.price
         }))
       }).catch(err => {
-        console.error("Gui email xac nhan that bai:", err);
+        console.error("Gửi email xác nhận thất bại:", err);
       });
 
       if (selectedMethod === "momo" || selectedMethod === "bank") {
         setPendingPaymentOrderCode(savedOrder?.orderCode || "ThanhToanCart");
         setShowQR(true);
       } else {
-        toast.success("Dat hang thanh cong! Don hang se duoc thanh toan khi nhan hang.");
+        toast.success("Đặt hàng thành công! Đơn hàng sẽ được thanh toán khi nhận hàng.");
         clearCart(true);
         setTimeout(() => navigate("/"), 2000);
       }
     } catch (error) {
-      const msg = error.response?.data?.message || "Tao don hang that bai. Vui long thu lai.";
+      const msg = error.response?.data?.message || "Tạo đơn hàng thất bại. Vui lòng thử lại.";
       toast.error(msg);
     }
   };
  
   const info_ct = [
     {label: "Full Name", place: "Nhập tên của bạn..."},
-    {label: "Phone Number", place: "Nhập sềEđiện thoại..."},
+    {label: "Phone Number", place: "Nhập số điện thoại..."},
   ];
   const info_ar = [
     {label: "City", name: "city", type: "select", options: ["Hà Nội", "TP.HCM", "Đà Nẵng"]},
@@ -148,7 +148,7 @@ export default function ThanhToan() {
             <div className="flex flex-col gap-2">
               <span className="font-bold">Shipping Address</span>
               <input 
-              placeholder={"Nhập địa chềEnhận hàng..."}
+              placeholder="Nhập địa chỉ nhận hàng..."
               className="h-10 w-full border border-gray-200 p-1 rounded-lg">
               </input>
             </div>
@@ -199,14 +199,14 @@ export default function ThanhToan() {
               <div className="mt-4 p-4 bg-gray-50 border border-gray-100 rounded-lg">
                 {selectedMethod === "momo" && (
                   <div className="flex flex-col items-center gap-2 text-center text-gray-600">
-                    <p className="font-bold text-pink-600 text-lg">MềEứng dụng MoMo đềEquét mã QR</p>
-                    <p className="text-sm">Mã QR thanh toán sẽ hiển thềEsau khi bạn nhấn nút PLACE ORDER bên cạnh.</p>
+                    <p className="font-bold text-pink-600 text-lg text-vi">Mở ứng dụng MoMo và quét mã QR</p>
+                    <p className="text-sm text-vi">Mã QR thanh toán sẽ hiển thị sau khi bạn nhấn nút đặt hàng bên cạnh.</p>
                   </div>
                 )}
                 {selectedMethod === "bank" && (
                   <div className="flex flex-col items-center gap-2 text-center text-gray-600">
                     <p className="font-bold text-blue-600 text-lg">Chuyển khoản ngân hàng (Vietcombank)</p>
-                    <p className="text-sm">Quét mã QR chuyển khoản hoặc sao chép STK sẽ được cung cấp ềEbước tiếp theo.</p>
+                    <p className="text-sm text-vi">Quét mã QR chuyển khoản hoặc sao chép STK sẽ được cung cấp ở bước tiếp theo.</p>
                   </div>
                 )}
                 {selectedMethod === "cod" && (
@@ -245,10 +245,10 @@ export default function ThanhToan() {
           </div>
           <div className="flex justify-between">
             <span className="font-semibold text-gray-600">Shipping</span>
-            <span className="font-semibold">{shipping === 0 ? "Mien phi" : formatVND(shipping)}</span>
+            <span className="font-semibold">{shipping === 0 ? "Miễn phí" : formatVND(shipping)}</span>
           </div>
           <div className="flex justify-between">
-            <span className="font-semibold text-gray-600">Thue</span>
+            <span className="font-semibold text-gray-600 text-vi">Thuế</span>
             <span className="font-semibold">{formatVND(tax)}</span>
           </div>
 
@@ -298,8 +298,8 @@ export default function ThanhToan() {
                    {selectedMethod === 'momo' ? <FaWallet className="text-3xl" /> : <FaMoneyCheckAlt className="text-3xl" />}
                  </div>
                </div>
-              <h3 className="text-xl font-black text-gray-900 mb-1">Quét mã QR đềEthanh toán</h3>
-              <p className="text-sm text-gray-500 mb-6">MềEứng dụng {selectedMethod === 'momo' ? 'MoMo' : 'Ngân hàng'} đềEquét mã bên dưới</p>
+              <h3 className="text-xl font-black text-gray-900 mb-1 text-vi">Quét mã QR để thanh toán</h3>
+              <p className="text-sm text-gray-500 mb-6 text-vi">Mở ứng dụng {selectedMethod === 'momo' ? 'MoMo' : 'Ngân hàng'} và quét mã bên dưới</p>
               
               <div className="bg-gray-50 p-4 rounded-xl border border-gray-100 flex justify-center mb-6">
                 <img src={qrUrl} alt="QR Code" className="w-56 h-auto mix-blend-multiply" />
@@ -348,12 +348,12 @@ export default function ThanhToan() {
                  <FaEnvelope className="w-6 h-6" />
                </div>
               <h3 className="text-lg font-black text-gray-900">Nhận hóa đơn điện tử</h3>
-              <p className="text-xs text-gray-500 mt-1">Vui lòng cung cấp email của bạn đềEchúng tôi tự động gửi hóa đơn xác nhận đơn hàng.</p>
+              <p className="text-xs text-gray-500 mt-1 text-vi">Vui lòng cung cấp email của bạn để chúng tôi tự động gửi hóa đơn xác nhận đơn hàng.</p>
             </div>
 
             <div className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-gray-700 uppercase tracking-wider mb-2">Địa chềEEmail</label>
+                <label className="block text-xs font-bold text-gray-700 mb-2 text-vi">Email</label>
                 <input 
                   type="email"
                   placeholder="email@example.com"
@@ -364,11 +364,11 @@ export default function ThanhToan() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       if (!guestEmail.trim()) {
-                        toast.warning("Vui lòng nhập địa chềEEmail!");
+                        toast.warning("Vui lòng nhập email!");
                         return;
                       }
                       if (!guestEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                        toast.warning("Vui lòng nhập Email hợp lềE");
+                        toast.warning("Vui lòng nhập email hợp lệ");
                         return;
                       }
                       setShowEmailModal(false);
@@ -383,15 +383,16 @@ export default function ThanhToan() {
                   onClick={() => setShowEmailModal(false)}
                   className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors text-sm"
                 >
-                  Hủy bềE                </button>
+                  Hủy bỏ
+                </button>
                 <button 
                   onClick={() => {
                     if (!guestEmail.trim()) {
-                      toast.warning("Vui lòng nhập địa chềEEmail!");
+                      toast.warning("Vui lòng nhập email!");
                       return;
                     }
                     if (!guestEmail.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
-                      toast.warning("Vui lòng nhập Email hợp lềE");
+                      toast.warning("Vui lòng nhập email hợp lệ");
                       return;
                     }
                     setShowEmailModal(false);

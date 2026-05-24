@@ -83,7 +83,7 @@ function CartItem({ item, onQtyChange, onRemove }) {
                 {/* Name + remove */}
                 <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
-                        <p className="text-xs text-blue-500 font-bold uppercase tracking-wide mb-0.5">
+                        <p className="text-xs text-blue-500 font-bold mb-0.5 text-vi">
                             {item.category}
                         </p>
                         <h3 className="text-sm font-bold text-gray-800 line-clamp-2 leading-snug">

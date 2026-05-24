@@ -33,7 +33,7 @@ public class DataInitializer {
 
             if (!userRepository.existsByUsername("customer@example.com") && !userRepository.existsByEmail("customer@example.com")) {
                 Role userRole = roleRepository.findByName(ERole.ROLE_USER)
-                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy vai trò người dùng."));
                 Set<Role> roles = new HashSet<>();
                 roles.add(userRole);
 
@@ -50,7 +50,7 @@ public class DataInitializer {
 
             if (!userRepository.existsByUsername("admin@luxe.com") && !userRepository.existsByEmail("admin@luxe.com")) {
                 Role adminRole = roleRepository.findByName(ERole.ROLE_ADMIN)
-                        .orElseThrow(() -> new RuntimeException("Error: Role is not found."));
+                        .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy vai trò người dùng."));
                 Set<Role> roles = new HashSet<>();
                 roles.add(adminRole);
 
@@ -105,8 +105,8 @@ public class DataInitializer {
                         "Chip: Snapdragon 8 Elite | RAM: 12GB | Bộ nhớ: 512GB | Camera: 200MP | Pin: 5000mAh | Màn hình: 6.8 inch AMOLED 120Hz"),
 
                     new Product(null,
-                        "Tai nghe Sony WH-1000XM6 Chống ồn",
-                        "Tai nghe over-ear không dây hàng đầu thị trường với công nghệ chống ồn ANC thế hệ mới, âm thanh Hi-Res.",
+                        "tài nghe Sony WH-1000XM6 Chống ồn",
+                        "tài nghe over-ear không dây hàng đầu thị trường với công nghệ chống ồn ANC thế hệ mới, âm thanh Hi-Res.",
                         new BigDecimal("8990000"),
                         new BigDecimal("7490000"),
                         "Âm thanh", "Sony", 30,
