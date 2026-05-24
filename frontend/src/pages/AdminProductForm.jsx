@@ -1,8 +1,8 @@
 // src/pages/AdminProductForm.jsx
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { getProductById, createProduct, updateProduct } from "../services/productService";
-import { FaArrowLeft, FaSave, FaSpinner } from "react-icons/fa";
+import { getProductById, createProduct, updateProduct, uploadFile } from "../services/productService";
+import { FaArrowLeft, FaSave, FaSpinner, FaUpload } from "react-icons/fa";
 
 // ── Icons ────────────────────────────────────────────────────────────────────
 const ArrowLeftIcon = () => <FaArrowLeft className="w-4 h-4" />;
@@ -18,6 +18,7 @@ export default function AdminProductForm() {
     // ── States ───────────────────────────────────────────────────────────────
     const [loading, setLoading] = useState(isEditMode);
     const [saving, setSaving] = useState(false);
+    const [uploading, setUploading] = useState(false);
     const [error, setError] = useState(null);
 
     // Data Form khớp chuẩn với Spring Boot Entity
@@ -64,6 +65,22 @@ export default function AdminProductForm() {
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleFileUpload = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        setUploading(true);
+        setError(null);
+        try {
+            const res = await uploadFile(file);
+            setFormData((prev) => ({ ...prev, imageUrl: res.url }));
+        } catch (err) {
+            setError(err.response?.data?.message || "Failed to upload image.");
+        } finally {
+            setUploading(false);
+        }
     };
 
     const handleSubmit = async (e) => {
@@ -194,14 +211,36 @@ export default function AdminProductForm() {
                         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 space-y-5">
                             <h2 className="text-base font-black text-gray-800 border-b border-gray-50 pb-3">Media</h2>
 
+                            {/* File Upload Input */}
                             <div>
-                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Image URL <span className="text-red-500">*</span></label>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Upload Product Image</label>
+                                <label className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-50 hover:bg-blue-100 active:scale-[0.98] text-blue-600 rounded-xl text-sm font-bold cursor-pointer border border-blue-200 border-dashed transition-all">
+                                    <FaUpload className="w-4 h-4" />
+                                    <span>{uploading ? "Uploading..." : "Choose Image File"}</span>
+                                    <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        onChange={handleFileUpload} 
+                                        className="hidden" 
+                                        disabled={uploading}
+                                    />
+                                </label>
+                            </div>
+
+                            {/* Or Enter URL */}
+                            <div>
+                                <label className="block text-sm font-bold text-gray-700 mb-1.5">Or Image URL <span className="text-red-500">*</span></label>
                                 <input required type="url" name="imageUrl" value={formData.imageUrl} onChange={handleChange} className="w-full px-4 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-100 focus:border-blue-500 transition-all" placeholder="https://example.com/image.jpg" />
                             </div>
 
-                            {/* Image Preview */}
+                            {/* Image Preview & Uploading Spinner */}
                             <div className="aspect-square w-full bg-gray-50 rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden relative">
-                                {formData.imageUrl ? (
+                                {uploading ? (
+                                    <div className="flex flex-col items-center gap-2">
+                                        <FaSpinner className="w-6 h-6 text-blue-600 animate-spin" />
+                                        <span className="text-xs font-bold text-gray-400">Uploading to cloud...</span>
+                                    </div>
+                                ) : formData.imageUrl ? (
                                     <img src={formData.imageUrl} alt="Preview" className="w-full h-full object-cover" onError={(e) => { e.target.src = "https://via.placeholder.com/400?text=Invalid+Image+URL"; }} />
                                 ) : (
                                     <span className="text-sm font-bold text-gray-400">Image Preview</span>

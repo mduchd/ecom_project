@@ -87,4 +87,20 @@ export const deleteProduct = async (id) => {
     await api.delete(`/products/${id}`);
 };
 
+/**
+ * Upload file lên Backend (trả về URL ảnh)
+ * @param {File} file
+ */
+export const uploadFile = async (file) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await api.post("/upload", formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+    return response.data; // trả về { url: "..." }
+};
+
 export default api;
+
