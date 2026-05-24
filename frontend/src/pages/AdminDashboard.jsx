@@ -1,8 +1,14 @@
-﻿import { useEffect, useMemo, useState } from "react";
+﻿import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../context/AuthContext.jsx";
-import { getProducts } from "../services/productService";
-import { getOrders, updateOrderStatus as updateOrderStatusApi } from "../services/orderService.js";
+import { getAdminProductStats } from "../services/productService";
+import {
+  getAdminOrders,
+  getAdminOrderStats,
+  updateOrderStatus as updateOrderStatusApi,
+} from "../services/orderService.js";
 import { toast } from "../components/Toast.jsx";
+import AdminPagination from "../components/AdminPagination.jsx";
+import { ADMIN_PAGE_SIZE, mapPagedResponse } from "../utils/pagination.js";
 import {
   FaChartLine,
   FaBox,
@@ -15,14 +21,26 @@ import {
   FaCheck,
   FaTimes,
   FaSpinner,
+  FaEye,
+  FaCopy,
 } from "react-icons/fa";
 
 const ORDER_STATUS = {
   PENDING: "Chờ duyệt",
+  PAID: "Đã thanh toán",
   SHIPPING: "Đang giao",
   DELIVERED: "Đã giao",
   CANCELED: "Đã hủy",
 };
+
+const ORDER_STATUS_FILTER_OPTIONS = [
+  { value: "ALL", label: "Tất cả trạng thái" },
+  { value: ORDER_STATUS.PENDING, label: ORDER_STATUS.PENDING },
+  { value: ORDER_STATUS.PAID, label: ORDER_STATUS.PAID },
+  { value: ORDER_STATUS.SHIPPING, label: ORDER_STATUS.SHIPPING },
+  { value: ORDER_STATUS.DELIVERED, label: ORDER_STATUS.DELIVERED },
+  { value: ORDER_STATUS.CANCELED, label: ORDER_STATUS.CANCELED },
+];
 
 function parsePrice(value) {
   if (value == null) return 0;
@@ -47,20 +65,105 @@ function formatVND(value) {
   return value.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 }
 
+function formatOrderDate(value) {
+  if (!value) return "-";
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return "-";
+  return date.toLocaleString("vi-VN");
+}
+
+function OrderDetailModal({ order, onClose, statusBadgeClass }) {
+  if (!order) return null;
+
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6">
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <h3 className="text-lg font-black text-gray-900 text-vi">Chi tiết đơn hàng</h3>
+            <p className="text-sm font-bold text-blue-600 mt-1">{order.code || `#${order.id}`}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onClose}
+            className="w-8 h-8 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-gray-200 transition-colors"
+            aria-label="Đóng"
+          >
+            <FaTimes size={12} />
+          </button>
+        </div>
+
+        <dl className="space-y-4 text-sm">
+          <div className="flex justify-between gap-4">
+            <dt className="text-gray-400 font-bold text-vi">Khách hàng</dt>
+            <dd className="font-bold text-gray-900 text-right">{order.customer || "Khách ẩn danh"}</dd>
+          </div>
+          {order.customerEmail && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-gray-400 font-bold text-vi">Email</dt>
+              <dd className="font-medium text-gray-700 text-right break-all">{order.customerEmail}</dd>
+            </div>
+          )}
+          <div className="flex justify-between gap-4">
+            <dt className="text-gray-400 font-bold text-vi">Sản phẩm</dt>
+            <dd className="font-medium text-gray-700 text-right max-w-[60%]">{order.product || "-"}</dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-gray-400 font-bold text-vi">Thanh toán</dt>
+            <dd className="font-bold text-gray-700">{order.method || "Không rõ"}</dd>
+          </div>
+          <div className="flex justify-between gap-4 items-center">
+            <dt className="text-gray-400 font-bold text-vi">Trạng thái</dt>
+            <dd>
+              <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black text-vi whitespace-nowrap ${statusBadgeClass(order.normalizedStatus)}`}>
+                {order.normalizedStatus}
+              </span>
+            </dd>
+          </div>
+          <div className="flex justify-between gap-4">
+            <dt className="text-gray-400 font-bold text-vi">Tổng tiền</dt>
+            <dd className="font-black text-gray-900">{formatVND(order.numericTotal)}</dd>
+          </div>
+          {order.pointsRedeemed > 0 && (
+            <div className="flex justify-between gap-4">
+              <dt className="text-gray-400 font-bold text-vi">Điểm đã dùng</dt>
+              <dd className="font-bold text-amber-600">
+                {order.pointsRedeemed} điểm ({formatVND(order.pointsDiscount)})
+              </dd>
+            </div>
+          )}
+          <div className="flex justify-between gap-4">
+            <dt className="text-gray-400 font-bold text-vi">Ngày tạo</dt>
+            <dd className="font-medium text-gray-700">{formatOrderDate(order.date)}</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  );
+}
+
 function normalizeStatus(input) {
   const text = String(input || "").toLowerCase();
 
-  if (text.includes("đã giao") || text.includes("da giao") || text.includes("delivered") || text.includes("ﾄ静｣ giao")) {
+  if (text.includes("đã giao") || text.includes("da giao") || text.includes("delivered")) {
     return ORDER_STATUS.DELIVERED;
   }
-  if (text.includes("đang giao") || text.includes("dang giao") || text.includes("shipping") || text.includes("ﾄ紳ng giao")) {
+  if (text.includes("đang giao") || text.includes("dang giao") || text.includes("shipping")) {
     return ORDER_STATUS.SHIPPING;
   }
-  if (text.includes("đã hủy") || text.includes("da huy") || text.includes("cancel") || text.includes("ﾄ静｣ h盻ｧy")) {
+  if (text.includes("đã hủy") || text.includes("da huy") || text.includes("cancel")) {
     return ORDER_STATUS.CANCELED;
+  }
+  if (text.includes("đã thanh toán") || text.includes("da thanh toan") || text === "paid") {
+    return ORDER_STATUS.PAID;
   }
 
   return ORDER_STATUS.PENDING;
+}
+
+function isOrderAwaitingApproval(status) {
+  return status === ORDER_STATUS.PENDING || status === ORDER_STATUS.PAID;
 }
 
 function StatCard({ label, value, icon, colorClass, trend }) {
@@ -80,19 +183,45 @@ export default function AdminDashboard() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState("revenue");
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [productsCount, setProductsCount] = useState(0);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [orderStats, setOrderStats] = useState(null);
   const [orders, setOrders] = useState([]);
+  const [ordersMeta, setOrdersMeta] = useState(() => mapPagedResponse({ content: [] }));
   const [ordersLoading, setOrdersLoading] = useState(true);
+  const [actionMenu, setActionMenu] = useState(null);
+  const [detailOrder, setDetailOrder] = useState(null);
+  const [ordersPage, setOrdersPage] = useState(1);
+  const [ordersPageSize, setOrdersPageSize] = useState(ADMIN_PAGE_SIZE);
+  const [statusFilter, setStatusFilter] = useState("ALL");
+
+  useEffect(() => {
+    const timer = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
+  useEffect(() => {
+    if (!actionMenu) return undefined;
+
+    const closeActionMenuOnViewportChange = () => setActionMenu(null);
+    window.addEventListener("scroll", closeActionMenuOnViewportChange, true);
+    window.addEventListener("resize", closeActionMenuOnViewportChange);
+
+    return () => {
+      window.removeEventListener("scroll", closeActionMenuOnViewportChange, true);
+      window.removeEventListener("resize", closeActionMenuOnViewportChange);
+    };
+  }, [actionMenu]);
 
   useEffect(() => {
     let mounted = true;
 
-    const loadProducts = async () => {
+    const loadProductStats = async () => {
       setProductsLoading(true);
       try {
-        const products = await getProducts();
-        if (mounted) setProductsCount(products.length);
+        const stats = await getAdminProductStats();
+        if (mounted) setProductsCount(stats?.totalProducts ?? 0);
       } catch {
         if (mounted) setProductsCount(0);
       } finally {
@@ -100,7 +229,7 @@ export default function AdminDashboard() {
       }
     };
 
-    loadProducts();
+    loadProductStats();
     return () => {
       mounted = false;
     };
@@ -109,26 +238,48 @@ export default function AdminDashboard() {
   useEffect(() => {
     let mounted = true;
 
-    const loadOrders = async () => {
-      setOrdersLoading(true);
+    const loadOrderStats = async () => {
       try {
-        const data = await getOrders();
-        if (mounted) setOrders(Array.isArray(data) ? data : []);
+        const stats = await getAdminOrderStats();
+        if (mounted) setOrderStats(stats);
       } catch {
-        if (mounted) {
-          setOrders([]);
-          toast.error("Không tải được danh sách đơn hàng.");
-        }
-      } finally {
-        if (mounted) setOrdersLoading(false);
+        if (mounted) setOrderStats(null);
       }
     };
 
-    loadOrders();
+    loadOrderStats();
     return () => {
       mounted = false;
     };
   }, []);
+
+  const fetchOrders = useCallback(async () => {
+    setOrdersLoading(true);
+    try {
+      const data = await getAdminOrders({
+        page: ordersPage,
+        size: ordersPageSize,
+        search: debouncedSearch,
+        status: statusFilter,
+      });
+      const mapped = mapPagedResponse(data, ordersPage);
+      if (mapped.correctedPage != null) {
+        setOrdersPage(mapped.correctedPage);
+      }
+      setOrdersMeta(mapped);
+      setOrders(mapped.items);
+    } catch {
+      setOrders([]);
+      setOrdersMeta(mapPagedResponse({ content: [] }));
+      toast.error("Không tải được danh sách đơn hàng.");
+    } finally {
+      setOrdersLoading(false);
+    }
+  }, [ordersPage, ordersPageSize, debouncedSearch, statusFilter]);
+
+  useEffect(() => {
+    fetchOrders();
+  }, [fetchOrders]);
 
   const normalizedOrders = useMemo(() => {
     return (orders || []).map((order) => ({
@@ -140,95 +291,103 @@ export default function AdminDashboard() {
       date: order.createdAt,
       normalizedStatus: normalizeStatus(order.status),
       numericTotal: parsePrice(order.totalAmount),
+      customerEmail: order.customerEmail,
+      pointsRedeemed: order.pointsRedeemed ?? 0,
+      pointsDiscount: parsePrice(order.pointsDiscount),
     }));
   }, [orders]);
 
-  const deliveredOrders = normalizedOrders.filter((order) => order.normalizedStatus === ORDER_STATUS.DELIVERED);
-  const pendingOrders = normalizedOrders.filter((order) => order.normalizedStatus === ORDER_STATUS.PENDING);
-  const totalRevenue = deliveredOrders.reduce((sum, order) => sum + order.numericTotal, 0);
-
-  const monthlyRevenue = useMemo(() => {
-    const values = Array(12).fill(0);
-    deliveredOrders.forEach((order) => {
-      const date = new Date(order.date);
-      if (!Number.isNaN(date.getTime())) {
-        values[date.getMonth()] += order.numericTotal;
-      }
-    });
-    return values;
-  }, [deliveredOrders]);
-
+  const totalRevenue = parsePrice(orderStats?.deliveredRevenue ?? 0);
+  const monthlyRevenue = useMemo(
+    () => (orderStats?.monthlyRevenue ?? Array(12).fill(0)).map((value) => parsePrice(value)),
+    [orderStats]
+  );
   const chartMax = Math.max(...monthlyRevenue, 1);
 
   const trends = useMemo(() => {
-    const now = new Date();
-    const currentMonth = now.getMonth();
-    const prevMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-
-    const currentRevenue = monthlyRevenue[currentMonth] || 0;
-    const prevRevenue = monthlyRevenue[prevMonth] || 0;
-
-    const monthOrders = (month) =>
-      normalizedOrders.filter((order) => {
-        const d = new Date(order.date);
-        return !Number.isNaN(d.getTime()) && d.getMonth() === month;
-      }).length;
-
-    const currentOrders = monthOrders(currentMonth);
-    const prevOrders = monthOrders(prevMonth);
-
     const toTrend = (current, prev) => {
-      if (prev === 0 && current === 0) return "0%";
-      if (prev === 0) return "+100%";
-      const pct = ((current - prev) / prev) * 100;
+      const currentValue = parsePrice(current);
+      const prevValue = parsePrice(prev);
+      if (prevValue === 0 && currentValue === 0) return "0%";
+      if (prevValue === 0) return "+100%";
+      const pct = ((currentValue - prevValue) / prevValue) * 100;
       return `${pct > 0 ? "+" : ""}${pct.toFixed(1)}%`;
     };
 
-    const pendingRate = normalizedOrders.length === 0 ? 0 : (pendingOrders.length / normalizedOrders.length) * 100;
+    const totalOrders = orderStats?.totalOrders ?? 0;
+    const awaitingCount = orderStats?.awaitingActionCount ?? 0;
+    const awaitingRate = totalOrders === 0 ? 0 : (awaitingCount / totalOrders) * 100;
 
     return {
-      revenue: toTrend(currentRevenue, prevRevenue),
-      orders: toTrend(currentOrders, prevOrders),
-      pending: `${pendingRate.toFixed(1)}%`,
+      revenue: toTrend(orderStats?.currentMonthRevenue, orderStats?.previousMonthRevenue),
+      orders: toTrend(orderStats?.currentMonthOrders, orderStats?.previousMonthOrders),
+      pending: `${awaitingRate.toFixed(1)}%`,
     };
-  }, [monthlyRevenue, normalizedOrders, pendingOrders.length]);
+  }, [orderStats]);
 
-  const filteredOrders = useMemo(() => {
-    const keyword = search.trim().toLowerCase();
-    if (!keyword) return normalizedOrders;
-
-    return normalizedOrders.filter((order) => {
-      return [
-        order.id,
-        order.code,
-        order.customer,
-        order.product,
-        order.method,
-        order.normalizedStatus,
-      ]
-        .filter(Boolean)
-        .some((value) => String(value).toLowerCase().includes(keyword));
-    });
-  }, [normalizedOrders, search]);
+  useEffect(() => {
+    setOrdersPage(1);
+  }, [debouncedSearch, statusFilter, ordersPageSize]);
 
   const statusBadgeClass = (status) => {
     if (status === ORDER_STATUS.DELIVERED) return "bg-emerald-100 text-emerald-700";
     if (status === ORDER_STATUS.PENDING) return "bg-amber-100 text-amber-700";
+    if (status === ORDER_STATUS.PAID) return "bg-sky-100 text-sky-700";
     if (status === ORDER_STATUS.SHIPPING) return "bg-blue-100 text-blue-700";
     return "bg-red-100 text-red-700";
   };
 
   const handleUpdateOrderStatus = async (orderId, status) => {
     try {
-      await updateOrderStatusApi(orderId, status);
-      setOrders((prev) => prev.map((order) => (
-        order.id === orderId ? { ...order, status } : order
-      )));
-      toast.success(`Đã cập nhật trạng thái: ${status}`);
+      const updated = await updateOrderStatusApi(orderId, status);
+      await Promise.all([
+        fetchOrders(),
+        getAdminOrderStats().then(setOrderStats),
+      ]);
+      toast.success(`Đã cập nhật trạng thái: ${normalizeStatus(updated.status)}`);
     } catch {
       toast.error("Cập nhật trạng thái đơn hàng thất bại.");
     }
   };
+
+  const openActionMenu = (event, orderId) => {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setActionMenu({
+      orderId,
+      top: rect.bottom + 6,
+      left: Math.max(8, rect.right - 176),
+    });
+  };
+
+  const closeActionMenu = () => setActionMenu(null);
+
+  const handleCopyOrderCode = async (code) => {
+    if (!code) {
+      toast.error("Không có mã đơn để sao chép.");
+      closeActionMenu();
+      return;
+    }
+
+    try {
+      await navigator.clipboard.writeText(code);
+      toast.success("Đã sao chép mã đơn.");
+    } catch {
+      toast.error("Không thể sao chép mã đơn.");
+    }
+    closeActionMenu();
+  };
+
+  const handleViewOrderDetail = (orderId) => {
+    const order = normalizedOrders.find((item) => item.id === orderId);
+    if (order) {
+      setDetailOrder(order);
+    }
+    closeActionMenu();
+  };
+
+  const actionMenuOrder = actionMenu
+    ? normalizedOrders.find((order) => order.id === actionMenu.orderId)
+    : null;
 
   return (
     <div className="bg-gray-50 min-h-screen flex flex-col font-sans">
@@ -263,7 +422,7 @@ export default function AdminDashboard() {
                 <FaDolly /> Sản phẩm: {productsLoading ? "..." : productsCount}
               </div>
               <div className="flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-gray-500 bg-gray-50">
-                <FaUsers /> Khách hàng: {ordersLoading ? "..." : normalizedOrders.length}
+                <FaUsers /> Đơn hàng: {ordersLoading ? "..." : orderStats?.totalOrders ?? ordersMeta.totalItems}
               </div>
             </nav>
           </div>
@@ -298,8 +457,8 @@ export default function AdminDashboard() {
             <div className="flex flex-col gap-8 animate-fadeIn">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                 <StatCard label="Doanh thu (Đã giao)" value={formatVND(totalRevenue)} icon={<FaChartLine size={24} />} colorClass="bg-blue-600" trend={trends.revenue} />
-                <StatCard label="Tổng đơn hàng" value={ordersLoading ? "..." : String(normalizedOrders.length)} icon={<FaBox size={24} />} colorClass="bg-purple-600" trend={trends.orders} />
-                <StatCard label="Đơn chờ duyệt" value={ordersLoading ? "..." : String(pendingOrders.length)} icon={<FaBell size={24} />} colorClass="bg-orange-600" trend={trends.pending} />
+                <StatCard label="Tổng đơn hàng" value={ordersLoading && !orderStats ? "..." : String(orderStats?.totalOrders ?? 0)} icon={<FaBox size={24} />} colorClass="bg-purple-600" trend={trends.orders} />
+                <StatCard label="Chờ xử lý" value={ordersLoading && !orderStats ? "..." : String(orderStats?.awaitingActionCount ?? 0)} icon={<FaBell size={24} />} colorClass="bg-orange-600" trend={trends.pending} />
                 <StatCard label="Sản phẩm" value={productsLoading ? "..." : String(productsCount)} icon={productsLoading ? <FaSpinner className="animate-spin" size={24} /> : <FaDolly size={24} />} colorClass="bg-emerald-600" trend="Trực tiếp" />
               </div>
 
@@ -339,7 +498,7 @@ export default function AdminDashboard() {
                   </div>
                 </div>
 
-                {deliveredOrders.length === 0 && (
+                {totalRevenue === 0 && (
                   <div className="mt-10 text-center py-10 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                     <p className="text-gray-400 font-bold text-sm">Chưa có dữ liệu doanh thu từ đơn đã giao.</p>
                   </div>
@@ -362,9 +521,19 @@ export default function AdminDashboard() {
                       placeholder="Tìm theo mã, khách hàng, sản phẩm..."
                     />
                   </div>
-                  <button className="px-4 py-3 bg-gray-50 rounded-xl text-gray-600 hover:bg-gray-100">
-                    <FaFilter />
-                  </button>
+                  <div className="relative">
+                    <FaFilter className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
+                    <select
+                      value={statusFilter}
+                      onChange={(event) => setStatusFilter(event.target.value)}
+                      className="appearance-none pl-10 pr-8 py-3 bg-gray-50 rounded-xl text-sm font-bold text-gray-700 border-none focus:ring-2 focus:ring-gray-200 cursor-pointer text-vi min-w-[170px]"
+                      aria-label="Lọc theo trạng thái đơn hàng"
+                    >
+                      {ORDER_STATUS_FILTER_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>{option.label}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
 
@@ -376,20 +545,29 @@ export default function AdminDashboard() {
                       <th className="px-4 py-4">Khách hàng</th>
                       <th className="px-4 py-4">Sản phẩm</th>
                       <th className="px-4 py-4 text-right">Tổng tiền</th>
-                      <th className="px-4 py-4 text-center">Trạng thái</th>
+                      <th className="px-4 py-4 text-center min-w-28 whitespace-nowrap">Trạng thái</th>
                       <th className="px-8 py-4 text-right">Hành động</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-100">
-                    {filteredOrders.length === 0 && (
+                    {ordersLoading && (
                       <tr>
-                        <td className="px-8 py-10 text-sm text-gray-400" colSpan={6}>
-                          {normalizedOrders.length === 0 ? "Chưa có đơn hàng thật nào." : "Không tìm thấy đơn hàng theo bộ lọc."}
+                        <td className="px-8 py-10 text-sm text-gray-400 text-center" colSpan={6}>
+                          <FaSpinner className="mx-auto mb-2 animate-spin" />
+                          Đang tải đơn hàng...
                         </td>
                       </tr>
                     )}
 
-                    {filteredOrders.map((order, index) => (
+                    {!ordersLoading && ordersMeta.totalItems === 0 && (
+                      <tr>
+                        <td className="px-8 py-10 text-sm text-gray-400" colSpan={6}>
+                          Không tìm thấy đơn hàng phù hợp với bộ lọc hoặc từ khóa tìm kiếm.
+                        </td>
+                      </tr>
+                    )}
+
+                    {!ordersLoading && normalizedOrders.map((order, index) => (
                       <tr key={`${order.id || "order"}-${index}`} className="hover:bg-gray-50/50 transition-colors">
                         <td className="px-8 py-6 font-black text-blue-600">{order.code || `ORD-${index + 1}`}</td>
                         <td className="px-4 py-6">
@@ -398,14 +576,14 @@ export default function AdminDashboard() {
                         </td>
                         <td className="px-4 py-6 font-medium text-gray-600">{order.product || "-"}</td>
                         <td className="px-4 py-6 text-right font-black text-gray-900">{formatVND(order.numericTotal)}</td>
-                        <td className="px-4 py-6 text-center">
-                          <span className={`px-3 py-1 rounded-full text-[10px] font-black text-vi ${statusBadgeClass(order.normalizedStatus)}`}>
+                        <td className="px-4 py-6 text-center min-w-28 whitespace-nowrap">
+                          <span className={`inline-block px-3 py-1 rounded-full text-[10px] font-black text-vi whitespace-nowrap ${statusBadgeClass(order.normalizedStatus)}`}>
                             {order.normalizedStatus}
                           </span>
                         </td>
                         <td className="px-8 py-6 text-right">
                           <div className="flex justify-end gap-2">
-                            {order.normalizedStatus === ORDER_STATUS.PENDING && (
+                            {isOrderAwaitingApproval(order.normalizedStatus) && (
                               <>
                                 <button
                                   onClick={() => handleUpdateOrderStatus(order.id, ORDER_STATUS.SHIPPING)}
@@ -434,7 +612,17 @@ export default function AdminDashboard() {
                             )}
 
                             {(order.normalizedStatus === ORDER_STATUS.DELIVERED || order.normalizedStatus === ORDER_STATUS.CANCELED) && (
-                              <button className="w-8 h-8 rounded-lg bg-gray-50 text-gray-400 flex items-center justify-center hover:bg-gray-200">
+                              <button
+                                type="button"
+                                onClick={(event) => openActionMenu(event, order.id)}
+                                className={`w-8 h-8 rounded-lg flex items-center justify-center transition-all shadow-sm ${
+                                  actionMenu?.orderId === order.id
+                                    ? "bg-gray-900 text-white"
+                                    : "bg-gray-50 text-gray-400 hover:bg-gray-200"
+                                }`}
+                                title="Thêm hành động"
+                                aria-label="Thêm hành động"
+                              >
                                 <FaEllipsisV size={12} />
                               </button>
                             )}
@@ -445,10 +633,60 @@ export default function AdminDashboard() {
                   </tbody>
                 </table>
               </div>
+
+              <AdminPagination
+                currentPage={ordersMeta.currentPage}
+                totalPages={ordersMeta.totalPages}
+                totalItems={ordersMeta.totalItems}
+                from={ordersMeta.from}
+                to={ordersMeta.to}
+                pageSize={ordersPageSize}
+                itemLabel="đơn hàng"
+                onPageChange={setOrdersPage}
+                onPageSizeChange={setOrdersPageSize}
+              />
             </div>
           )}
         </main>
       </div>
+
+      {actionMenu && actionMenuOrder && (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-[55] cursor-default"
+            aria-label="Đóng menu hành động"
+            onClick={closeActionMenu}
+          />
+          <div
+            className="fixed z-[56] w-44 bg-white rounded-xl shadow-xl border border-gray-100 py-1 overflow-hidden"
+            style={{ top: actionMenu.top, left: actionMenu.left }}
+          >
+            <button
+              type="button"
+              onClick={() => handleViewOrderDetail(actionMenu.orderId)}
+              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors text-vi"
+            >
+              <FaEye size={12} className="text-gray-400" />
+              Xem chi tiết
+            </button>
+            <button
+              type="button"
+              onClick={() => handleCopyOrderCode(actionMenuOrder.code)}
+              className="w-full flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors text-vi"
+            >
+              <FaCopy size={12} className="text-gray-400" />
+              Sao chép mã đơn
+            </button>
+          </div>
+        </>
+      )}
+
+      <OrderDetailModal
+        order={detailOrder}
+        onClose={() => setDetailOrder(null)}
+        statusBadgeClass={statusBadgeClass}
+      />
 
       <style>{`
         @keyframes fadeIn {

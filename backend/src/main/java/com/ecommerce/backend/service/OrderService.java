@@ -1,10 +1,12 @@
 package com.ecommerce.backend.service;
 
+import com.ecommerce.backend.dto.AdminOrderStatsResponse;
 import com.ecommerce.backend.dto.CreateOrderItemRequest;
 import com.ecommerce.backend.dto.CreateOrderRequest;
 import com.ecommerce.backend.dto.OrderPricing;
 import com.ecommerce.backend.dto.OrderTrackingResponse;
 import com.ecommerce.backend.dto.OrderTrackingStepResponse;
+import com.ecommerce.backend.dto.PagedResponse;
 import com.ecommerce.backend.entity.Order;
 import com.ecommerce.backend.entity.Product;
 import com.ecommerce.backend.entity.User;
@@ -12,6 +14,10 @@ import com.ecommerce.backend.exception.OrderTrackingNotFoundException;
 import com.ecommerce.backend.repository.OrderRepository;
 import com.ecommerce.backend.repository.ProductRepository;
 import com.ecommerce.backend.repository.UserRepository;
+import com.ecommerce.backend.util.PageFetch;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,6 +25,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -160,7 +167,7 @@ public class OrderService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với id: " + id));
         String oldStatus = normalizeTrackingStatus(existing.getStatus());
         String newStatus = normalizeTrackingStatus(status);
-        existing.setStatus(status);
+        existing.setStatus(toStoredStatus(status));
 
         if (!"DELIVERED".equals(oldStatus) && "DELIVERED".equals(newStatus)) {
             loyaltyService.creditEarnedPoints(existing);
@@ -293,6 +300,16 @@ public class OrderService {
         return "PENDING";
     }
 
+    private String toStoredStatus(String status) {
+        return switch (normalizeTrackingStatus(status)) {
+            case "PAID" -> "Đã thanh toán";
+            case "SHIPPING" -> STATUS_SHIPPING;
+            case "DELIVERED" -> STATUS_DELIVERED;
+            case "CANCELED" -> STATUS_CANCELED;
+            default -> STATUS_PENDING;
+        };
+    }
+
     private String statusLabel(String status) {
         return switch (status) {
             case "PAID" -> "Đã thanh toán";
@@ -344,5 +361,66 @@ public class OrderService {
             return false;
         }
         return left.trim().equalsIgnoreCase(right.trim());
+    }
+
+    @Transactional(readOnly = true)
+    public PagedResponse<Order> getAdminPage(int page, int size, String search, String status) {
+        int safePage = Math.max(page, 1);
+        int safeSize = Math.max(1, Math.min(size, 100));
+        String statusGroup = resolveStatusGroup(status);
+        String normalizedSearch = search == null ? "" : search.trim();
+        Pageable pageable = PageRequest.of(safePage - 1, safeSize);
+        String searchParam = normalizedSearch.isEmpty() ? null : normalizedSearch;
+        Page<Order> result = orderRepository.findAdminOrders(statusGroup, searchParam, pageable);
+        result = PageFetch.clampRequestedPage(
+                result,
+                safePage,
+                nextPageable -> orderRepository.findAdminOrders(statusGroup, searchParam, nextPageable)
+        );
+        return PagedResponse.from(result, safePage);
+    }
+
+    @Transactional(readOnly = true)
+    public AdminOrderStatsResponse getAdminStats() {
+        int year = LocalDateTime.now().getYear();
+        int currentMonth = LocalDateTime.now().getMonthValue();
+        int previousMonth = currentMonth == 1 ? 12 : currentMonth - 1;
+        int previousMonthYear = currentMonth == 1 ? year - 1 : year;
+
+        List<BigDecimal> monthlyRevenue = new ArrayList<>(List.of(
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO,
+                BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO, BigDecimal.ZERO
+        ));
+        for (Object[] row : orderRepository.sumDeliveredRevenueByMonth(year)) {
+            int month = ((Number) row[0]).intValue();
+            BigDecimal amount = (BigDecimal) row[1];
+            if (month >= 1 && month <= 12) {
+                monthlyRevenue.set(month - 1, amount);
+            }
+        }
+
+        BigDecimal currentMonthRevenue = monthlyRevenue.get(currentMonth - 1);
+        BigDecimal previousMonthRevenue = previousMonthYear == year
+                ? monthlyRevenue.get(previousMonth - 1)
+                : orderRepository.sumDeliveredRevenueForMonth(previousMonthYear, previousMonth);
+
+        return new AdminOrderStatsResponse(
+                orderRepository.count(),
+                orderRepository.countAwaitingActionOrders(),
+                orderRepository.sumDeliveredRevenue(),
+                monthlyRevenue,
+                orderRepository.countOrdersByMonth(year, currentMonth),
+                orderRepository.countOrdersByMonth(previousMonthYear, previousMonth),
+                currentMonthRevenue,
+                previousMonthRevenue
+        );
+    }
+
+    private String resolveStatusGroup(String status) {
+        if (status == null || status.isBlank() || "ALL".equalsIgnoreCase(status.trim())) {
+            return null;
+        }
+        return normalizeTrackingStatus(status);
     }
 }

@@ -2,6 +2,8 @@ package com.ecommerce.backend.service;
 
 import com.ecommerce.backend.dto.UserProfileRequest;
 import com.ecommerce.backend.dto.UserProfileResponse;
+import com.ecommerce.backend.entity.ERole;
+import com.ecommerce.backend.entity.Role;
 import com.ecommerce.backend.entity.User;
 import com.ecommerce.backend.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,8 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 class UserServiceTest {
@@ -86,5 +90,27 @@ class UserServiceTest {
 
         assertEquals(88, response.getPointsBalance());
         assertEquals(true, response.isPointsLocked());
+    }
+
+    @Test
+    void setEnabledBlocksDisablingLastAdmin() {
+        Role adminRole = Role.builder().name(ERole.ROLE_ADMIN).build();
+        User admin = User.builder()
+                .id(1L)
+                .username("admin")
+                .email("admin@example.com")
+                .enabled(true)
+                .roles(Set.of(adminRole))
+                .build();
+
+        when(userRepository.findById(1L)).thenReturn(Optional.of(admin));
+        when(userRepository.countEnabledAdmins(ERole.ROLE_ADMIN)).thenReturn(1L);
+
+        IllegalArgumentException error = assertThrows(
+                IllegalArgumentException.class,
+                () -> userService.setEnabled(1L, false)
+        );
+
+        assertEquals("Không thể khóa tài khoản quản trị cuối cùng.", error.getMessage());
     }
 }

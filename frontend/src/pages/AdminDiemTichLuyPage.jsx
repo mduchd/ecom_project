@@ -1,4 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
+import AdminPagination from "../components/AdminPagination.jsx";
+import { ADMIN_PAGE_SIZE, mapPagedResponse } from "../utils/pagination.js";
 import { FaCoins, FaHistory, FaSave, FaSlidersH, FaSpinner } from "react-icons/fa";
 import {
   dieuChinhDiem,
@@ -16,30 +18,59 @@ export default function AdminDiemTichLuyPage() {
   const [summary, setSummary] = useState(null);
   const [settings, setSettings] = useState(null);
   const [transactions, setTransactions] = useState([]);
+  const [transactionsMeta, setTransactionsMeta] = useState(() => mapPagedResponse({ content: [] }));
   const [adjustment, setAdjustment] = useState({ userId: "", increase: true, points: "", reason: "" });
   const [loading, setLoading] = useState(true);
+  const [transactionsLoading, setTransactionsLoading] = useState(true);
+  const [transactionsPage, setTransactionsPage] = useState(1);
+  const [transactionsPageSize, setTransactionsPageSize] = useState(ADMIN_PAGE_SIZE);
 
-  const loadData = async () => {
+  const loadTransactions = useCallback(async () => {
+    setTransactionsLoading(true);
+    try {
+      const data = await layLichSuDiem({ page: transactionsPage, size: transactionsPageSize });
+      const mapped = mapPagedResponse(data, transactionsPage);
+      if (mapped.correctedPage != null) {
+        setTransactionsPage(mapped.correctedPage);
+      }
+      setTransactionsMeta(mapped);
+      setTransactions(mapped.items);
+    } catch {
+      setTransactions([]);
+      setTransactionsMeta(mapPagedResponse({ content: [] }));
+      toast.error("Không thể tải lịch sử điểm.");
+    } finally {
+      setTransactionsLoading(false);
+    }
+  }, [transactionsPage, transactionsPageSize]);
+
+  const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      const [nextSummary, nextSettings, nextTransactions] = await Promise.all([
+      const [nextSummary, nextSettings] = await Promise.all([
         layThongKeDiem(),
         layCauHinhDoiDiem(),
-        layLichSuDiem(),
       ]);
       setSummary(nextSummary);
       setSettings(nextSettings);
-      setTransactions(nextTransactions);
-    } catch (error) {
+    } catch {
       toast.error("Không thể tải dữ liệu điểm tích lũy.");
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
+
+  useEffect(() => {
+    loadTransactions();
+  }, [loadTransactions]);
+
+  useEffect(() => {
+    setTransactionsPage(1);
+  }, [transactionsPageSize]);
 
   const handleSaveSettings = async () => {
     try {
@@ -72,7 +103,7 @@ export default function AdminDiemTichLuyPage() {
       });
       toast.success("Đã cập nhật điểm cho khách hàng.");
       setAdjustment({ userId: "", increase: true, points: "", reason: "" });
-      await loadData();
+      await Promise.all([loadData(), loadTransactions()]);
     } catch (error) {
       toast.error(error.response?.data?.message || "Điều chỉnh điểm thất bại.");
     }
@@ -190,7 +221,24 @@ export default function AdminDiemTichLuyPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
-              {transactions.map((item) => (
+              {transactionsLoading && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                    <FaSpinner className="mx-auto mb-2 animate-spin" />
+                    Đang tải lịch sử...
+                  </td>
+                </tr>
+              )}
+
+              {!transactionsLoading && transactions.length === 0 && (
+                <tr>
+                  <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
+                    Chưa có giao dịch điểm.
+                  </td>
+                </tr>
+              )}
+
+              {!transactionsLoading && transactions.map((item) => (
                 <tr key={item.id}>
                   <td className="px-4 py-3 whitespace-nowrap">{formatDate(item.createdAt)}</td>
                   <td className="px-4 py-3">{item.customerEmail}</td>
@@ -203,6 +251,19 @@ export default function AdminDiemTichLuyPage() {
             </tbody>
           </table>
         </div>
+        {!transactionsLoading && (
+          <AdminPagination
+            currentPage={transactionsMeta.currentPage}
+            totalPages={transactionsMeta.totalPages}
+            totalItems={transactionsMeta.totalItems}
+            from={transactionsMeta.from}
+            to={transactionsMeta.to}
+            pageSize={transactionsPageSize}
+            itemLabel="giao dịch"
+            onPageChange={setTransactionsPage}
+            onPageSizeChange={setTransactionsPageSize}
+          />
+        )}
       </section>
     </main>
   );
