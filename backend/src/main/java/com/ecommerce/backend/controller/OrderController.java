@@ -1,6 +1,7 @@
 package com.ecommerce.backend.controller;
 
 import com.ecommerce.backend.dto.CreateOrderRequest;
+import com.ecommerce.backend.dto.OrderTrackingResponse;
 import com.ecommerce.backend.dto.UpdateOrderStatusRequest;
 import com.ecommerce.backend.entity.Order;
 import com.ecommerce.backend.service.OrderService;
@@ -34,6 +35,11 @@ public class OrderController {
     @GetMapping("/code/{orderCode}")
     public ResponseEntity<Order> getOrderByCode(@PathVariable String orderCode) {
         return ResponseEntity.ok(orderService.getByOrderCode(orderCode));
+    }
+
+    @GetMapping("/track")
+    public ResponseEntity<OrderTrackingResponse> trackOrder(@RequestParam String code, @RequestParam String email) {
+        return ResponseEntity.ok(orderService.track(code, email));
     }
 
     @PatchMapping("/{id}/status")

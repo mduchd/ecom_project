@@ -96,13 +96,13 @@ function TopBar({ currency, setCurrency, language, setLanguage }) {
                 </div>
 
                 <div className="flex items-center gap-3 sm:gap-4">
-                    <a
-                        href="#"
+                    <Link
+                        to="/track-order"
                         className="hidden sm:inline-flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-semibold px-3 py-1 rounded-full transition-colors duration-150"
                     >
                         <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse inline-block" />
                         Theo dõi đơn
-                    </a>
+                    </Link>
                     <Dropdown selected={currency} options={CURRENCIES} onChange={setCurrency} />
                     <div className="w-px h-3.5 bg-gray-300" />
                     <Dropdown selected={language} options={LANGUAGES} onChange={setLanguage} icon={<FaGlobe className="w-3.5 h-3.5" />} />

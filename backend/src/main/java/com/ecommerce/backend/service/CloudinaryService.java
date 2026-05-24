@@ -92,12 +92,13 @@ public class CloudinaryService {
         }
 
         String contentType = file.getContentType();
-        if (contentType != null && ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase(Locale.ROOT))) {
-            return;
-        }
-
         String extension = getFileExtension(file.getOriginalFilename());
-        if (extension != null && ALLOWED_EXTENSIONS.contains(extension)) {
+
+        boolean validContentType = contentType != null
+                && ALLOWED_CONTENT_TYPES.contains(contentType.toLowerCase(Locale.ROOT));
+        boolean validExtension = extension != null && ALLOWED_EXTENSIONS.contains(extension);
+
+        if (validContentType && validExtension) {
             return;
         }
 

@@ -12,24 +12,29 @@ export default function ThanhToan() {
   const [selectedMethod, setSelectedMethod] = useState("momo");
   const [showQR, setShowQR] = useState(false);
   const [pendingPaymentOrderCode, setPendingPaymentOrderCode] = useState("");
+  const [pendingPaymentEmail, setPendingPaymentEmail] = useState("");
   const [showEmailModal, setShowEmailModal] = useState(false);
   const [guestEmail, setGuestEmail] = useState("");
 
   // Tự động kiểm tra trạng thái thanh toán qua Webhook SePay (Polling mỗi 3 giây)
   useEffect(() => {
     let intervalId;
-    if (showQR && pendingPaymentOrderCode) {
+    if (showQR && pendingPaymentOrderCode && pendingPaymentEmail) {
       intervalId = setInterval(async () => {
         try {
-          const response = await api.get(`/orders/code/${pendingPaymentOrderCode}`);
-          // Khi SePay webhook nhận thanh toán thành công, status chuyển thành "Đang giao" (STATUS_SHIPPING)
-          if (response.data && response.data.status === "Đang giao") {
+          const response = await api.get("/orders/track", {
+            params: { code: pendingPaymentOrderCode, email: pendingPaymentEmail },
+          });
+          if (response.data && (response.data.status === "SHIPPING" || response.data.status === "PAID")) {
             clearInterval(intervalId);
             setShowQR(false);
+            const orderCode = pendingPaymentOrderCode;
+            const orderEmail = pendingPaymentEmail;
             setPendingPaymentOrderCode("");
+            setPendingPaymentEmail("");
             toast.success("Thanh toán thành công! Cảm ơn bạn đã mua hàng tại Snapcart.");
             clearCart(true);
-            navigate("/");
+            navigate(`/track-order?code=${encodeURIComponent(orderCode)}&email=${encodeURIComponent(orderEmail)}`);
           }
         } catch (err) {
           console.error("Lỗi khi kiểm tra trạng thái thanh toán:", err);
@@ -40,7 +45,7 @@ export default function ThanhToan() {
     return () => {
       if (intervalId) clearInterval(intervalId);
     };
-  }, [showQR, pendingPaymentOrderCode, navigate, clearCart]);
+  }, [showQR, pendingPaymentOrderCode, pendingPaymentEmail, navigate, clearCart]);
   
   const formatVND = (value) => value.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
@@ -96,11 +101,12 @@ export default function ThanhToan() {
 
       if (selectedMethod === "momo" || selectedMethod === "bank") {
         setPendingPaymentOrderCode(savedOrder?.orderCode || "ThanhToanCart");
+        setPendingPaymentEmail(email);
         setShowQR(true);
       } else {
-        toast.success("Đặt hàng thành công! Đơn hàng sẽ được thanh toán khi nhận hàng.");
+        toast.success("Đặt hàng thành công! Bạn có thể theo dõi trạng thái đơn hàng.");
         clearCart(true);
-        setTimeout(() => navigate("/"), 2000);
+        navigate(`/track-order?code=${encodeURIComponent(savedOrder?.orderCode || "")}&email=${encodeURIComponent(email)}`);
       }
     } catch (error) {
       const msg = error.response?.data?.message || "Tạo đơn hàng thất bại. Vui lòng thử lại.";
@@ -135,7 +141,7 @@ export default function ThanhToan() {
             </div>
 
             <div className="flex justify-between gap-5">
-              {info_ct.map((item, index) => (
+              {info_ct.map((item) => (
                 <div key={item.label} className="flex flex-col w-1/2 gap-2">
                 <span className="font-bold text-vi">{item.label}</span>
                 <input placeholder={item.place}
@@ -287,6 +293,7 @@ export default function ThanhToan() {
                onClick={() => {
                  setShowQR(false);
                  setPendingPaymentOrderCode("");
+                 setPendingPaymentEmail("");
                }}
                className="absolute top-4 right-4 text-gray-400 hover:text-red-500 bg-gray-100 hover:bg-red-50 p-2 rounded-full transition-colors"
              >
@@ -309,10 +316,17 @@ export default function ThanhToan() {
                 <button 
                   onClick={() => {
                     setShowQR(false);
+                    const orderCode = pendingPaymentOrderCode;
+                    const orderEmail = pendingPaymentEmail;
                     setPendingPaymentOrderCode("");
+                    setPendingPaymentEmail("");
                     toast.success("Đặt hàng thành công! Cảm ơn bạn đã mua hàng.");
                     clearCart(true);
-                    setTimeout(() => navigate("/"), 2000);
+                    if (orderCode && orderEmail) {
+                      navigate(`/track-order?code=${encodeURIComponent(orderCode)}&email=${encodeURIComponent(orderEmail)}`);
+                    } else {
+                      navigate("/");
+                    }
                   }}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-colors"
                 >
@@ -322,6 +336,7 @@ export default function ThanhToan() {
                   onClick={() => {
                     setShowQR(false);
                     setPendingPaymentOrderCode("");
+                    setPendingPaymentEmail("");
                   }}
                   className="w-full bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-3 rounded-xl transition-colors"
                 >

@@ -21,3 +21,6 @@ backend/bin/
 # OS files
 Thumbs.db
 .DS_Store
+
+# Agent implementation plans (local only)
+docs/superpowers/plans/

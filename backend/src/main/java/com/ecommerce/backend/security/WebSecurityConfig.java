@@ -71,6 +71,7 @@ public class WebSecurityConfig {
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/orders/confirm")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/orders/test-email")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/payments/sepay/webhook")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/orders/track")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/orders/**")).hasRole("ADMIN")
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PATCH, "/api/orders/**")).hasRole("ADMIN")
                     .anyRequest().authenticated()

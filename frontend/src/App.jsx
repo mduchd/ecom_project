@@ -11,6 +11,7 @@ import ProductDetail from './pages/ProductDetail'
 import Cart from './pages/Cart'
 import Auth from './pages/Auth'
 import ThanhToan from './pages/ThanhToan'
+import OrderTracking from './pages/OrderTracking'
 import Footer from './components/Footer';
 import AdminProductForm from './pages/AdminProductForm';
 import AdminDashboard from './pages/AdminDashboard';
@@ -94,6 +95,7 @@ function AppContent() {
           <Route path="/cart" element={<Cart />} />
           <Route path="/login" element={<Auth />} />
           <Route path="/checkout" element={<ThanhToan />} />
+          <Route path="/track-order" element={<OrderTracking />} />
           <Route path="/admin/products/new" element={<AdminRoute><AdminShell><AdminProductForm /></AdminShell></AdminRoute>} />
           <Route path="/admin/products/edit/:id" element={<AdminRoute><AdminShell><AdminProductForm /></AdminShell></AdminRoute>} />
           <Route path="/admin/dashboard" element={<AdminRoute><AdminShell><AdminDashboard /></AdminShell></AdminRoute>} />
