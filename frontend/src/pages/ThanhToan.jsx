@@ -330,7 +330,7 @@ export default function ThanhToan() {
                 )}
                 {selectedMethod === "bank" && (
                   <div className="flex flex-col items-center gap-2 text-center text-gray-600">
-                    <p className="font-bold text-blue-600 text-lg">Chuyển khoản ngân hàng (Vietcombank)</p>
+                    <p className="font-bold text-blue-600 text-lg">Chuyển khoản ngân hàng ({bankName})</p>
                     <p className="text-sm text-vi">Quét mã QR chuyển khoản hoặc sao chép STK sẽ được cung cấp ở bước tiếp theo.</p>
                   </div>
                 )}
