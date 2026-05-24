@@ -66,7 +66,7 @@ public class UserService {
                 user.getCity(),
                 user.getPostalCode(),
                 roles,
-                user.getPointsBalance(),
+                user.getPointsBalance() == null ? 0 : user.getPointsBalance(),
                 user.isPointsLocked());
     }
 }

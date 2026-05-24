@@ -28,21 +28,42 @@ export default function ThanhToan() {
   const [pointsToUse, setPointsToUse] = useState(0);
   const [loyaltySettings, setLoyaltySettings] = useState(DEFAULT_LOYALTY);
   const [loyaltySettingsLoaded, setLoyaltySettingsLoaded] = useState(false);
+  const [loyaltySettingsFailed, setLoyaltySettingsFailed] = useState(false);
 
   useEffect(() => {
+    if (user?.id) {
+      refreshProfile();
+    }
+  }, [user?.id]);
+
+  useEffect(() => {
+    let cancelled = false;
+
     layCauHinhCheckout()
       .then((settings) => {
+        if (cancelled) return;
         setLoyaltySettings({
-          pointValue: Number(settings.pointValue || DEFAULT_LOYALTY.pointValue),
-          maxRedeemPercent: Number(settings.maxRedeemPercent || DEFAULT_LOYALTY.maxRedeemPercent),
-          enabled: Boolean(settings.enabled),
+          pointValue: Number(settings.pointValue ?? DEFAULT_LOYALTY.pointValue),
+          maxRedeemPercent: Number(settings.maxRedeemPercent ?? DEFAULT_LOYALTY.maxRedeemPercent),
+          enabled: settings.enabled === true || settings.isEnabled === true,
         });
-        setLoyaltySettingsLoaded(true);
+        setLoyaltySettingsFailed(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        if (cancelled) return;
+        console.error("Không tải được cấu hình điểm tích lũy:", error);
         setLoyaltySettings(DEFAULT_LOYALTY);
-        setLoyaltySettingsLoaded(false);
+        setLoyaltySettingsFailed(true);
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setLoyaltySettingsLoaded(true);
+        }
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Tự động kiểm tra trạng thái thanh toán qua Webhook SePay (Polling mỗi 3 giây)
@@ -89,7 +110,7 @@ export default function ThanhToan() {
   const availablePoints = user?.points || 0;
   const pointValue = Number(loyaltySettings.pointValue || DEFAULT_LOYALTY.pointValue);
   const maxRedeemPercent = Number(loyaltySettings.maxRedeemPercent || DEFAULT_LOYALTY.maxRedeemPercent);
-  const loyaltyEnabled = loyaltySettingsLoaded && Boolean(loyaltySettings.enabled);
+  const loyaltyEnabled = loyaltySettingsLoaded && !loyaltySettingsFailed && Boolean(loyaltySettings.enabled);
   const maxPointDiscount = loyaltyEnabled
     ? Math.floor(subtotal * (maxRedeemPercent / 100))
     : 0;
@@ -349,6 +370,10 @@ export default function ThanhToan() {
           </div>
 
           {user && !loyaltySettingsLoaded && (
+            <p className="text-xs text-gray-400 text-vi">Đang tải cấu hình điểm tích lũy...</p>
+          )}
+
+          {user && loyaltySettingsLoaded && loyaltySettingsFailed && (
             <p className="text-xs text-amber-600 text-vi">
               Không tải được cấu hình điểm tích lũy.
             </p>
