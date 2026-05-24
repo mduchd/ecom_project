@@ -15,7 +15,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Boolean existsByEmail(String email);
 
     @Query("select coalesce(sum(u.pointsBalance), 0) from User u")
-    Integer sumActivePoints();
+    Long sumActivePoints();
 
     @Query("select count(u) from User u where u.pointsBalance > 0")
     long countUsersWithPoints();

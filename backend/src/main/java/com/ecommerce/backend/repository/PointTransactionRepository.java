@@ -30,12 +30,12 @@ public interface PointTransactionRepository extends JpaRepository<PointTransacti
             from PointTransaction t
             where t.type = :type
             """)
-    Integer sumPointsByType(@Param("type") PointTransactionType type);
+    Long sumPointsByType(@Param("type") PointTransactionType type);
 
     @Query("""
             select coalesce(sum(abs(t.points)), 0)
             from PointTransaction t
             where t.type = :type
             """)
-    Integer sumAbsolutePointsByType(@Param("type") PointTransactionType type);
+    Long sumAbsolutePointsByType(@Param("type") PointTransactionType type);
 }

@@ -6,6 +6,7 @@ import com.ecommerce.backend.dto.LoyaltySettingRequest;
 import com.ecommerce.backend.dto.LoyaltySettingResponse;
 import com.ecommerce.backend.dto.PointTransactionResponse;
 import com.ecommerce.backend.entity.LoyaltySetting;
+import com.ecommerce.backend.entity.PointTransaction;
 import com.ecommerce.backend.entity.PointTransactionType;
 import com.ecommerce.backend.repository.UserRepository;
 import com.ecommerce.backend.service.LoyaltyService;
@@ -79,10 +80,10 @@ public class AdminLoyaltyController {
 
     @GetMapping("/summary")
     public ResponseEntity<AdminLoyaltySummaryResponse> getSummary() {
-        Integer activePoints = userRepository.sumActivePoints();
+        Long activePoints = userRepository.sumActivePoints();
         long customersWithPoints = userRepository.countUsersWithPoints();
-        Integer earned = loyaltyService.sumPointsByType(PointTransactionType.EARN);
-        Integer redeemed = loyaltyService.sumAbsolutePointsByType(PointTransactionType.REDEEM);
+        Long earned = loyaltyService.sumPointsByType(PointTransactionType.EARN);
+        Long redeemed = loyaltyService.sumAbsolutePointsByType(PointTransactionType.REDEEM);
         return ResponseEntity.ok(new AdminLoyaltySummaryResponse(customersWithPoints, activePoints, earned, redeemed));
     }
 

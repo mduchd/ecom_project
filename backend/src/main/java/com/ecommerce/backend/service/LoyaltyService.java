@@ -209,12 +209,12 @@ public class LoyaltyService {
     }
 
     @Transactional(readOnly = true)
-    public Integer sumPointsByType(PointTransactionType type) {
+    public Long sumPointsByType(PointTransactionType type) {
         return transactionRepository.sumPointsByType(type);
     }
 
     @Transactional(readOnly = true)
-    public Integer sumAbsolutePointsByType(PointTransactionType type) {
+    public Long sumAbsolutePointsByType(PointTransactionType type) {
         return transactionRepository.sumAbsolutePointsByType(type);
     }
 }

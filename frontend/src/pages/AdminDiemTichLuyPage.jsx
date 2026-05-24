@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaCoins, FaHistory, FaSave, FaSlidersH } from "react-icons/fa";
+import { FaCoins, FaHistory, FaSave, FaSlidersH, FaSpinner } from "react-icons/fa";
 import {
   dieuChinhDiem,
   layCauHinhDoiDiem,
@@ -79,7 +79,14 @@ export default function AdminDiemTichLuyPage() {
   };
 
   if (loading) {
-    return <div className="max-w-[1280px] mx-auto p-6 text-sm font-bold text-gray-500">Đang tải dữ liệu điểm tích lũy...</div>;
+    return (
+      <main className="flex min-h-[calc(100vh-3.5rem)] items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <FaSpinner className="h-10 w-10 animate-spin text-blue-600" aria-hidden="true" />
+          <p className="text-sm font-bold text-gray-500">Đang tải dữ liệu điểm tích lũy...</p>
+        </div>
+      </main>
+    );
   }
 
   return (

@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class AdminLoyaltySummaryResponse {
     private long customersWithPoints;
-    private Integer activePoints;
-    private Integer earnedPoints;
-    private Integer redeemedPoints;
+    private Long activePoints;
+    private Long earnedPoints;
+    private Long redeemedPoints;
 }
