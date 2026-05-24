@@ -24,6 +24,7 @@ import {
     FaShoppingBag,
     FaSignOutAlt,
     FaStar,
+    FaAddressBook,
 } from "react-icons/fa";
 
 const CATEGORIES = [
@@ -485,6 +486,14 @@ function UserActions({ cartCount, cartTotal }) {
                                     </Link>
                                 )}
                                 <Link
+                                    to="/account"
+                                    onClick={() => setDropdownOpen(false)}
+                                    className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors group"
+                                >
+                                    <FaAddressBook className="w-3.5 h-3.5 text-gray-400 group-hover:text-blue-600 transition-colors" />
+                                    <span>Tài khoản của tôi</span>
+                                </Link>
+                                <Link
                                     to="/shop"
                                     onClick={() => setDropdownOpen(false)}
                                     className="flex items-center gap-2 px-4 py-2 text-xs font-bold text-gray-700 hover:bg-blue-50 hover:text-blue-600 transition-colors group"
@@ -626,6 +635,13 @@ function MobileMenu({ open, onClose }) {
                                     <FaCog /> Quản trị hệ thống
                                 </Link>
                             )}
+                            <Link
+                                to="/account"
+                                onClick={onClose}
+                                className="flex items-center gap-1.5 mt-2 text-xs font-bold text-blue-600 hover:underline"
+                            >
+                                <FaAddressBook /> Tài khoản của tôi
+                            </Link>
                         </div>
                     )}
 

@@ -72,6 +72,8 @@ public class OrderService {
                 .orderCode(generateOrderCode())
                 .customerName(request.getCustomerName().trim())
                 .customerEmail(request.getCustomerEmail().trim())
+                .customerPhone(normalizeOptionalText(request.getCustomerPhone()))
+                .shippingAddress(normalizeOptionalText(request.getShippingAddress()))
                 .productSummary(pricing.getProductSummary())
                 .totalAmount(pricing.getPrePointsTotal())
                 .paymentMethod(request.getPaymentMethod().trim().toUpperCase(Locale.ROOT))
@@ -217,6 +219,8 @@ public class OrderService {
         return new OrderTrackingResponse(
                 order.getOrderCode(),
                 maskEmail(order.getCustomerEmail()),
+                order.getCustomerPhone(),
+                order.getShippingAddress(),
                 order.getProductSummary(),
                 order.getTotalAmount(),
                 order.getPaymentMethod(),
@@ -422,5 +426,13 @@ public class OrderService {
             return null;
         }
         return normalizeTrackingStatus(status);
+    }
+
+    private String normalizeOptionalText(String value) {
+        if (value == null) {
+            return null;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? null : trimmed;
     }
 }

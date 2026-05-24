@@ -104,6 +104,10 @@ export default function ThanhToan() {
   }, [showQR, pendingPaymentOrderCode, pendingPaymentEmail, navigate, clearCart, user, refreshProfile]);
   
   const formatVND = (value) => value.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
+  const buildShippingAddress = (profileUser) => {
+    if (!profileUser) return "";
+    return [profileUser.address, profileUser.city, profileUser.postalCode].filter(Boolean).join(", ");
+  };
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
   const shipping = subtotal >= 399000 || subtotal === 0 ? 0 : 30000;
   const tax = 0;
@@ -148,8 +152,10 @@ export default function ThanhToan() {
   const submitOrder = async (email) => {
     try {
       const savedOrder = await createOrder({
-        customerName: user?.name || "Khách hàng mới",
+        customerName: user?.fullName || user?.name || "Khách hàng mới",
         customerEmail: email,
+        customerPhone: user?.phoneNumber || "",
+        shippingAddress: buildShippingAddress(user),
         items: cart.map(item => ({ productId: item.id, quantity: item.qty })),
         paymentMethod: selectedMethod.toUpperCase(),
         pointsToRedeem: loyaltyEnabled ? pointsToUse : 0,

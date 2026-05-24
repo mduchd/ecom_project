@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { toast } from "../components/Toast.jsx";
 import api from "../services/productService.js";
 import { getMyProfile } from "../services/userService.js";
@@ -22,6 +22,19 @@ const readStoredUser = () => {
   }
 };
 
+const readStoredCart = () => {
+  const savedCart = localStorage.getItem("snapcart_cart");
+  if (!savedCart) {
+    return [];
+  }
+  try {
+    return JSON.parse(savedCart);
+  } catch (error) {
+    console.error("Không thể đọc dữ liệu giỏ hàng", error);
+    return [];
+  }
+};
+
 const applyProfileToUser = (baseUser, profile) => {
   if (!baseUser || !profile) {
     return baseUser;
@@ -32,6 +45,15 @@ const applyProfileToUser = (baseUser, profile) => {
   return {
     ...baseUser,
     name: profile.fullName || profile.username || baseUser.name,
+    fullName: profile.fullName || baseUser.fullName || profile.username || baseUser.name,
+    username: profile.username || baseUser.username,
+    email: profile.email || baseUser.email,
+    avatar: profile.avatar || baseUser.avatar,
+    phoneNumber: profile.phoneNumber || "",
+    address: profile.address || "",
+    city: profile.city || "",
+    postalCode: profile.postalCode || "",
+    provider: profile.provider || baseUser.provider || "local",
     points: Number(pointsBalance) || 0,
     pointsLocked: Boolean(pointsLocked),
   };
@@ -42,26 +64,12 @@ export function useAuth() {
 }
 
 export function AuthProvider({ children }) {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState(() => readStoredUser());
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => readStoredCart());
 
-  // Khôi phục phiên đăng nhập và làm mới số điểm từ server
+  // Làm mới số điểm và hồ sơ từ server khi có token
   useEffect(() => {
-    const storedUser = readStoredUser();
-    if (storedUser) {
-      setUser(storedUser);
-    }
-
-    const savedCart = localStorage.getItem("snapcart_cart");
-    if (savedCart) {
-      try {
-        setCart(JSON.parse(savedCart));
-      } catch (e) {
-        console.error("Không thể đọc dữ liệu giỏ hàng", e);
-      }
-    }
-
     const token = localStorage.getItem("snapcart_token");
     if (!token) {
       return;
@@ -70,7 +78,7 @@ export function AuthProvider({ children }) {
     getMyProfile()
       .then((profile) => {
         setUser((prev) => {
-          const baseUser = prev || storedUser || readStoredUser();
+          const baseUser = prev || readStoredUser();
           if (!baseUser) {
             return prev;
           }
@@ -184,7 +192,7 @@ export function AuthProvider({ children }) {
     toast.success("Đã đăng xuất");
   };
 
-  const refreshProfile = async () => {
+  const refreshProfile = useCallback(async () => {
     if (!localStorage.getItem("snapcart_token")) {
       return null;
     }
@@ -204,7 +212,7 @@ export function AuthProvider({ children }) {
       console.error("Không thể làm mới hồ sơ người dùng", error);
       return null;
     }
-  };
+  }, []);
 
   const openAuthModal = () => setIsAuthModalOpen(true);
   const closeAuthModal = () => setIsAuthModalOpen(false);

@@ -14,6 +14,8 @@ public class OrderResponse {
     private String orderCode;
     private String customerName;
     private String customerEmail;
+    private String customerPhone;
+    private String shippingAddress;
     private String productSummary;
     private BigDecimal totalAmount;
     private String paymentMethod;
@@ -33,6 +35,8 @@ public class OrderResponse {
                 order.getOrderCode(),
                 order.getCustomerName(),
                 order.getCustomerEmail(),
+                order.getCustomerPhone(),
+                order.getShippingAddress(),
                 order.getProductSummary(),
                 order.getTotalAmount(),
                 order.getPaymentMethod(),

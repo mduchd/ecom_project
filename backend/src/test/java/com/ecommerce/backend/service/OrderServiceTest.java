@@ -90,6 +90,36 @@ class OrderServiceTest {
     }
 
     @Test
+    void createOrderPersistsContactAndShipping() {
+        mockProduct(1L, "Laptop Asus", new BigDecimal("1500"), 10);
+        mockPersistedOrderSave();
+
+        CreateOrderRequest request = buildRequest("COD", 0);
+        request.setCustomerPhone("0901234567");
+        request.setShippingAddress("123 Nguyen Trai, Ho Chi Minh, 700000");
+
+        Order created = orderService.create(request, null);
+
+        assertEquals("0901234567", created.getCustomerPhone());
+        assertEquals("123 Nguyen Trai, Ho Chi Minh, 700000", created.getShippingAddress());
+    }
+
+    @Test
+    void createOrderNormalizesBlankContactAndShippingToNull() {
+        mockProduct(1L, "Laptop Asus", new BigDecimal("1500"), 10);
+        mockPersistedOrderSave();
+
+        CreateOrderRequest request = buildRequest("COD", 0);
+        request.setCustomerPhone("   ");
+        request.setShippingAddress("");
+
+        Order created = orderService.create(request, null);
+
+        assertEquals(null, created.getCustomerPhone());
+        assertEquals(null, created.getShippingAddress());
+    }
+
+    @Test
     void createOrderRedeemsPointsAfterOrderPersisted() {
         mockProduct(1L, "Laptop Asus", new BigDecimal("200000"), 10);
         mockPersistedOrderSave();
@@ -138,6 +168,8 @@ class OrderServiceTest {
                 .orderCode("SPC2605241830123")
                 .customerName("Nguyen Van A")
                 .customerEmail("buyer@example.com")
+                .customerPhone("0901234567")
+                .shippingAddress("123 Nguyen Trai, Ho Chi Minh")
                 .productSummary("Laptop Asus x1")
                 .totalAmount(new BigDecimal("1500000"))
                 .paymentMethod("COD")
@@ -152,6 +184,8 @@ class OrderServiceTest {
 
         assertEquals("SPC2605241830123", response.getOrderCode());
         assertEquals("b***r@example.com", response.getCustomerEmail());
+        assertEquals("0901234567", response.getCustomerPhone());
+        assertEquals("123 Nguyen Trai, Ho Chi Minh", response.getShippingAddress());
         assertEquals("SHIPPING", response.getStatus());
         assertEquals("Đang giao", response.getStatusLabel());
         assertEquals("CURRENT", response.getSteps().get(2).getState());

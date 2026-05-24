@@ -24,3 +24,9 @@ Thumbs.db
 
 # Agent implementation plans (local only)
 docs/superpowers/plans/
+
+# Frontend contract tests (local verification)
+frontend/src/tests/
+
+# Backend unit tests (local verification)
+backend/src/test/

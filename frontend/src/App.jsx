@@ -20,6 +20,17 @@ import AdminUsersPage from './pages/AdminUsersPage';
 import AboutUs from './pages/AboutUs'
 import FAQ from './pages/FAQ'
 import Contact from './pages/Contact'
+import AccountCenter from './pages/AccountCenter'
+
+function ProtectedRoute({ children }) {
+  const { user } = useAuth();
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  return children;
+}
 
 function AdminRoute({ children }) {
   const { user } = useAuth();
@@ -100,6 +111,7 @@ function AppContent() {
           <Route path="/login" element={<Auth />} />
           <Route path="/checkout" element={<ThanhToan />} />
           <Route path="/track-order" element={<OrderTracking />} />
+          <Route path="/account" element={<ProtectedRoute><AccountCenter /></ProtectedRoute>} />
           <Route path="/admin/products/new" element={<AdminRoute><AdminShell><AdminProductForm /></AdminShell></AdminRoute>} />
           <Route path="/admin/products/edit/:id" element={<AdminRoute><AdminShell><AdminProductForm /></AdminShell></AdminRoute>} />
           <Route path="/admin/dashboard" element={<AdminRoute><AdminShell><AdminDashboard /></AdminShell></AdminRoute>} />
