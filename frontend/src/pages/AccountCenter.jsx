@@ -10,10 +10,12 @@ import {
   FaShieldAlt,
   FaStar,
   FaSyncAlt,
+  FaUpload,
   FaUser,
 } from "react-icons/fa";
 import { toast } from "../components/Toast.jsx";
 import { useAuth } from "../context/AuthContext.jsx";
+import { uploadFile } from "../services/productService.js";
 import {
   changeMyPassword,
   getMyOrders,
@@ -21,6 +23,12 @@ import {
   getMyProfile,
   updateMyProfile,
 } from "../services/userService.js";
+import {
+  UPLOAD_ACCEPTED_EXTENSIONS,
+  UPLOAD_HINT,
+  getApiErrorMessage,
+  validateImageFile,
+} from "../utils/uploadUtils.js";
 
 const tabs = [
   { key: "overview", label: "Tổng quan", icon: FaClipboardList },
@@ -51,6 +59,7 @@ export default function AccountCenter() {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [savingProfile, setSavingProfile] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [passwordForm, setPasswordForm] = useState({ currentPassword: "", newPassword: "", confirmPassword: "" });
 
@@ -130,28 +139,59 @@ export default function AccountCenter() {
     return { delivered, totalSpend };
   }, [orders]);
 
-  const handleProfileSubmit = async (event) => {
+  const buildProfilePayload = useCallback((data) => ({
+    fullName: (data.fullName || user?.name || "").trim(),
+    avatar: (data.avatar || "").trim(),
+    phoneNumber: (data.phoneNumber || "").trim(),
+    address: (data.address || "").trim(),
+    city: (data.city || "").trim(),
+    postalCode: (data.postalCode || "").trim(),
+  }), [user?.name]);
+
+  const handleProfileSubmit = async (event, { requireFullName = true } = {}) => {
     event.preventDefault();
-    if (!profile.fullName.trim()) {
+    if (requireFullName && !profile.fullName.trim()) {
       toast.warning("Vui lòng nhập họ tên.");
       return;
     }
     try {
       setSavingProfile(true);
-      await updateMyProfile({
-        fullName: profile.fullName.trim(),
-        avatar: profile.avatar.trim(),
-        phoneNumber: profile.phoneNumber.trim(),
-        address: profile.address.trim(),
-        city: profile.city.trim(),
-        postalCode: profile.postalCode.trim(),
-      });
+      await updateMyProfile(buildProfilePayload(profile));
       await loadAccount();
       toast.success("Đã cập nhật thông tin tài khoản.");
     } catch (error) {
       toast.error(error.response?.data?.message || "Không cập nhật được hồ sơ.");
     } finally {
       setSavingProfile(false);
+    }
+  };
+
+  const handleAvatarUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+
+    const validationError = validateImageFile(file);
+    if (validationError) {
+      toast.warning(validationError);
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      setUploadingAvatar(true);
+      const res = await uploadFile(file);
+      const nextProfile = { ...profile, avatar: res.url };
+      await updateMyProfile(buildProfilePayload(nextProfile));
+      setProfile(nextProfile);
+      await refreshProfile();
+      toast.success("Đã cập nhật ảnh đại diện.");
+    } catch (error) {
+      toast.error(getApiErrorMessage(error, "Không tải lên được ảnh đại diện."));
+    } finally {
+      setUploadingAvatar(false);
+      event.target.value = "";
     }
   };
 
@@ -262,13 +302,14 @@ export default function AccountCenter() {
                 )}
 
                 {activeTab === "profile" && (
-                  <ProfileForm
-                    title="Hồ sơ"
+                  <ProfileTab
                     profile={profile}
+                    user={user}
                     saving={savingProfile}
+                    uploadingAvatar={uploadingAvatar}
                     onSubmit={handleProfileSubmit}
                     onChange={updateProfileField}
-                    fields={["fullName", "avatar", "phoneNumber"]}
+                    onAvatarUpload={handleAvatarUpload}
                   />
                 )}
 
@@ -277,7 +318,7 @@ export default function AccountCenter() {
                     title="Địa chỉ giao hàng"
                     profile={profile}
                     saving={savingProfile}
-                    onSubmit={handleProfileSubmit}
+                    onSubmit={(event) => handleProfileSubmit(event, { requireFullName: false })}
                     onChange={updateProfileField}
                     fields={["address", "city", "postalCode"]}
                   />
@@ -406,10 +447,73 @@ function Field({ label, value, onChange, type = "text" }) {
   );
 }
 
+function ReadOnlyField({ label, value, hint }) {
+  return (
+    <div className="block">
+      <span className="text-xs font-black text-gray-600">{label}</span>
+      <p className="mt-2 w-full rounded-xl border border-gray-100 bg-gray-50 px-4 py-3 text-sm font-semibold text-gray-700">
+        {value}
+      </p>
+      {hint && <p className="mt-1 text-xs text-gray-400">{hint}</p>}
+    </div>
+  );
+}
+
+function ProfileTab({ profile, user, saving, uploadingAvatar, onChange, onSubmit, onAvatarUpload }) {
+  const provider = (user?.provider || "local").toLowerCase();
+  const avatarPreview = profile.avatar
+    || user?.avatar
+    || `https://ui-avatars.com/api/?name=${encodeURIComponent(profile.fullName || user?.name || "User")}&background=0D8ABC&color=fff`;
+
+  return (
+    <Panel title="Hồ sơ">
+      <form onSubmit={onSubmit} className="grid gap-4 max-w-2xl">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+          <img
+            src={avatarPreview}
+            alt="Ảnh đại diện"
+            className="w-24 h-24 rounded-full object-cover border-2 border-gray-100 shadow-sm"
+          />
+          <div>
+            <label className={`inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-black text-gray-700 hover:bg-gray-50 ${uploadingAvatar ? "opacity-60 pointer-events-none" : "cursor-pointer"}`}>
+              <FaUpload />
+              {uploadingAvatar ? "Đang tải lên..." : "Chọn ảnh đại diện"}
+              <input
+                type="file"
+                accept={UPLOAD_ACCEPTED_EXTENSIONS}
+                className="hidden"
+                disabled={uploadingAvatar}
+                onChange={onAvatarUpload}
+              />
+            </label>
+            <p className="text-xs text-gray-400 mt-2">{UPLOAD_HINT}</p>
+          </div>
+        </div>
+
+        <ReadOnlyField
+          label="Email"
+          value={user?.email || "—"}
+          hint="Email dùng để đăng nhập, không thể thay đổi tại đây."
+        />
+        <ReadOnlyField
+          label="Phương thức đăng nhập"
+          value={provider === "google" ? "Google" : "Email và mật khẩu"}
+        />
+
+        <Field label="Họ tên" value={profile.fullName} onChange={(value) => onChange("fullName", value)} />
+        <Field label="Số điện thoại" value={profile.phoneNumber} onChange={(value) => onChange("phoneNumber", value)} />
+
+        <button disabled={saving || uploadingAvatar} className="inline-flex w-fit items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-black text-white hover:bg-blue-700 disabled:opacity-60">
+          <FaSave /> {saving ? "Đang lưu..." : "Lưu thay đổi"}
+        </button>
+      </form>
+    </Panel>
+  );
+}
+
 function ProfileForm({ title, profile, fields, onChange, onSubmit, saving }) {
   const labels = {
     fullName: "Họ tên",
-    avatar: "URL ảnh đại diện",
     phoneNumber: "Số điện thoại",
     address: "Địa chỉ chi tiết",
     city: "Tỉnh / thành phố",
