@@ -12,15 +12,17 @@ import java.util.List;
 @Getter
 @Setter
 public class CreateOrderRequest {
-    @NotBlank
+    @NotBlank(message = "Vui lòng nhập họ và tên")
     private String customerName;
 
     @NotBlank
     @Email
     private String customerEmail;
 
+    @NotBlank(message = "Vui lòng nhập số điện thoại")
     private String customerPhone;
 
+    @NotBlank(message = "Vui lòng nhập địa chỉ giao hàng")
     private String shippingAddress;
 
     @Valid
