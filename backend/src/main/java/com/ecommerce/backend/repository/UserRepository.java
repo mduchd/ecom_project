@@ -41,8 +41,21 @@ public interface UserRepository extends JpaRepository<User, Long> {
                 (:role = 'ADMIN' AND EXISTS (SELECT 1 FROM u.roles r WHERE r.name = com.ecommerce.backend.entity.ERole.ROLE_ADMIN)) OR
                 (:role = 'USER' AND NOT EXISTS (SELECT 1 FROM u.roles r WHERE r.name = com.ecommerce.backend.entity.ERole.ROLE_ADMIN))
             )
+            AND (
+                :tier IS NULL OR :tier = '' OR :tier = 'ALL' OR
+                (:tier = 'BRONZE' AND COALESCE(u.deliveredSpend, 0) < :silverMin) OR
+                (:tier = 'SILVER' AND COALESCE(u.deliveredSpend, 0) >= :silverMin AND COALESCE(u.deliveredSpend, 0) < :goldMin) OR
+                (:tier = 'GOLD' AND COALESCE(u.deliveredSpend, 0) >= :goldMin AND COALESCE(u.deliveredSpend, 0) < :diamondMin) OR
+                (:tier = 'DIAMOND' AND COALESCE(u.deliveredSpend, 0) >= :diamondMin)
+            )
             """)
-    Page<User> findAdminUsers(@Param("search") String search, @Param("role") String role, Pageable pageable);
+    Page<User> findAdminUsers(@Param("search") String search,
+                              @Param("role") String role,
+                              @Param("tier") String tier,
+                              @Param("silverMin") java.math.BigDecimal silverMin,
+                              @Param("goldMin") java.math.BigDecimal goldMin,
+                              @Param("diamondMin") java.math.BigDecimal diamondMin,
+                              Pageable pageable);
 
     @Query("SELECT COUNT(u) FROM User u WHERE u.enabled = true")
     long countEnabledUsers();

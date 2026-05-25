@@ -33,6 +33,7 @@ class UserServiceTest {
     private OrderRepository orderRepository;
     private PointTransactionRepository pointTransactionRepository;
     private PasswordEncoder passwordEncoder;
+    private MemberTierService memberTierService;
     private UserService userService;
 
     @BeforeEach
@@ -41,7 +42,8 @@ class UserServiceTest {
         orderRepository = Mockito.mock(OrderRepository.class);
         pointTransactionRepository = Mockito.mock(PointTransactionRepository.class);
         passwordEncoder = Mockito.mock(PasswordEncoder.class);
-        userService = new UserService(userRepository, orderRepository, pointTransactionRepository, passwordEncoder);
+        memberTierService = Mockito.mock(MemberTierService.class);
+        userService = new UserService(userRepository, orderRepository, pointTransactionRepository, passwordEncoder, memberTierService);
     }
 
     @Test

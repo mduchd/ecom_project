@@ -23,4 +23,10 @@ public class UserProfileResponse {
     private List<String> roles;
     private Integer pointsBalance;
     private boolean pointsLocked;
+    private String memberTier;
+    private String memberTierLabel;
+    private java.math.BigDecimal deliveredSpend;
+    private java.math.BigDecimal nextTierThreshold;
+    private String nextTierLabel;
+    private Double pointsMultiplier;
 }

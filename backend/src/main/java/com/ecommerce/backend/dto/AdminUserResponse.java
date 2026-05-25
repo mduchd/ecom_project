@@ -18,4 +18,7 @@ public class AdminUserResponse {
     private boolean pointsLocked;
     private boolean enabled;
     private String provider;
+    private String memberTier;
+    private String memberTierLabel;
+    private java.math.BigDecimal deliveredSpend;
 }

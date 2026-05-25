@@ -14,6 +14,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class LoyaltyServiceTest {
+    private MemberTierService memberTierService;
+
+    @org.junit.jupiter.api.BeforeEach
+    void setUp() {
+        memberTierService = org.mockito.Mockito.mock(MemberTierService.class);
+        org.mockito.Mockito.when(memberTierService.resolveTier(org.mockito.Mockito.any()))
+                .thenReturn(com.ecommerce.backend.entity.MemberTier.BRONZE);
+    }
+
     @Test
     void loyaltyEntitiesHaveExpectedDefaults() {
         User user = User.builder()
@@ -46,7 +55,7 @@ class LoyaltyServiceTest {
         var userRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.UserRepository.class);
         var transactionRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.PointTransactionRepository.class);
         var settingRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.LoyaltySettingRepository.class);
-        LoyaltyService service = new LoyaltyService(userRepository, transactionRepository, settingRepository);
+        LoyaltyService service = new LoyaltyService(userRepository, transactionRepository, settingRepository, memberTierService);
 
         User user = User.builder().id(1L).username("customer").email("customer@example.com").pointsBalance(5).build();
 
@@ -65,7 +74,7 @@ class LoyaltyServiceTest {
         var userRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.UserRepository.class);
         var transactionRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.PointTransactionRepository.class);
         var settingRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.LoyaltySettingRepository.class);
-        LoyaltyService service = new LoyaltyService(userRepository, transactionRepository, settingRepository);
+        LoyaltyService service = new LoyaltyService(userRepository, transactionRepository, settingRepository, memberTierService);
 
         User user = User.builder().id(1L).username("customer").email("customer@example.com").pointsBalance(100).build();
 
@@ -84,7 +93,7 @@ class LoyaltyServiceTest {
         var userRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.UserRepository.class);
         var transactionRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.PointTransactionRepository.class);
         var settingRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.LoyaltySettingRepository.class);
-        LoyaltyService service = new LoyaltyService(userRepository, transactionRepository, settingRepository);
+        LoyaltyService service = new LoyaltyService(userRepository, transactionRepository, settingRepository, memberTierService);
 
         User user = User.builder().id(1L).username("customer").email("customer@example.com").pointsBalance(100).build();
         org.mockito.Mockito.when(settingRepository.findById(1L)).thenReturn(java.util.Optional.of(LoyaltySetting.defaultSetting()));
@@ -103,7 +112,7 @@ class LoyaltyServiceTest {
         var userRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.UserRepository.class);
         var transactionRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.PointTransactionRepository.class);
         var settingRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.LoyaltySettingRepository.class);
-        LoyaltyService service = new LoyaltyService(userRepository, transactionRepository, settingRepository);
+        LoyaltyService service = new LoyaltyService(userRepository, transactionRepository, settingRepository, memberTierService);
 
         User user = User.builder().id(1L).username("customer").email("customer@example.com").pointsBalance(0).build();
         Order order = Order.builder()
@@ -123,5 +132,32 @@ class LoyaltyServiceTest {
         assertEquals(50, earned);
         assertEquals(50, order.getPointsEarned());
         assertEquals(50, user.getPointsBalance());
+    }
+
+    @Test
+    void creditEarnedPointsAppliesTierMultiplier() {
+        var userRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.UserRepository.class);
+        var transactionRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.PointTransactionRepository.class);
+        var settingRepository = org.mockito.Mockito.mock(com.ecommerce.backend.repository.LoyaltySettingRepository.class);
+        LoyaltyService service = new LoyaltyService(userRepository, transactionRepository, settingRepository, memberTierService);
+
+        User user = User.builder().id(1L).username("customer").email("customer@example.com").pointsBalance(0).build();
+        Order order = Order.builder()
+                .id(10L)
+                .orderCode("SPC260524002")
+                .user(user)
+                .totalAmount(new BigDecimal("500000.00"))
+                .pointsDiscount(BigDecimal.ZERO)
+                .pointsCredited(false)
+                .build();
+
+        org.mockito.Mockito.when(settingRepository.findById(1L)).thenReturn(java.util.Optional.of(com.ecommerce.backend.entity.LoyaltySetting.defaultSetting()));
+        org.mockito.Mockito.when(memberTierService.resolveTier(user)).thenReturn(com.ecommerce.backend.entity.MemberTier.GOLD);
+        org.mockito.Mockito.when(transactionRepository.save(org.mockito.Mockito.any())).thenAnswer(invocation -> invocation.getArgument(0));
+
+        int earned = service.creditEarnedPoints(order);
+
+        assertEquals(62, earned);
+        assertEquals(62, user.getPointsBalance());
     }
 }

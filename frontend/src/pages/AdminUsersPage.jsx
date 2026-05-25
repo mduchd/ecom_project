@@ -32,9 +32,11 @@ import AdminPagination from "../components/AdminPagination.jsx";
 
 import { toast } from "../components/Toast.jsx";
 
-import { getAdminUsers, getAdminUserStats, setUserEnabled } from "../services/adminUserService.js";
+import { getAdminUsers, getAdminUserStats, setUserEnabled, syncAllDeliveredSpend, syncUserDeliveredSpend } from "../services/adminUserService.js";
 
 import { khoaDiemKhach } from "../services/diemTichLuyService.js";
+
+import { MemberTierBadge, formatSpend, TIER_FILTER_OPTIONS } from "../utils/memberTier.jsx";
 
 import { ADMIN_PAGE_SIZE, mapPagedResponse } from "../utils/pagination.js";
 
@@ -92,11 +94,15 @@ export default function AdminUsersPage() {
 
   const [roleFilter, setRoleFilter] = useState("ALL");
 
+  const [tierFilter, setTierFilter] = useState("ALL");
+
   const [page, setPage] = useState(1);
 
   const [pageSize, setPageSize] = useState(ADMIN_PAGE_SIZE);
 
   const [updatingId, setUpdatingId] = useState(null);
+
+  const [syncingAll, setSyncingAll] = useState(false);
 
 
 
@@ -124,7 +130,7 @@ export default function AdminUsersPage() {
 
     try {
 
-      const data = await getAdminUsers({ page, size: pageSize, search: debouncedSearch, role: roleFilter });
+      const data = await getAdminUsers({ page, size: pageSize, search: debouncedSearch, role: roleFilter, tier: tierFilter });
 
       const mapped = mapPagedResponse(data, page);
 
@@ -150,7 +156,7 @@ export default function AdminUsersPage() {
 
     }
 
-  }, [page, pageSize, debouncedSearch, roleFilter]);
+  }, [page, pageSize, debouncedSearch, roleFilter, tierFilter]);
 
 
 
@@ -184,7 +190,7 @@ export default function AdminUsersPage() {
 
     setPage(1);
 
-  }, [debouncedSearch, roleFilter, pageSize]);
+  }, [debouncedSearch, roleFilter, tierFilter, pageSize]);
 
 
 
@@ -266,6 +272,58 @@ export default function AdminUsersPage() {
 
 
 
+  const handleSyncAllDeliveredSpend = async () => {
+
+    try {
+
+      setSyncingAll(true);
+
+      const result = await syncAllDeliveredSpend();
+
+      await refreshAll();
+
+      toast.success(`Đã đồng bộ chi tiêu cho ${result.usersUpdated} người dùng (${result.ordersUpdated} đơn).`);
+
+    } catch (error) {
+
+      toast.error(error.response?.data?.message || "Không thể đồng bộ chi tiêu.");
+
+    } finally {
+
+      setSyncingAll(false);
+
+    }
+
+  };
+
+
+
+  const handleSyncUserDeliveredSpend = async (user) => {
+
+    try {
+
+      setUpdatingId(user.id);
+
+      const updated = await syncUserDeliveredSpend(user.id);
+
+      setUsers((current) => current.map((item) => (item.id === user.id ? updated : item)));
+
+      toast.success(`Đã đồng bộ chi tiêu cho ${updated.fullName || updated.username}.`);
+
+    } catch (error) {
+
+      toast.error(error.response?.data?.message || "Không thể đồng bộ chi tiêu người dùng.");
+
+    } finally {
+
+      setUpdatingId(null);
+
+    }
+
+  };
+
+
+
   return (
 
     <main className="max-w-[1280px] mx-auto px-4 sm:px-6 py-8 space-y-6">
@@ -300,11 +358,31 @@ export default function AdminUsersPage() {
 
           <p className="text-sm text-gray-400 mt-1 text-vi">
 
-            Theo dõi tài khoản, vai trò và trạng thái điểm tích lũy.
+            Theo dõi tài khoản, vai trò, hạng hội viên và điểm tích lũy.
 
           </p>
 
         </div>
+
+        <div className="flex flex-wrap gap-2">
+
+        <button
+
+          type="button"
+
+          onClick={handleSyncAllDeliveredSpend}
+
+          disabled={loading || syncingAll}
+
+          className="inline-flex items-center gap-2 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-100 disabled:opacity-60"
+
+        >
+
+          <FaSync className={syncingAll ? "animate-spin" : ""} />
+
+          Đồng bộ chi tiêu
+
+        </button>
 
         <button
 
@@ -312,7 +390,7 @@ export default function AdminUsersPage() {
 
           onClick={refreshAll}
 
-          disabled={loading}
+          disabled={loading || syncingAll}
 
           className="inline-flex items-center gap-2 rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm font-bold text-gray-700 hover:bg-gray-50 disabled:opacity-60"
 
@@ -323,6 +401,8 @@ export default function AdminUsersPage() {
           Làm mới
 
         </button>
+
+        </div>
 
       </div>
 
@@ -416,6 +496,26 @@ export default function AdminUsersPage() {
 
             </select>
 
+            <select
+
+              value={tierFilter}
+
+              onChange={(event) => setTierFilter(event.target.value)}
+
+              className="rounded-xl bg-gray-50 px-4 py-3 text-sm font-bold text-gray-700 border-none focus:ring-2 focus:ring-gray-200 text-vi"
+
+              aria-label="Lọc theo hạng hội viên"
+
+            >
+
+              {TIER_FILTER_OPTIONS.map((option) => (
+
+                <option key={option.value} value={option.value}>{option.label}</option>
+
+              ))}
+
+            </select>
+
           </div>
 
         </div>
@@ -436,6 +536,8 @@ export default function AdminUsersPage() {
 
                 <th className="px-4 py-4">Vai trò</th>
 
+                <th className="px-4 py-4">Hạng</th>
+
                 <th className="px-4 py-4 text-right">Điểm</th>
 
                 <th className="px-4 py-4 text-center">Trạng thái</th>
@@ -452,7 +554,7 @@ export default function AdminUsersPage() {
 
                 <tr>
 
-                  <td colSpan={6} className="px-5 py-12 text-center text-gray-400">
+                  <td colSpan={7} className="px-5 py-12 text-center text-gray-400">
 
                     <FaSpinner className="mx-auto mb-2 animate-spin" />
 
@@ -470,7 +572,7 @@ export default function AdminUsersPage() {
 
                 <tr>
 
-                  <td colSpan={6} className="px-5 py-12 text-center text-gray-400 text-vi">
+                  <td colSpan={7} className="px-5 py-12 text-center text-gray-400 text-vi">
 
                     Không tìm thấy người dùng phù hợp.
 
@@ -524,6 +626,14 @@ export default function AdminUsersPage() {
 
                   </td>
 
+                  <td className="px-4 py-4">
+
+                    <MemberTierBadge tierKey={user.memberTier} tierLabel={user.memberTierLabel} shiny={false} showIcon={false} />
+
+                    <p className="mt-1 text-[10px] font-bold text-gray-400">{formatSpend(user.deliveredSpend)}</p>
+
+                  </td>
+
                   <td className="px-4 py-4 text-right">
 
                     <p className="font-black text-gray-900">{formatNumber(user.pointsBalance)}</p>
@@ -553,6 +663,28 @@ export default function AdminUsersPage() {
                   <td className="px-5 py-4">
 
                     <div className="flex justify-end gap-2">
+
+                      {!isAdminUser(user) && (
+
+                        <button
+
+                          type="button"
+
+                          onClick={() => handleSyncUserDeliveredSpend(user)}
+
+                          disabled={updatingId === user.id}
+
+                          className="h-8 w-8 rounded-lg flex items-center justify-center transition-all bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white"
+
+                          title="Đồng bộ chi tiêu đã giao"
+
+                        >
+
+                          <FaSync size={12} className={updatingId === user.id ? "animate-spin" : ""} />
+
+                        </button>
+
+                      )}
 
                       {!isAdminUser(user) && (
 

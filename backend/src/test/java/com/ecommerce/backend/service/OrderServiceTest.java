@@ -30,6 +30,7 @@ class OrderServiceTest {
     private com.ecommerce.backend.repository.UserRepository userRepository;
     private ProductRepository productRepository;
     private LoyaltyService loyaltyService;
+    private MemberTierService memberTierService;
     private OrderService orderService;
     private Map<Long, Product> productsById;
 
@@ -39,6 +40,7 @@ class OrderServiceTest {
         userRepository = Mockito.mock(com.ecommerce.backend.repository.UserRepository.class);
         productRepository = Mockito.mock(ProductRepository.class);
         loyaltyService = Mockito.mock(LoyaltyService.class);
+        memberTierService = Mockito.mock(MemberTierService.class);
         productsById = new HashMap<>();
         when(productRepository.findAllById(Mockito.any())).thenAnswer(invocation -> {
             Iterable<Long> ids = invocation.getArgument(0);
@@ -47,7 +49,7 @@ class OrderServiceTest {
                     .filter(java.util.Objects::nonNull)
                     .toList();
         });
-        orderService = new OrderService(orderRepository, userRepository, productRepository, loyaltyService);
+        orderService = new OrderService(orderRepository, userRepository, productRepository, loyaltyService, memberTierService);
     }
 
     private CreateOrderRequest buildRequest(String paymentMethod, int pointsToRedeem) {
@@ -96,6 +98,7 @@ class OrderServiceTest {
         assertEquals("a@example.com", created.getCustomerEmail());
         assertEquals("Laptop Asus x1", created.getProductSummary());
         assertEquals(new BigDecimal("31500"), created.getTotalAmount());
+        assertEquals(new BigDecimal("1500"), created.getMembershipSpendAmount());
         assertEquals("COD", created.getPaymentMethod());
         assertEquals("Chờ duyệt", created.getStatus());
         assertNotNull(created.getOrderCode());
@@ -312,6 +315,7 @@ class OrderServiceTest {
 
         assertEquals("Đã giao", updated.getStatus());
         verify(loyaltyService).creditEarnedPoints(order);
+        verify(memberTierService).creditDeliveredSpend(order);
     }
 
     @Test
@@ -332,6 +336,7 @@ class OrderServiceTest {
         orderService.updateStatus(1L, "Đã hủy");
 
         verify(loyaltyService).refundRedeemedPoints(order);
+        verify(memberTierService).reverseDeliveredSpend(order);
         verify(loyaltyService).reverseEarnedPoints(order);
     }
 

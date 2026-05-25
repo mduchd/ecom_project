@@ -51,15 +51,18 @@ public class OrderService {
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final LoyaltyService loyaltyService;
+    private final MemberTierService memberTierService;
 
     public OrderService(OrderRepository orderRepository,
                         UserRepository userRepository,
                         ProductRepository productRepository,
-                        LoyaltyService loyaltyService) {
+                        LoyaltyService loyaltyService,
+                        MemberTierService memberTierService) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.loyaltyService = loyaltyService;
+        this.memberTierService = memberTierService;
     }
 
     @Transactional
@@ -80,6 +83,7 @@ public class OrderService {
                 .shippingAddress(normalizeOptionalText(request.getShippingAddress()))
                 .productSummary(pricing.getProductSummary())
                 .totalAmount(pricing.getPrePointsTotal())
+                .membershipSpendAmount(pricing.getSubtotal())
                 .paymentMethod(request.getPaymentMethod().trim().toUpperCase(Locale.ROOT))
                 .status(STATUS_PENDING)
                 .user(user)
@@ -177,10 +181,12 @@ public class OrderService {
 
         if (!"DELIVERED".equals(oldStatus) && "DELIVERED".equals(newStatus)) {
             loyaltyService.creditEarnedPoints(existing);
+            memberTierService.creditDeliveredSpend(existing);
         }
         if ("CANCELED".equals(newStatus)) {
             loyaltyService.refundRedeemedPoints(existing);
             if ("DELIVERED".equals(oldStatus)) {
+                memberTierService.reverseDeliveredSpend(existing);
                 loyaltyService.reverseEarnedPoints(existing);
             }
         }
