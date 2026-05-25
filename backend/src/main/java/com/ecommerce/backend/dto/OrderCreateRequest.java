@@ -19,7 +19,7 @@ public class OrderCreateRequest {
 
     private String couponCode;
 
-    @NotBlank(message = "Vui lòng nhập họ tên người nhận")
+    @NotBlank(message = "Vui lòng nhập họ và tên người nhận")
     private String receiverName;
 
     @NotBlank(message = "Vui lòng nhập số điện thoại")

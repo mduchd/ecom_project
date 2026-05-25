@@ -14,7 +14,9 @@ import org.mockito.Mockito;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -29,6 +31,7 @@ class OrderServiceTest {
     private ProductRepository productRepository;
     private LoyaltyService loyaltyService;
     private OrderService orderService;
+    private Map<Long, Product> productsById;
 
     @BeforeEach
     void setUp() {
@@ -36,6 +39,14 @@ class OrderServiceTest {
         userRepository = Mockito.mock(com.ecommerce.backend.repository.UserRepository.class);
         productRepository = Mockito.mock(ProductRepository.class);
         loyaltyService = Mockito.mock(LoyaltyService.class);
+        productsById = new HashMap<>();
+        when(productRepository.findAllById(Mockito.any())).thenAnswer(invocation -> {
+            Iterable<Long> ids = invocation.getArgument(0);
+            return java.util.stream.StreamSupport.stream(ids.spliterator(), false)
+                    .map(productsById::get)
+                    .filter(java.util.Objects::nonNull)
+                    .toList();
+        });
         orderService = new OrderService(orderRepository, userRepository, productRepository, loyaltyService);
     }
 
@@ -59,6 +70,7 @@ class OrderServiceTest {
         product.setName(name);
         product.setPrice(price);
         product.setStockQuantity(stock);
+        productsById.put(id, product);
         when(productRepository.findById(id)).thenReturn(Optional.of(product));
     }
 
@@ -142,6 +154,45 @@ class OrderServiceTest {
         assertEquals(new BigDecimal("20000.00"), created.getPointsDiscount());
         assertEquals(new BigDecimal("210000.00"), created.getTotalAmount());
         verify(loyaltyService).redeemPoints(Mockito.eq(user), Mockito.argThat(order -> order.getId() != null), Mockito.eq(20), Mockito.eq(new BigDecimal("200000")));
+    }
+
+    @Test
+    void createOrderBatchLoadsProductsForAllItems() {
+        CreateOrderItemRequest firstItem = new CreateOrderItemRequest();
+        firstItem.setProductId(1L);
+        firstItem.setQuantity(2);
+
+        CreateOrderItemRequest secondItem = new CreateOrderItemRequest();
+        secondItem.setProductId(2L);
+        secondItem.setQuantity(1);
+
+        CreateOrderRequest request = buildRequest("COD", 0);
+        request.setItems(List.of(firstItem, secondItem));
+
+        Product firstProduct = new Product();
+        firstProduct.setId(1L);
+        firstProduct.setName("Laptop Asus");
+        firstProduct.setPrice(new BigDecimal("200000"));
+        firstProduct.setStockQuantity(10);
+
+        Product secondProduct = new Product();
+        secondProduct.setId(2L);
+        secondProduct.setName("Mouse Logitech");
+        secondProduct.setPrice(new BigDecimal("100000"));
+        secondProduct.setStockQuantity(5);
+
+        productsById.put(1L, firstProduct);
+        productsById.put(2L, secondProduct);
+        mockPersistedOrderSave();
+
+        Order created = orderService.create(request, null);
+
+        assertEquals("Laptop Asus x2, Mouse Logitech x1", created.getProductSummary());
+        assertEquals(new BigDecimal("500000"), created.getTotalAmount());
+        verify(productRepository).findAllById(Mockito.argThat(ids ->
+                java.util.stream.StreamSupport.stream(ids.spliterator(), false).toList().equals(List.of(1L, 2L))
+        ));
+        Mockito.verify(productRepository, Mockito.never()).findById(Mockito.anyLong());
     }
 
     @Test

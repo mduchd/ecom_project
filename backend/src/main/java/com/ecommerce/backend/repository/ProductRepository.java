@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>, ProductRepositoryCustom {
 
     // Tìm theo category
     List<Product> findByCategory(String category);
@@ -21,6 +21,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // Tìm sản phẩm còn hàng
     List<Product> findByStockQuantityGreaterThan(Integer quantity);
+
+    List<Product> findByStockQuantityGreaterThan(Integer quantity, Pageable pageable);
 
     // Tìm kiếm full-text theo tên hoặc mô tả hoặc thông số kỹ thuật (cho RAG)
     @Query("SELECT p FROM Product p WHERE " +
