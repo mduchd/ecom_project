@@ -26,8 +26,12 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 
@@ -237,13 +241,23 @@ public class OrderService {
             throw new IllegalArgumentException("Đơn hàng phải có ít nhất một sản phẩm.");
         }
 
+        Set<Long> productIds = new LinkedHashSet<>();
+        for (CreateOrderItemRequest item : items) {
+            productIds.add(item.getProductId());
+        }
+
+        Map<Long, Product> productsById = new HashMap<>();
+        productRepository.findAllById(productIds)
+                .forEach(product -> productsById.put(product.getId(), product));
+
         BigDecimal subtotal = BigDecimal.ZERO;
         StringBuilder summary = new StringBuilder();
 
         for (CreateOrderItemRequest item : items) {
-            Product product = productRepository.findById(item.getProductId())
-                    .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy sản phẩm với id: " + item.getProductId()));
-
+            Product product = productsById.get(item.getProductId());
+            if (product == null) {
+                throw new IllegalArgumentException("Không tìm thấy sản phẩm với id: " + item.getProductId());
+            }
             if (product.getStockQuantity() != null && product.getStockQuantity() < item.getQuantity()) {
                 throw new IllegalArgumentException("Sản phẩm '" + product.getName() + "' không đủ số lượng.");
             }

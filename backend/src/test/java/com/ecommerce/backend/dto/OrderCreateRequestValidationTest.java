@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OrderCreateRequestValidationTest {
@@ -33,5 +34,28 @@ class OrderCreateRequestValidationTest {
         assertTrue(invalidFields.contains("receiverName"));
         assertTrue(invalidFields.contains("phoneNumber"));
         assertTrue(invalidFields.contains("shippingAddress"));
+    }
+
+    @Test
+    void createOrderRequestAllowsBlankOptionalContactAndShippingFields() {
+        CreateOrderItemRequest item = new CreateOrderItemRequest();
+        item.setProductId(1L);
+        item.setQuantity(1);
+
+        CreateOrderRequest request = new CreateOrderRequest();
+        request.setCustomerName("Nguyen Van A");
+        request.setCustomerEmail("a@example.com");
+        request.setCustomerPhone(" ");
+        request.setShippingAddress("");
+        request.setItems(List.of(item));
+        request.setPaymentMethod("COD");
+
+        Set<String> invalidFields = validator.validate(request).stream()
+                .map(ConstraintViolation::getPropertyPath)
+                .map(Object::toString)
+                .collect(Collectors.toSet());
+
+        assertFalse(invalidFields.contains("customerPhone"));
+        assertFalse(invalidFields.contains("shippingAddress"));
     }
 }

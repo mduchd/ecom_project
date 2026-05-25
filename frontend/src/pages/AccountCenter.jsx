@@ -151,7 +151,7 @@ export default function AccountCenter() {
   const handleProfileSubmit = async (event, { requireFullName = true } = {}) => {
     event.preventDefault();
     if (requireFullName && !profile.fullName.trim()) {
-      toast.warning("Vui lòng nhập họ tên.");
+      toast.warning("Vui lòng nhập họ và tên.");
       return;
     }
     try {
@@ -293,7 +293,7 @@ export default function AccountCenter() {
                       <Stat title="Tổng chi tiêu" value={formatVND(stats.totalSpend)} />
                     </div>
                     <Panel title="Hồ sơ nhanh">
-                      <Info label="Họ tên" value={profile.fullName || user?.name} />
+                      <Info label="Họ và tên" value={profile.fullName || user?.name} />
                       <Info label="Email" value={user?.email} />
                       <Info label="Số điện thoại" value={profile.phoneNumber || "Chưa cập nhật"} />
                       <Info label="Địa chỉ" value={[profile.address, profile.city, profile.postalCode].filter(Boolean).join(", ") || "Chưa cập nhật"} />
@@ -500,7 +500,7 @@ function ProfileTab({ profile, user, saving, uploadingAvatar, onChange, onSubmit
           value={provider === "google" ? "Google" : "Email và mật khẩu"}
         />
 
-        <Field label="Họ tên" value={profile.fullName} onChange={(value) => onChange("fullName", value)} />
+        <Field label="Họ và tên" value={profile.fullName} onChange={(value) => onChange("fullName", value)} />
         <Field label="Số điện thoại" value={profile.phoneNumber} onChange={(value) => onChange("phoneNumber", value)} />
 
         <button disabled={saving || uploadingAvatar} className="inline-flex w-fit items-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-black text-white hover:bg-blue-700 disabled:opacity-60">
@@ -513,7 +513,7 @@ function ProfileTab({ profile, user, saving, uploadingAvatar, onChange, onSubmit
 
 function ProfileForm({ title, profile, fields, onChange, onSubmit, saving }) {
   const labels = {
-    fullName: "Họ tên",
+    fullName: "Họ và tên",
     phoneNumber: "Số điện thoại",
     address: "Địa chỉ chi tiết",
     city: "Tỉnh / thành phố",

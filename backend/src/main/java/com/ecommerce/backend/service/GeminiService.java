@@ -4,6 +4,7 @@ import com.ecommerce.backend.entity.Product;
 import com.ecommerce.backend.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -12,6 +13,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class GeminiService {
+    private static final int RELEVANT_PRODUCT_LIMIT = 5;
+    private static final int FALLBACK_PRODUCT_LIMIT = 3;
 
     @Value("${google.gemini.api.key}")
     private String apiKey;
@@ -41,28 +44,18 @@ public class GeminiService {
 
     // ── RAG: Lấy sản phẩm liên quan từ Database ────────────────────────────────
     private List<Product> retrieveRelevantProducts(String userMessage) {
-        Set<Product> results = new LinkedHashSet<>();
         List<String> keywords = extractKeywords(userMessage);
+        List<Product> results = keywords.isEmpty()
+                ? List.of()
+                : productRepository.searchInStockByKeywords(keywords, PageRequest.of(0, RELEVANT_PRODUCT_LIMIT));
 
-        for (String keyword : keywords) {
-            List<Product> found = productRepository.searchByKeyword(keyword);
-            // Chỉ lấy sản phẩm còn hàng
-            found.stream()
-                 .filter(p -> p.getStockQuantity() != null && p.getStockQuantity() > 0)
-                 .forEach(results::add);
-            if (results.size() >= 5) break; // Giới hạn tối đa 5 sản phẩm
-        }
-
-        // Nếu không tìm thấy sản phẩm cụ thể, trả về 3 sản phẩm nổi bật bất kỳ
         if (results.isEmpty()) {
-            productRepository.findByStockQuantityGreaterThan(0)
-                    .stream().limit(3).forEach(results::add);
+            return productRepository.findByStockQuantityGreaterThan(0, PageRequest.of(0, FALLBACK_PRODUCT_LIMIT));
         }
 
-        return new ArrayList<>(results);
+        return results;
     }
 
-    // ── Format thông tin sản phẩm thành chuỗi văn bản cho Prompt ──────────────
     private String formatProductsAsContext(List<Product> products) {
         if (products.isEmpty()) return "Hiện tại cửa hàng không có sản phẩm phù hợp.";
 

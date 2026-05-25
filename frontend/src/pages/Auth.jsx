@@ -262,7 +262,7 @@ function SignUpForm({ onSwitch, onSignupSuccess }) {
 
     const validate = () => {
         const e = {};
-        if (!name.trim()) e.name = "Vui lòng nhập họ tên.";
+        if (!name.trim()) e.name = "Vui lòng nhập họ và tên.";
         if (!email) e.email = "Vui lòng nhập email.";
         else if (!/\S+@\S+\.\S+/.test(email)) e.email = "Email không hợp lệ.";
         if (!password) e.password = "Vui lòng nhập mật khẩu.";
