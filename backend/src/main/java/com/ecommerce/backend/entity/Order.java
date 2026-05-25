@@ -43,6 +43,10 @@ public class Order {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal totalAmount;
 
+    @Column(nullable = false, precision = 12, scale = 2, columnDefinition = "DECIMAL(12,2) DEFAULT 0")
+    @Builder.Default
+    private BigDecimal membershipSpendAmount = BigDecimal.ZERO;
+
     @Column(nullable = false, length = 64)
     private String paymentMethod;
 
@@ -77,6 +81,14 @@ public class Order {
     @Column(nullable = false)
     @Builder.Default
     private boolean earnedPointsReversed = false;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean membershipSpendCredited = false;
+
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean membershipSpendReversed = false;
 
     @Column(length = 64)
     @JsonIgnore

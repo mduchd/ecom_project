@@ -29,6 +29,11 @@ import {
   getApiErrorMessage,
   validateImageFile,
 } from "../utils/uploadUtils.js";
+import {
+  MemberTierBadge,
+  MemberTierCard,
+  getTierProgress,
+} from "../utils/memberTier.jsx";
 
 const tabs = [
   { key: "overview", label: "Tổng quan", icon: FaClipboardList },
@@ -136,8 +141,14 @@ export default function AccountCenter() {
   const stats = useMemo(() => {
     const delivered = orders.filter((order) => String(order.status || "").toLowerCase().includes("giao")).length;
     const totalSpend = orders.reduce((sum, order) => sum + Number(order.totalAmount || 0), 0);
-    return { delivered, totalSpend };
-  }, [orders]);
+    const tierProgress = getTierProgress(
+      user?.deliveredSpend,
+      user?.memberTier,
+      user?.nextTierThreshold,
+      user?.nextTierLabel
+    );
+    return { delivered, totalSpend, tierProgress };
+  }, [orders, user?.deliveredSpend, user?.memberTier, user?.nextTierThreshold, user?.nextTierLabel]);
 
   const buildProfilePayload = useCallback((data) => ({
     fullName: (data.fullName || user?.name || "").trim(),
@@ -253,6 +264,9 @@ export default function AccountCenter() {
               <div className="min-w-0">
                 <p className="text-sm font-black text-gray-900 truncate">{user?.name}</p>
                 <p className="text-xs text-gray-400 truncate">{user?.email}</p>
+                <div className="mt-2">
+                  <MemberTierBadge tierKey={user?.memberTier} tierLabel={user?.memberTierLabel} />
+                </div>
               </div>
             </div>
             <nav className="pt-3 space-y-1">
@@ -286,6 +300,7 @@ export default function AccountCenter() {
               <>
                 {activeTab === "overview" && (
                   <div className="space-y-6">
+                    <MemberTierCard user={user} tierProgress={stats.tierProgress} />
                     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
                       <Stat title="Điểm hiện có" value={Number(user?.points || 0).toLocaleString("vi-VN")} />
                       <Stat title="Tổng đơn hàng" value={orders.length.toLocaleString("vi-VN")} />
@@ -353,6 +368,7 @@ export default function AccountCenter() {
 
                 {activeTab === "points" && (
                   <Panel title="Điểm tích lũy">
+                    <MemberTierCard user={user} tierProgress={stats.tierProgress} compact />
                     <div className="mb-4 rounded-xl bg-yellow-50 border border-yellow-100 p-4">
                       <p className="text-xs font-bold text-yellow-700">Số dư hiện tại</p>
                       <p className="text-2xl font-black text-yellow-700">{Number(user?.points || 0).toLocaleString("vi-VN")} điểm</p>

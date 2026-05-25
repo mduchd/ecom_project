@@ -56,6 +56,12 @@ const applyProfileToUser = (baseUser, profile) => {
     provider: profile.provider || baseUser.provider || "local",
     points: Number(pointsBalance) || 0,
     pointsLocked: Boolean(pointsLocked),
+    memberTier: profile.memberTier || baseUser.memberTier || "BRONZE",
+    memberTierLabel: profile.memberTierLabel || baseUser.memberTierLabel || "Đồng",
+    deliveredSpend: Number(profile.deliveredSpend ?? baseUser.deliveredSpend ?? 0),
+    nextTierThreshold: profile.nextTierThreshold ?? baseUser.nextTierThreshold ?? null,
+    nextTierLabel: profile.nextTierLabel ?? baseUser.nextTierLabel ?? null,
+    pointsMultiplier: Number(profile.pointsMultiplier ?? baseUser.pointsMultiplier ?? 1),
   };
 };
 

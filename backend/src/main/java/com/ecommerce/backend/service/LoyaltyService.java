@@ -2,6 +2,7 @@ package com.ecommerce.backend.service;
 
 import com.ecommerce.backend.dto.PagedResponse;
 import com.ecommerce.backend.entity.LoyaltySetting;
+import com.ecommerce.backend.entity.MemberTier;
 import com.ecommerce.backend.entity.Order;
 import com.ecommerce.backend.entity.PointTransaction;
 import com.ecommerce.backend.entity.PointTransactionType;
@@ -28,13 +29,16 @@ public class LoyaltyService {
     private final UserRepository userRepository;
     private final PointTransactionRepository transactionRepository;
     private final LoyaltySettingRepository settingRepository;
+    private final MemberTierService memberTierService;
 
     public LoyaltyService(UserRepository userRepository,
                           PointTransactionRepository transactionRepository,
-                          LoyaltySettingRepository settingRepository) {
+                          LoyaltySettingRepository settingRepository,
+                          MemberTierService memberTierService) {
         this.userRepository = userRepository;
         this.transactionRepository = transactionRepository;
         this.settingRepository = settingRepository;
+        this.memberTierService = memberTierService;
     }
 
     @Transactional(readOnly = true)
@@ -125,13 +129,18 @@ public class LoyaltyService {
         if (!setting.isEnabled()) {
             return 0;
         }
-        int points = resolveEarnBaseAmount(order)
+        int basePoints = resolveEarnBaseAmount(order)
                 .divide(setting.getEarnAmountPerPoint(), 0, RoundingMode.DOWN)
                 .intValue();
-        if (points <= 0) {
+        if (basePoints <= 0) {
             return 0;
         }
         User user = order.getUser();
+        MemberTier tier = memberTierService.resolveTier(user);
+        int points = (int) Math.floor(basePoints * tier.getPointsMultiplier());
+        if (points <= 0) {
+            return 0;
+        }
         user.setPointsBalance(currentBalance(user) + points);
         order.setPointsEarned(points);
         order.setPointsCredited(true);
@@ -140,7 +149,7 @@ public class LoyaltyService {
                 .order(order)
                 .type(PointTransactionType.EARN)
                 .points(points)
-                .reason("Cộng điểm từ đơn hàng " + order.getOrderCode())
+                .reason("Cộng điểm từ đơn hàng " + order.getOrderCode() + " (hạng " + tier.getLabel() + " x" + tier.getPointsMultiplier() + ")")
                 .expiresAt(LocalDateTime.now().plusMonths(setting.getExpiryMonths()))
                 .build());
         userRepository.save(user);

@@ -2,6 +2,8 @@ package com.ecommerce.backend.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.Set;
 
 @Entity
@@ -60,5 +62,8 @@ public class User {
     @Column(nullable = false)
     @Builder.Default
     private boolean enabled = true;
-    
+
+    @Column(nullable = false, precision = 14, scale = 2, columnDefinition = "DECIMAL(14,2) DEFAULT 0")
+    @Builder.Default
+    private BigDecimal deliveredSpend = BigDecimal.ZERO;
 }

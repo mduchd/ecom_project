@@ -3,12 +3,15 @@ package com.ecommerce.backend.service;
 import com.ecommerce.backend.dto.AdminUserResponse;
 import com.ecommerce.backend.dto.AdminUserStatsResponse;
 import com.ecommerce.backend.dto.ChangePasswordRequest;
+import com.ecommerce.backend.dto.MemberTierInfo;
+import com.ecommerce.backend.dto.MemberTierSyncResponse;
 import com.ecommerce.backend.dto.OrderResponse;
 import com.ecommerce.backend.dto.PagedResponse;
 import com.ecommerce.backend.dto.PointTransactionResponse;
 import com.ecommerce.backend.dto.UserProfileRequest;
 import com.ecommerce.backend.dto.UserProfileResponse;
 import com.ecommerce.backend.entity.ERole;
+import com.ecommerce.backend.entity.MemberTier;
 import com.ecommerce.backend.entity.PointTransaction;
 import com.ecommerce.backend.entity.Role;
 import com.ecommerce.backend.entity.User;
@@ -33,15 +36,18 @@ public class UserService {
     private final OrderRepository orderRepository;
     private final PointTransactionRepository pointTransactionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final MemberTierService memberTierService;
 
     public UserService(UserRepository userRepository,
                        OrderRepository orderRepository,
                        PointTransactionRepository pointTransactionRepository,
-                       PasswordEncoder passwordEncoder) {
+                       PasswordEncoder passwordEncoder,
+                       MemberTierService memberTierService) {
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
         this.pointTransactionRepository = pointTransactionRepository;
         this.passwordEncoder = passwordEncoder;
+        this.memberTierService = memberTierService;
     }
 
     @Transactional(readOnly = true)
@@ -52,18 +58,33 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public PagedResponse<AdminUserResponse> getAdminPage(int page, int size, String search, String role) {
+    public PagedResponse<AdminUserResponse> getAdminPage(int page, int size, String search, String role, String tier) {
         int safePage = Math.max(page, 1);
         int safeSize = Math.max(1, Math.min(size, 100));
         String normalizedSearch = search == null ? "" : search.trim();
         String normalizedRole = role == null || role.isBlank() ? "ALL" : role.trim().toUpperCase(Locale.ROOT);
+        String normalizedTier = tier == null || tier.isBlank() ? "ALL" : tier.trim().toUpperCase(Locale.ROOT);
         Pageable pageable = PageRequest.of(safePage - 1, safeSize);
         String searchParam = normalizedSearch.isEmpty() ? null : normalizedSearch;
-        Page<User> result = userRepository.findAdminUsers(searchParam, normalizedRole, pageable);
+        Page<User> result = userRepository.findAdminUsers(
+                searchParam,
+                normalizedRole,
+                normalizedTier,
+                MemberTier.SILVER.getMinSpend(),
+                MemberTier.GOLD.getMinSpend(),
+                MemberTier.DIAMOND.getMinSpend(),
+                pageable);
         result = PageFetch.clampRequestedPage(
                 result,
                 safePage,
-                nextPageable -> userRepository.findAdminUsers(searchParam, normalizedRole, nextPageable)
+                nextPageable -> userRepository.findAdminUsers(
+                        searchParam,
+                        normalizedRole,
+                        normalizedTier,
+                        MemberTier.SILVER.getMinSpend(),
+                        MemberTier.GOLD.getMinSpend(),
+                        MemberTier.DIAMOND.getMinSpend(),
+                        nextPageable)
         );
         return PagedResponse.from(result.map(this::toAdminResponse), safePage);
     }
@@ -92,6 +113,17 @@ public class UserService {
 
         user.setEnabled(enabled);
         return toAdminResponse(userRepository.save(user));
+    }
+
+    @Transactional
+    public AdminUserResponse syncDeliveredSpend(Long userId) {
+        memberTierService.syncUserDeliveredSpend(userId);
+        return toAdminResponse(getUser(userId));
+    }
+
+    @Transactional
+    public MemberTierSyncResponse syncAllDeliveredSpend() {
+        return memberTierService.syncAllUsersDeliveredSpend();
     }
 
     @Transactional(readOnly = true)
@@ -170,6 +202,7 @@ public class UserService {
         List<String> roles = user.getRoles() == null
                 ? List.of()
                 : user.getRoles().stream().map(role -> role.getName().name()).toList();
+        MemberTierInfo tierInfo = MemberTierInfo.from(user);
         return new UserProfileResponse(
                 user.getId(),
                 user.getUsername(),
@@ -183,7 +216,14 @@ public class UserService {
                 user.getProvider() == null ? "local" : user.getProvider(),
                 roles,
                 user.getPointsBalance() == null ? 0 : user.getPointsBalance(),
-                user.isPointsLocked());
+                user.isPointsLocked(),
+                tierInfo.getTier(),
+                tierInfo.getTierLabel(),
+                tierInfo.getDeliveredSpend(),
+                tierInfo.getNextTierThreshold(),
+                tierInfo.getNextTierLabel(),
+                tierInfo.getPointsMultiplier()
+        );
     }
 
     private PointTransactionResponse toPointTransactionResponse(PointTransaction transaction) {
@@ -204,6 +244,7 @@ public class UserService {
         List<String> roles = user.getRoles() == null
                 ? List.of()
                 : user.getRoles().stream().map(role -> role.getName().name()).toList();
+        MemberTierInfo tierInfo = MemberTierInfo.from(user);
         return new AdminUserResponse(
                 user.getId(),
                 user.getUsername(),
@@ -214,7 +255,10 @@ public class UserService {
                 user.getPointsBalance() == null ? 0 : user.getPointsBalance(),
                 user.isPointsLocked(),
                 user.isEnabled(),
-                user.getProvider() == null ? "local" : user.getProvider()
+                user.getProvider() == null ? "local" : user.getProvider(),
+                tierInfo.getTier(),
+                tierInfo.getTierLabel(),
+                tierInfo.getDeliveredSpend()
         );
     }
 }
