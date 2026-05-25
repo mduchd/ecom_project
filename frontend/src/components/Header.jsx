@@ -103,27 +103,66 @@ function TopBar({ currency, setCurrency, language, setLanguage }) {
     return (
         <div className="bg-gray-50 border-b border-gray-200">
             <div className="max-w-[1280px] mx-auto px-4 sm:px-6 h-9 flex items-center justify-between">
-                <div className="flex items-center gap-1.5 text-gray-500 text-xs">
-                    <FaPhoneAlt className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline font-medium text-gray-600">Hotline 24/7:</span>
-                    <a href="tel:08824586945" className="font-semibold text-gray-700 hover:text-blue-600 transition-colors">
+                {/* Left Side: Hotline */}
+                <div className="flex items-center gap-1.5 text-gray-500 text-xs flex-shrink-0">
+                    <FaPhoneAlt className="w-3 h-3 text-blue-600" />
+                    <span className="hidden sm:inline font-semibold text-gray-600">Hotline 24/7:</span>
+                    <a href="tel:08824586945" className="font-bold text-gray-700 hover:text-blue-600 transition-colors">
                         088-24586945
                     </a>
                 </div>
 
-                <div className="flex items-center gap-3 sm:gap-4">
+                {/* Center Area: Running Marquee Text */}
+                <div className="flex-1 mx-6 overflow-hidden hidden md:block text-[11px] font-bold text-gray-500">
+                    <div className="marquee-container">
+                        <div className="marquee-content hover:[animation-play-state:paused]">
+                            <span className="mx-4 text-rose-500 font-extrabold">🔥 Khuyến mãi sốc:</span>
+                            <span className="mx-2">🚚 Miễn phí vận chuyển cho đơn hàng từ 300k</span>
+                            <span className="mx-4 text-gray-300">•</span>
+                            <span className="mx-2">🔄 Thu cũ đổi mới giá tốt - Lên đời tiết kiệm</span>
+                            <span className="mx-4 text-gray-300">•</span>
+                            <span className="mx-2">🛡️ Sản phẩm chính hãng 100% - Xuất VAT đầy đủ</span>
+                            <span className="mx-4 text-gray-300">•</span>
+                            <span className="mx-2">⚡ Giao hàng siêu tốc trong 2 giờ</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Right Side: Navigation & Language */}
+                <div className="flex items-center gap-3 sm:gap-4 flex-shrink-0">
                     <Link
                         to="/track-order"
-                        className="hidden sm:inline-flex items-center gap-1.5 bg-emerald-500 hover:bg-emerald-600 text-white text-[11px] font-semibold px-3 py-1 rounded-full transition-colors duration-150"
+                        className="text-xs font-semibold text-gray-600 hover:text-blue-600 transition-colors duration-150"
                     >
-                        <span className="w-1.5 h-1.5 rounded-full bg-white/80 animate-pulse inline-block" />
-                        Theo dõi đơn
+                        Tra cứu đơn hàng
                     </Link>
-                    <Dropdown selected={currency} options={CURRENCIES} onChange={setCurrency} />
-                    <div className="w-px h-3.5 bg-gray-300" />
+                    <div className="w-px h-3 bg-gray-300" />
                     <Dropdown selected={language} options={LANGUAGES} onChange={setLanguage} icon={<FaGlobe className="w-3.5 h-3.5" />} />
                 </div>
             </div>
+
+            {/* CSS styles for Marquee animation */}
+            <style>{`
+                @keyframes marquee {
+                    0% { transform: translate3d(100%, 0, 0); }
+                    100% { transform: translate3d(-100%, 0, 0); }
+                }
+                .marquee-container {
+                    overflow: hidden;
+                    white-space: nowrap;
+                    position: relative;
+                    width: 100%;
+                }
+                .marquee-content {
+                    display: inline-block;
+                    animation: marquee 25s linear infinite;
+                    will-change: transform;
+                }
+                .marquee-content:hover {
+                    animation-play-state: paused;
+                    cursor: pointer;
+                }
+            `}</style>
         </div>
     );
 }
