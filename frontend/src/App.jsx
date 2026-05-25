@@ -4,6 +4,7 @@ import { useAuth } from "./context/AuthContext.jsx";
 
 import Header from './components/Header'
 import AIChatBot from './components/AIChatBot'
+import FlipLabProPopup from './components/FlipLabProPopup'
 import Home from './pages/Home'
 import Shop from './pages/Shop'
 import AdminProducts from './pages/AdminProducts'
@@ -101,6 +102,7 @@ function AppContent() {
         <Toaster position="top-right" />
         {!hidePublicLayout && <Header />}
         {!hidePublicLayout && <AIChatBot />}
+        {!hidePublicLayout && <FlipLabProPopup />}
 
         <Routes>
           <Route path="/" element={<HomeRoute />} />
