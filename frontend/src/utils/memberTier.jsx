@@ -10,6 +10,8 @@ export const MEMBER_TIERS = {
     badgeBorder: "border-stone-400",
     badgeClass: "text-stone-800",
     progressClass: "bg-stone-600",
+    frameGradient: "bg-gradient-to-br from-orange-800 via-orange-700 to-orange-900",
+    cardTint: "bg-gradient-to-br from-orange-50/80 via-white to-orange-50/60",
   },
   SILVER: {
     key: "SILVER",
@@ -22,6 +24,8 @@ export const MEMBER_TIERS = {
     badgeBorder: "border-slate-300",
     badgeClass: "text-slate-800",
     progressClass: "bg-slate-500",
+    frameGradient: "bg-gradient-to-br from-slate-500 via-slate-300 to-slate-200",
+    cardTint: "bg-gradient-to-br from-slate-50/80 via-white to-slate-50/50",
   },
   GOLD: {
     key: "GOLD",
@@ -34,6 +38,8 @@ export const MEMBER_TIERS = {
     badgeBorder: "border-orange-400",
     badgeClass: "text-orange-900",
     progressClass: "bg-orange-600",
+    frameGradient: "bg-gradient-to-br from-orange-700 via-orange-500 to-orange-400",
+    cardTint: "bg-gradient-to-br from-orange-50/90 via-white to-orange-50/70",
   },
   DIAMOND: {
     key: "DIAMOND",
@@ -46,6 +52,8 @@ export const MEMBER_TIERS = {
     badgeBorder: "border-cyan-300",
     badgeClass: "text-cyan-900",
     progressClass: "bg-cyan-500",
+    frameGradient: "bg-gradient-to-br from-cyan-500 via-cyan-300 to-sky-200",
+    cardTint: "bg-gradient-to-br from-cyan-50/70 via-white to-sky-50/60",
   },
 };
 
@@ -56,6 +64,37 @@ export const TIER_FILTER_OPTIONS = [
   { value: "GOLD", label: "Vàng" },
   { value: "DIAMOND", label: "Kim cương" },
 ];
+
+function ShinyTierStyles() {
+  return (
+    <style>{`
+      @keyframes tier-badge-shimmer {
+        0% { transform: translateX(-120%) skewX(-20deg); }
+        100% { transform: translateX(220%) skewX(-20deg); }
+      }
+      .member-tier-badge-shimmer::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, transparent 20%, rgba(255, 255, 255, 0.35) 45%, rgba(255, 255, 255, 0.7) 50%, rgba(255, 255, 255, 0.35) 55%, transparent 80%);
+        width: 45%;
+        animation: tier-badge-shimmer 2.8s ease-in-out infinite;
+        pointer-events: none;
+        opacity: 0.75;
+      }
+      .member-tier-frame-sheen::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(105deg, transparent 15%, rgba(255, 255, 255, 0.25) 40%, rgba(255, 255, 255, 0.45) 50%, rgba(255, 255, 255, 0.25) 60%, transparent 85%);
+        width: 40%;
+        animation: tier-badge-shimmer 3.6s ease-in-out infinite;
+        pointer-events: none;
+        z-index: 1;
+      }
+    `}</style>
+  );
+}
 
 export function getTierConfig(tierKey) {
   return MEMBER_TIERS[tierKey] || MEMBER_TIERS.BRONZE;
@@ -89,16 +128,27 @@ export function getTierProgress(deliveredSpend, tierKey, nextTierThreshold, next
   return { percent, remaining, nextLabel };
 }
 
-export function MemberTierBadge({ tierKey, tierLabel, className = "" }) {
+export function MemberTierBadge({ tierKey, tierLabel, className = "", shiny = true }) {
   const tier = getTierConfig(tierKey);
   const label = tierLabel || tier.label;
 
+  const baseClass = `inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black shadow-sm ${tier.badgeBg} ${tier.badgeBorder} ${tier.badgeClass}`;
+
+  if (!shiny) {
+    return (
+      <span className={`${baseClass} ${className}`}>
+        {label}
+      </span>
+    );
+  }
+
   return (
-    <span
-      className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black ${tier.badgeBg} ${tier.badgeBorder} ${tier.badgeClass} ${className}`}
-    >
-      {label}
-    </span>
+    <>
+      <ShinyTierStyles />
+      <span className={`member-tier-badge-shimmer relative overflow-hidden ${baseClass} ${className}`}>
+        <span className="relative z-[1] tracking-wide">{label}</span>
+      </span>
+    </>
   );
 }
 
@@ -107,8 +157,11 @@ export function MemberTierCard({ user, tierProgress, compact = false }) {
   const multiplier = user?.pointsMultiplier || tier.multiplier;
 
   return (
-    <div className={`rounded-2xl border border-gray-100 bg-white shadow-sm ${compact ? "mb-4" : ""}`}>
-      <div className={compact ? "p-4" : "p-5 sm:p-6"}>
+    <>
+      <ShinyTierStyles />
+      <div className={`rounded-2xl p-[2px] ${tier.frameGradient} ${compact ? "mb-4" : ""}`}>
+        <div className={`member-tier-frame-sheen relative overflow-hidden rounded-[14px] ${tier.cardTint}`}>
+          <div className={`relative z-[2] ${compact ? "p-4" : "p-5 sm:p-6"}`}>
         {!compact && (
           <h2 className="mb-4 text-lg font-black text-gray-900">Hạng hội viên</h2>
         )}
@@ -150,7 +203,9 @@ export function MemberTierCard({ user, tierProgress, compact = false }) {
             <p className="text-sm font-black text-cyan-700">Bạn đang ở hạng cao nhất!</p>
           )}
         </div>
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
