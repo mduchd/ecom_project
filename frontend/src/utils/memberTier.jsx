@@ -10,7 +10,6 @@ export const MEMBER_TIERS = {
     badgeBorder: "border-stone-400",
     badgeClass: "text-stone-800",
     progressClass: "bg-stone-600",
-    frameBorder: "border-stone-300",
   },
   SILVER: {
     key: "SILVER",
@@ -23,7 +22,6 @@ export const MEMBER_TIERS = {
     badgeBorder: "border-slate-300",
     badgeClass: "text-slate-800",
     progressClass: "bg-slate-500",
-    frameBorder: "border-slate-200",
   },
   GOLD: {
     key: "GOLD",
@@ -36,7 +34,6 @@ export const MEMBER_TIERS = {
     badgeBorder: "border-orange-400",
     badgeClass: "text-orange-900",
     progressClass: "bg-orange-600",
-    frameBorder: "border-orange-200",
   },
   DIAMOND: {
     key: "DIAMOND",
@@ -49,7 +46,6 @@ export const MEMBER_TIERS = {
     badgeBorder: "border-cyan-300",
     badgeClass: "text-cyan-900",
     progressClass: "bg-cyan-500",
-    frameBorder: "border-cyan-200",
   },
 };
 
@@ -111,7 +107,7 @@ export function MemberTierCard({ user, tierProgress, compact = false }) {
   const multiplier = user?.pointsMultiplier || tier.multiplier;
 
   return (
-    <div className={`rounded-2xl border bg-white ${tier.frameBorder} ${compact ? "mb-4" : ""}`}>
+    <div className={`rounded-2xl border border-gray-100 bg-white shadow-sm ${compact ? "mb-4" : ""}`}>
       <div className={compact ? "p-4" : "p-5 sm:p-6"}>
         {!compact && (
           <h2 className="mb-4 text-lg font-black text-gray-900">Hạng hội viên</h2>
