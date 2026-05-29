@@ -628,7 +628,7 @@ export default function AdminUsersPage() {
 
                   <td className="px-4 py-4">
 
-                    <MemberTierBadge tierKey={user.memberTier} tierLabel={user.memberTierLabel} shiny={false} />
+                    <MemberTierBadge tierKey={user.memberTier} tierLabel={user.memberTierLabel} />
 
                     <p className="mt-1 text-[10px] font-bold text-gray-400">{formatSpend(user.deliveredSpend)}</p>
 
