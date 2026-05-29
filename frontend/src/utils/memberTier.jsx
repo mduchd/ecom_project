@@ -6,10 +6,10 @@ export const MEMBER_TIERS = {
     nextThreshold: 5_000_000,
     nextKey: "SILVER",
     multiplier: 1,
-    badgeBg: "bg-stone-200",
-    badgeBorder: "border-stone-400",
-    badgeClass: "text-stone-800",
-    progressClass: "bg-stone-600",
+    badgeGradient: "bg-gradient-to-r from-orange-800 via-orange-700 to-orange-600",
+    badgeBorder: "border-orange-700/40",
+    badgeClass: "text-orange-50",
+    progressClass: "bg-gradient-to-r from-orange-800 via-orange-600 to-orange-700",
     frameGradient: "bg-gradient-to-br from-orange-800 via-orange-700 to-orange-900",
     cardTint: "bg-gradient-to-br from-orange-50/80 via-white to-orange-50/60",
   },
@@ -20,10 +20,10 @@ export const MEMBER_TIERS = {
     nextThreshold: 15_000_000,
     nextKey: "GOLD",
     multiplier: 1.1,
-    badgeBg: "bg-slate-100",
-    badgeBorder: "border-slate-300",
-    badgeClass: "text-slate-800",
-    progressClass: "bg-slate-500",
+    badgeGradient: "bg-gradient-to-r from-slate-600 via-slate-500 to-slate-400",
+    badgeBorder: "border-slate-500/40",
+    badgeClass: "text-white",
+    progressClass: "bg-gradient-to-r from-slate-600 via-slate-500 to-slate-400",
     frameGradient: "bg-gradient-to-br from-slate-500 via-slate-300 to-slate-200",
     cardTint: "bg-gradient-to-br from-slate-50/80 via-white to-slate-50/50",
   },
@@ -34,10 +34,10 @@ export const MEMBER_TIERS = {
     nextThreshold: 30_000_000,
     nextKey: "DIAMOND",
     multiplier: 1.25,
-    badgeBg: "bg-orange-100",
-    badgeBorder: "border-orange-400",
-    badgeClass: "text-orange-900",
-    progressClass: "bg-orange-600",
+    badgeGradient: "bg-gradient-to-r from-orange-700 via-orange-600 to-orange-500",
+    badgeBorder: "border-orange-600/40",
+    badgeClass: "text-white",
+    progressClass: "bg-gradient-to-r from-orange-700 via-orange-600 to-orange-500",
     frameGradient: "bg-gradient-to-br from-orange-700 via-orange-500 to-orange-400",
     cardTint: "bg-gradient-to-br from-orange-50/90 via-white to-orange-50/70",
   },
@@ -48,10 +48,10 @@ export const MEMBER_TIERS = {
     nextThreshold: null,
     nextKey: null,
     multiplier: 1.5,
-    badgeBg: "bg-cyan-100",
-    badgeBorder: "border-cyan-300",
-    badgeClass: "text-cyan-900",
-    progressClass: "bg-cyan-500",
+    badgeGradient: "bg-gradient-to-r from-cyan-600 via-cyan-500 to-cyan-400",
+    badgeBorder: "border-cyan-500/40",
+    badgeClass: "text-white",
+    progressClass: "bg-gradient-to-r from-cyan-600 via-cyan-500 to-cyan-400",
     frameGradient: "bg-gradient-to-br from-cyan-500 via-cyan-300 to-sky-200",
     cardTint: "bg-gradient-to-br from-cyan-50/70 via-white to-sky-50/60",
   },
@@ -132,7 +132,7 @@ export function MemberTierBadge({ tierKey, tierLabel, className = "", shiny = tr
   const tier = getTierConfig(tierKey);
   const label = tierLabel || tier.label;
 
-  const baseClass = `inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black shadow-sm ${tier.badgeBg} ${tier.badgeBorder} ${tier.badgeClass}`;
+  const baseClass = `inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-black shadow-sm ${tier.badgeGradient} ${tier.badgeBorder} ${tier.badgeClass}`;
 
   if (!shiny) {
     return (
