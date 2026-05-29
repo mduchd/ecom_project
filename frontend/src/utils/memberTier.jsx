@@ -8,13 +8,14 @@ export const MEMBER_TIERS = {
     nextThreshold: 5_000_000,
     nextKey: "SILVER",
     multiplier: 1,
-    badgeBg: "bg-amber-100",
-    badgeBorder: "border-amber-400",
-    badgeClass: "text-amber-900",
-    progressClass: "bg-amber-500",
-    iconClass: "text-amber-700",
-    frameBorder: "border-amber-400",
-    glow: "shadow-[0_0_20px_rgba(245,158,11,0.25)]",
+    badgeGradient: "bg-gradient-to-r from-amber-800 via-amber-600 to-orange-700",
+    badgeBorder: "border-amber-700/50",
+    badgeClass: "text-amber-50",
+    progressClass: "bg-gradient-to-r from-amber-700 via-amber-500 to-orange-600",
+    iconClass: "text-amber-100 drop-shadow-sm",
+    frameGradient: "bg-gradient-to-br from-amber-700 via-amber-500 to-orange-600",
+    cardTint: "bg-gradient-to-br from-amber-50/80 via-white to-orange-50/60",
+    glow: "shadow-[0_0_24px_rgba(180,83,9,0.35)]",
     Icon: FaMedal,
   },
   SILVER: {
@@ -24,13 +25,14 @@ export const MEMBER_TIERS = {
     nextThreshold: 15_000_000,
     nextKey: "GOLD",
     multiplier: 1.1,
-    badgeBg: "bg-slate-200",
-    badgeBorder: "border-slate-400",
-    badgeClass: "text-slate-800",
-    progressClass: "bg-slate-500",
-    iconClass: "text-slate-600",
-    frameBorder: "border-slate-400",
-    glow: "shadow-[0_0_20px_rgba(148,163,184,0.3)]",
+    badgeGradient: "bg-gradient-to-r from-slate-500 via-slate-300 to-yellow-200",
+    badgeBorder: "border-slate-400/50",
+    badgeClass: "text-slate-900",
+    progressClass: "bg-gradient-to-r from-slate-500 via-slate-300 to-yellow-300",
+    iconClass: "text-white drop-shadow-sm",
+    frameGradient: "bg-gradient-to-br from-slate-400 via-gray-200 to-yellow-300",
+    cardTint: "bg-gradient-to-br from-slate-50/80 via-white to-yellow-50/50",
+    glow: "shadow-[0_0_24px_rgba(148,163,184,0.35)]",
     Icon: FaMedal,
   },
   GOLD: {
@@ -40,13 +42,14 @@ export const MEMBER_TIERS = {
     nextThreshold: 30_000_000,
     nextKey: "DIAMOND",
     multiplier: 1.25,
-    badgeBg: "bg-yellow-100",
-    badgeBorder: "border-yellow-400",
-    badgeClass: "text-yellow-900",
-    progressClass: "bg-yellow-500",
-    iconClass: "text-yellow-700",
-    frameBorder: "border-yellow-400",
-    glow: "shadow-[0_0_22px_rgba(234,179,8,0.3)]",
+    badgeGradient: "bg-gradient-to-r from-yellow-700 via-yellow-400 to-amber-300",
+    badgeBorder: "border-yellow-500/50",
+    badgeClass: "text-yellow-950",
+    progressClass: "bg-gradient-to-r from-yellow-600 via-yellow-400 to-amber-300",
+    iconClass: "text-yellow-50 drop-shadow-sm",
+    frameGradient: "bg-gradient-to-br from-yellow-600 via-yellow-400 to-amber-300",
+    cardTint: "bg-gradient-to-br from-yellow-50/90 via-white to-amber-50/70",
+    glow: "shadow-[0_0_28px_rgba(234,179,8,0.45)]",
     Icon: FaStar,
   },
   DIAMOND: {
@@ -56,13 +59,14 @@ export const MEMBER_TIERS = {
     nextThreshold: null,
     nextKey: null,
     multiplier: 1.5,
-    badgeBg: "bg-cyan-100",
-    badgeBorder: "border-cyan-400",
-    badgeClass: "text-cyan-900",
-    progressClass: "bg-cyan-500",
-    iconClass: "text-cyan-700",
-    frameBorder: "border-cyan-400",
-    glow: "shadow-[0_0_24px_rgba(6,182,212,0.35)]",
+    badgeGradient: "bg-gradient-to-r from-amber-400 via-yellow-200 to-cyan-200",
+    badgeBorder: "border-amber-300/60",
+    badgeClass: "text-amber-950",
+    progressClass: "bg-gradient-to-r from-amber-400 via-yellow-300 to-cyan-300",
+    iconClass: "text-amber-900 drop-shadow-sm",
+    frameGradient: "bg-gradient-to-br from-amber-300 via-yellow-100 to-cyan-200",
+    cardTint: "bg-gradient-to-br from-amber-50/70 via-white to-cyan-50/60",
+    glow: "shadow-[0_0_32px_rgba(251,191,36,0.4)]",
     Icon: FaGem,
   },
 };
@@ -90,18 +94,18 @@ function ShinyTierStyles() {
         content: "";
         position: absolute;
         inset: 0;
-        background: rgba(255, 255, 255, 0.45);
-        width: 40%;
+        background: linear-gradient(105deg, transparent 20%, rgba(255, 251, 235, 0.55) 45%, rgba(255, 255, 255, 0.85) 50%, rgba(255, 251, 235, 0.55) 55%, transparent 80%);
+        width: 45%;
         animation: tier-badge-shimmer 2.8s ease-in-out infinite;
         pointer-events: none;
-        opacity: 0.6;
+        opacity: 0.75;
       }
       .member-tier-frame-sheen::before {
         content: "";
         position: absolute;
         inset: 0;
-        background: rgba(255, 255, 255, 0.18);
-        width: 35%;
+        background: linear-gradient(105deg, transparent 15%, rgba(255, 251, 235, 0.35) 40%, rgba(255, 255, 255, 0.5) 50%, rgba(255, 251, 235, 0.35) 60%, transparent 85%);
+        width: 40%;
         animation: tier-badge-shimmer 3.6s ease-in-out infinite;
         pointer-events: none;
         z-index: 1;
@@ -124,9 +128,14 @@ export function formatSpend(value) {
 export function getTierProgress(deliveredSpend, tierKey, nextTierThreshold, nextTierLabel) {
   const spend = Number(deliveredSpend || 0);
   const tier = getTierConfig(tierKey);
-  const threshold = nextTierThreshold != null ? Number(nextTierThreshold) : tier.nextThreshold;
 
-  if (!threshold) {
+  if (!tier.nextKey || spend >= MEMBER_TIERS.DIAMOND.minSpend) {
+    return { percent: 100, remaining: 0, nextLabel: null };
+  }
+
+  const threshold = tier.nextThreshold ?? (nextTierThreshold != null ? Number(nextTierThreshold) : null);
+
+  if (threshold == null || Number.isNaN(threshold)) {
     return { percent: 100, remaining: 0, nextLabel: null };
   }
 
@@ -135,7 +144,7 @@ export function getTierProgress(deliveredSpend, tierKey, nextTierThreshold, next
   const current = Math.max(0, spend - base);
   const percent = range > 0 ? Math.min(100, Math.round((current / range) * 100)) : 0;
   const remaining = Math.max(0, threshold - spend);
-  const nextLabel = nextTierLabel || (tier.nextKey ? getTierConfig(tier.nextKey).label : null);
+  const nextLabel = nextTierLabel || getTierConfig(tier.nextKey).label;
 
   return { percent, remaining, nextLabel };
 }
@@ -145,7 +154,7 @@ export function MemberTierBadge({ tierKey, tierLabel, className = "", shiny = tr
   const label = tierLabel || tier.label;
   const Icon = tier.Icon;
 
-  const baseClass = `inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black ${tier.badgeBg} ${tier.badgeBorder} ${tier.badgeClass}`;
+  const baseClass = `inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-black shadow-sm ${tier.badgeGradient} ${tier.badgeBorder} ${tier.badgeClass}`;
 
   if (!shiny) {
     return (
@@ -159,9 +168,9 @@ export function MemberTierBadge({ tierKey, tierLabel, className = "", shiny = tr
   return (
     <>
       <ShinyTierStyles />
-      <span className={`member-tier-badge-shimmer relative overflow-hidden shadow-sm ${baseClass} ${className}`}>
+      <span className={`member-tier-badge-shimmer relative overflow-hidden ${baseClass} ${className}`}>
         {showIcon && <Icon className={`member-tier-sparkle-icon relative z-[1] w-3 h-3 shrink-0 ${tier.iconClass}`} />}
-        <span className="relative z-[1] tracking-wide">{label}</span>
+        <span className="relative z-[1] tracking-wide drop-shadow-[0_1px_1px_rgba(0,0,0,0.15)]">{label}</span>
       </span>
     </>
   );
@@ -175,14 +184,13 @@ export function MemberTierCard({ user, tierProgress, compact = false }) {
   return (
     <>
       <ShinyTierStyles />
-      <div
-        className={`member-tier-frame-sheen relative overflow-hidden rounded-2xl border-2 bg-white ${tier.frameBorder} ${tier.glow} ${compact ? "mb-4" : ""}`}
-      >
+      <div className={`rounded-2xl p-[2px] ${tier.frameGradient} ${tier.glow} ${compact ? "mb-4" : ""}`}>
+        <div className={`member-tier-frame-sheen relative overflow-hidden rounded-[14px] ${tier.cardTint}`}>
         <div className={`relative z-[2] ${compact ? "p-4" : "p-5 sm:p-6"}`}>
           {!compact && (
             <div className="mb-4 flex items-center justify-between gap-3">
               <h2 className="text-lg font-black text-gray-900">Hạng hội viên</h2>
-              <div className={`flex h-10 w-10 items-center justify-center rounded-xl border ${tier.badgeBg} ${tier.badgeBorder}`}>
+              <div className={`flex h-10 w-10 items-center justify-center rounded-xl border shadow-sm ${tier.badgeGradient} ${tier.badgeBorder}`}>
                 <Icon className={`member-tier-sparkle-icon h-5 w-5 ${tier.iconClass}`} />
               </div>
             </div>
@@ -222,9 +230,12 @@ export function MemberTierCard({ user, tierProgress, compact = false }) {
                 </p>
               </div>
             ) : (
-              <p className="text-sm font-black text-cyan-700">Bạn đang ở hạng cao nhất!</p>
+              <p className="bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-400 bg-clip-text text-sm font-black text-transparent">
+                Bạn đang ở hạng cao nhất!
+              </p>
             )}
           </div>
+        </div>
         </div>
       </div>
     </>

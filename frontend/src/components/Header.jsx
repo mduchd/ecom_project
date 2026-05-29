@@ -1,7 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext.jsx";
-import { MemberTierBadge } from "../utils/memberTier.jsx";
 import { getProducts } from "../services/productService";
 import {
     FaPhoneAlt,
@@ -513,9 +512,6 @@ function UserActions({ cartCount, cartTotal }) {
                                         {user.pointsLocked ? " (tạm khóa)" : ""}
                                     </span>
                                 </div>
-                                <div className="mt-1.5">
-                                    <MemberTierBadge tierKey={user.memberTier} tierLabel={user.memberTierLabel} shiny />
-                                </div>
                             </div>
                             <div className="py-1">
                                 {user.role === "admin" && (
@@ -668,9 +664,6 @@ function MobileMenu({ open, onClose }) {
                                     {Number(user.points || 0).toLocaleString("vi-VN")} điểm tích lũy
                                     {user.pointsLocked ? " (tạm khóa)" : ""}
                                 </span>
-                            </div>
-                            <div className="mt-2">
-                                <MemberTierBadge tierKey={user.memberTier} tierLabel={user.memberTierLabel} shiny />
                             </div>
                             {user.role === "admin" && (
                                 <Link
