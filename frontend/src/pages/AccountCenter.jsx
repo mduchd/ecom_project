@@ -30,7 +30,6 @@ import {
   validateImageFile,
 } from "../utils/uploadUtils.js";
 import {
-  MemberTierBadge,
   MemberTierCard,
   getTierProgress,
 } from "../utils/memberTier.jsx";
@@ -264,9 +263,6 @@ export default function AccountCenter() {
               <div className="min-w-0">
                 <p className="text-sm font-black text-gray-900 truncate">{user?.name}</p>
                 <p className="text-xs text-gray-400 truncate">{user?.email}</p>
-                <div className="mt-2">
-                  <MemberTierBadge tierKey={user?.memberTier} tierLabel={user?.memberTierLabel} />
-                </div>
               </div>
             </div>
             <nav className="pt-3 space-y-1">
@@ -368,7 +364,6 @@ export default function AccountCenter() {
 
                 {activeTab === "points" && (
                   <Panel title="Điểm tích lũy">
-                    <MemberTierCard user={user} tierProgress={stats.tierProgress} compact />
                     <div className="mb-4 rounded-xl bg-yellow-50 border border-yellow-100 p-4">
                       <p className="text-xs font-bold text-yellow-700">Số dư hiện tại</p>
                       <p className="text-2xl font-black text-yellow-700">{Number(user?.points || 0).toLocaleString("vi-VN")} điểm</p>
