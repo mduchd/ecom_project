@@ -1,20 +1,20 @@
 package com.ecommerce.backend.service;
 
 import com.ecommerce.backend.entity.Product;
-import com.ecommerce.backend.repository.ProductRepository;
+import com.ecommerce.backend.util.ProductRagDocumentBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class GeminiService {
-    private static final int RELEVANT_PRODUCT_LIMIT = 5;
-    private static final int FALLBACK_PRODUCT_LIMIT = 3;
 
     @Value("${google.gemini.api.key}")
     private String apiKey;
@@ -23,97 +23,60 @@ public class GeminiService {
     private String apiUrl;
 
     @Autowired
-    private ProductRepository productRepository;
+    private ProductRagRetrievalService productRagRetrievalService;
 
-    private final RestTemplate restTemplate = new RestTemplate();
+    private final RestTemplate restTemplate;
 
-    // ── Trích xuất từ khóa quan trọng từ câu hỏi của user ─────────────────────
-    private List<String> extractKeywords(String userMessage) {
-        // Loại bỏ các stop words tiếng Việt phổ biến
-        String[] stopWords = {"tôi", "bạn", "có", "không", "và", "hoặc", "là", "của", "cho", "với",
-                "này", "đó", "được", "để", "từ", "một", "những", "các", "cái", "muốn",
-                "cần", "mua", "tìm", "xem", "hỏi", "về", "giá", "bao", "nhiêu", "rẻ",
-                "đắt", "tốt", "ngon", "mạnh", "nhanh", "bền", "đẹp", "nhẹ", "chất"};
-        Set<String> stopSet = new HashSet<>(Arrays.asList(stopWords));
-
-        return Arrays.stream(userMessage.toLowerCase().split("\\s+"))
-                .filter(word -> word.length() > 2 && !stopSet.contains(word))
-                .distinct()
-                .collect(Collectors.toList());
-    }
-
-    // ── RAG: Lấy sản phẩm liên quan từ Database ────────────────────────────────
-    private List<Product> retrieveRelevantProducts(String userMessage) {
-        List<String> keywords = extractKeywords(userMessage);
-        List<Product> results = keywords.isEmpty()
-                ? List.of()
-                : productRepository.searchInStockByKeywords(keywords, PageRequest.of(0, RELEVANT_PRODUCT_LIMIT));
-
-        if (results.isEmpty()) {
-            return productRepository.findByStockQuantityGreaterThan(0, PageRequest.of(0, FALLBACK_PRODUCT_LIMIT));
-        }
-
-        return results;
+    public GeminiService() {
+        SimpleClientHttpRequestFactory factory = new SimpleClientHttpRequestFactory();
+        factory.setConnectTimeout(10_000);
+        factory.setReadTimeout(30_000);
+        this.restTemplate = new RestTemplate(factory);
     }
 
     private String formatProductsAsContext(List<Product> products) {
-        if (products.isEmpty()) return "Hiện tại cửa hàng không có sản phẩm phù hợp.";
+        if (products.isEmpty()) {
+            return "Hien tai cua hang khong co san pham phu hop.";
+        }
 
         StringBuilder sb = new StringBuilder();
-        sb.append("=== DANH SÁCH SẢN PHẨM TRONG KHO ===\n");
+        sb.append("=== PRODUCT DOCS FOR RAG ===\n");
         for (int i = 0; i < products.size(); i++) {
-            Product p = products.get(i);
-            sb.append(String.format("\n[Sản phẩm %d]\n", i + 1));
-            sb.append("Tên: ").append(p.getName()).append("\n");
-            sb.append("Danh mục: ").append(p.getCategory()).append("\n");
-            sb.append("Thương hiệu: ").append(p.getBrand()).append("\n");
-            sb.append("Giá gốc: ").append(String.format("%,.0f VNĐ", p.getPrice())).append("\n");
-            if (p.getDiscountPrice() != null) {
-                sb.append("Giá khuyến mãi: ").append(String.format("%,.0f VNĐ", p.getDiscountPrice())).append("\n");
-            }
-            sb.append("Tồn kho: ").append(p.getStockQuantity()).append(" sản phẩm\n");
-            if (p.getSpecifications() != null) {
-                sb.append("Thông số: ").append(p.getSpecifications()).append("\n");
-            }
-            if (p.getDescription() != null) {
-                sb.append("Mô tả: ").append(p.getDescription()).append("\n");
-            }
+            Product product = products.get(i);
+            sb.append("\n[doc ").append(i + 1).append("]\n");
+            sb.append(ProductRagDocumentBuilder.build(product));
         }
         sb.append("\n=====================================\n");
         return sb.toString();
     }
 
-    // ── Main chat method ───────────────────────────────────────────────────────
     public String getChatResponse(String userMessage) {
         String url = apiUrl + apiKey;
 
-        // BƯỚC 1 - RETRIEVE: Lấy sản phẩm liên quan từ DB
-        List<Product> relevantProducts = retrieveRelevantProducts(userMessage);
+        List<Product> relevantProducts = productRagRetrievalService.retrieveRelevantProducts(userMessage, 5);
         String productContext = formatProductsAsContext(relevantProducts);
 
-        // BƯỚC 2 - AUGMENT: Nhúng dữ liệu sản phẩm thật vào Prompt
-        String systemInstruction = "Bạn là SnapBot, trợ lý mua sắm thông minh của cửa hàng SnapCart. " +
-                "Hãy tư vấn dựa trên DỮ LIỆU SẢN PHẨM THỰC TẾ được cung cấp bên dưới. " +
-                "Chỉ giới thiệu sản phẩm có trong danh sách này, KHÔNG được bịa đặt sản phẩm không có trong kho. " +
-                "Khi nêu giá, hãy ưu tiên giá khuyến mãi nếu có. " +
-                "Nếu khách hỏi về chủ đề không liên quan đến mua sắm, hãy lịch sự từ chối. " +
-                "Trả lời ngắn gọn, thân thiện và luôn dùng tiếng Việt.\n\n" +
+        String systemInstruction =
+                "Ban la SnapBot, tro ly mua sam thong minh cua SnapCart. " +
+                "Chi duoc tra loi dua tren DU LIEU SAN PHAM THUC TE duoc cung cap ben duoi. " +
+                "Khong duoc tu them san pham khong co trong kho. " +
+                "Neu co gia khuyen mai thi uu tien gia khuyen mai. " +
+                "Neu cau hoi khong lien quan den mua sam, hay lich su va ngan gon. " +
+                "Tra loi ngan gon, than thien, va luon dung tieng Viet.\n\n" +
                 productContext;
 
-        // Chuẩn bị request body cho Gemini API
         Map<String, Object> requestBody = new HashMap<>();
         List<Map<String, Object>> contents = new ArrayList<>();
         Map<String, Object> content = new HashMap<>();
         List<Map<String, Object>> parts = new ArrayList<>();
         Map<String, Object> part = new HashMap<>();
 
-        part.put("text", systemInstruction + "\nKhách hàng hỏi: " + userMessage);
+        part.put("text", systemInstruction + "\nKhach hang hoi: " + userMessage);
         parts.add(part);
         content.put("parts", parts);
         contents.add(content);
         requestBody.put("contents", contents);
 
-        // BƯỚC 3 - GENERATE: Gọi Gemini API với retry logic
         int maxRetries = 3;
         for (int attempt = 1; attempt <= maxRetries; attempt++) {
             try {
@@ -126,20 +89,25 @@ public class GeminiService {
                         Map<String, Object> responseContent = (Map<String, Object>) candidate.get("content");
                         List<Map<String, Object>> responseParts = (List<Map<String, Object>>) responseContent.get("parts");
                         if (!responseParts.isEmpty()) {
-                            return (String) responseParts.get(0).get("text");
+                            return String.valueOf(responseParts.get(0).get("text"));
                         }
                     }
                 }
-                return "Xin lỗi, mình không thể xử lý yêu cầu lúc này.";
 
+                return "Xin loi, minh chua xu ly duoc yeu cau nay.";
             } catch (Exception e) {
                 if (attempt < maxRetries) {
-                    try { Thread.sleep(2000); } catch (InterruptedException ie) { Thread.currentThread().interrupt(); }
+                    try {
+                        Thread.sleep(1500);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
                 } else {
-                    return "Xin lỗi, AI đang quá bận! Bạn vui lòng thử lại sau giây lát nhé 🙏";
+                    return "Xin loi, AI dang ban. Ban vui long thu lai sau.";
                 }
             }
         }
-        return "Xin lỗi, AI đang quá bận! Bạn vui lòng thử lại sau giây lát nhé 🙏";
+
+        return "Xin loi, AI dang ban. Ban vui long thu lai sau.";
     }
 }

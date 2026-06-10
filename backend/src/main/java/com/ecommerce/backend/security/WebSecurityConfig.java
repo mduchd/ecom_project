@@ -73,6 +73,7 @@ public class WebSecurityConfig {
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.PUT, "/api/products/**")).hasRole("ADMIN")
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.DELETE, "/api/products/**")).hasRole("ADMIN")
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/orders")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/orders/quote")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/orders/confirm")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/orders/test-email")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/payments/sepay/webhook")).permitAll()

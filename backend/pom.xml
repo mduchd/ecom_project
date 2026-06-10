@@ -102,6 +102,13 @@
 			<version>2.0.0</version>
 		</dependency>
 
+		<!-- PDF invoice generation -->
+		<dependency>
+			<groupId>org.apache.pdfbox</groupId>
+			<artifactId>pdfbox</artifactId>
+			<version>2.0.31</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>
