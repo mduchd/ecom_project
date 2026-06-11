@@ -3,6 +3,7 @@ package com.ecommerce.backend.service;
 import com.ecommerce.backend.dto.AIChatResponse;
 import com.ecommerce.backend.dto.AIProductSuggestionDto;
 import com.ecommerce.backend.entity.Product;
+import com.ecommerce.backend.repository.ProductRepository;
 import com.ecommerce.backend.util.ProductRagDocumentBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,9 +11,12 @@ import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 
@@ -29,6 +33,9 @@ public class GeminiService {
     @Autowired
     private ProductRagRetrievalService productRagRetrievalService;
 
+    @Autowired
+    private ProductRepository productRepository;
+
     private final RestTemplate restTemplate;
 
     public GeminiService() {
@@ -40,7 +47,7 @@ public class GeminiService {
 
     private String formatProductsAsContext(List<Product> products) {
         if (products.isEmpty()) {
-            return "Hien tai cua hang khong co san pham phu hop.";
+            return "Hiện tại cửa hàng không có sản phẩm phù hợp.";
         }
 
         StringBuilder sb = new StringBuilder();
@@ -55,13 +62,71 @@ public class GeminiService {
     }
 
     public AIChatResponse getChatResponse(String userMessage) {
-        List<Product> relevantProducts = productRagRetrievalService.retrieveRelevantProducts(userMessage, 5);
-        List<AIProductSuggestionDto> suggestions = relevantProducts.stream()
+        List<Product> relevantProducts = selectSuggestedProducts(userMessage);
+        String reply = generateReply(userMessage, relevantProducts);
+        List<AIProductSuggestionDto> suggestions = shouldHideProductSuggestions(reply)
+                ? List.of()
+                : relevantProducts.stream()
                 .map(this::toSuggestionDto)
                 .toList();
 
-        String reply = generateReply(userMessage, relevantProducts);
         return new AIChatResponse(reply, suggestions);
+    }
+
+    private List<Product> selectSuggestedProducts(String userMessage) {
+        if (isHighestPriceQuery(userMessage)) {
+            return findExtremePriceProduct(true);
+        }
+        if (isLowestPriceQuery(userMessage)) {
+            return findExtremePriceProduct(false);
+        }
+        return productRagRetrievalService.retrieveRelevantProducts(userMessage, 5);
+    }
+
+    private boolean isHighestPriceQuery(String userMessage) {
+        String normalized = normalizeText(userMessage);
+        return normalized.contains("dat nhat")
+                || normalized.contains("gia cao nhat")
+                || normalized.contains("mac nhat");
+    }
+
+    private boolean isLowestPriceQuery(String userMessage) {
+        String normalized = normalizeText(userMessage);
+        return normalized.contains("re nhat")
+                || normalized.contains("gia thap nhat")
+                || normalized.contains("gia mem nhat");
+    }
+
+    private List<Product> findExtremePriceProduct(boolean highest) {
+        Comparator<Product> comparator = Comparator.comparing(
+                this::resolveDisplayPrice,
+                Comparator.nullsLast(Comparator.naturalOrder())
+        );
+
+        if (highest) {
+            comparator = comparator.reversed();
+        }
+
+        return productRepository.findByStockQuantityGreaterThan(0).stream()
+                .sorted(comparator)
+                .limit(1)
+                .toList();
+    }
+
+    private java.math.BigDecimal resolveDisplayPrice(Product product) {
+        if (product == null) {
+            return null;
+        }
+        return product.getDiscountPrice() != null ? product.getDiscountPrice() : product.getPrice();
+    }
+
+    private String normalizeText(String value) {
+        if (value == null) {
+            return "";
+        }
+        String normalized = Normalizer.normalize(value, Normalizer.Form.NFD)
+                .replaceAll("\\p{M}+", "");
+        return normalized.toLowerCase(Locale.ROOT);
     }
 
     private String generateReply(String userMessage, List<Product> relevantProducts) {
@@ -69,13 +134,13 @@ public class GeminiService {
         String productContext = formatProductsAsContext(relevantProducts);
 
         String systemInstruction =
-                "Ban la SnapBot, tro ly mua sam thong minh cua SnapCart. " +
-                "Chi duoc tra loi dua tren DU LIEU SAN PHAM THUC TE duoc cung cap ben duoi. " +
-                "Khong duoc tu them san pham khong co trong kho. " +
-                "Neu co gia khuyen mai thi uu tien gia khuyen mai. " +
-                "Neu cau hoi khong lien quan den mua sam, hay lich su va ngan gon. " +
-                "Tra loi ngan gon, than thien, luon dung tieng Viet va KHONG dung markdown, KHONG dung ky tu **, __, # hay bullet list. " +
-                "Neu co san pham phu hop, chi can gioi thieu ngan gon de frontend hien card san pham rieng.\n\n" +
+                "Bạn là SnapBot, trợ lý mua sắm thông minh của SnapCart. " +
+                "Chỉ được trả lời dựa trên dữ liệu sản phẩm thực tế được cung cấp bên dưới. " +
+                "Không được tự thêm sản phẩm không có trong kho. " +
+                "Nếu có giá khuyến mãi thì ưu tiên giá khuyến mãi. " +
+                "Nếu câu hỏi không liên quan đến mua sắm, hãy lịch sự và ngắn gọn. " +
+                "Trả lời ngắn gọn, thân thiện, luôn dùng tiếng Việt và không dùng markdown, không dùng ký tự **, __, # hay bullet list. " +
+                "Nếu có sản phẩm phù hợp, chỉ cần giới thiệu ngắn gọn để frontend hiển thị card sản phẩm riêng.\n\n" +
                 productContext;
 
         Map<String, Object> requestBody = new HashMap<>();
@@ -84,7 +149,7 @@ public class GeminiService {
         List<Map<String, Object>> parts = new ArrayList<>();
         Map<String, Object> part = new HashMap<>();
 
-        part.put("text", systemInstruction + "\nKhach hang hoi: " + userMessage);
+        part.put("text", systemInstruction + "\nKhách hàng hỏi: " + userMessage);
         parts.add(part);
         content.put("parts", parts);
         contents.add(content);
@@ -107,7 +172,7 @@ public class GeminiService {
                     }
                 }
 
-                return "Xin loi, minh chua xu ly duoc yeu cau nay.";
+                return "Xin lỗi, mình chưa xử lý được yêu cầu này.";
             } catch (Exception e) {
                 if (attempt < maxRetries) {
                     try {
@@ -116,17 +181,17 @@ public class GeminiService {
                         Thread.currentThread().interrupt();
                     }
                 } else {
-                    return "Xin loi, AI dang ban. Ban vui long thu lai sau.";
+                    return "Xin lỗi, AI đang bận. Bạn vui lòng thử lại sau.";
                 }
             }
         }
 
-        return "Xin loi, AI dang ban. Ban vui long thu lai sau.";
+        return "Xin lỗi, AI đang bận. Bạn vui lòng thử lại sau.";
     }
 
     private String sanitizeReply(String reply) {
         if (reply == null || reply.isBlank()) {
-            return "Xin loi, minh chua xu ly duoc yeu cau nay.";
+            return "Xin lỗi, mình chưa xử lý được yêu cầu này.";
         }
 
         return MARKDOWN_DECORATORS.matcher(reply)
@@ -134,6 +199,15 @@ public class GeminiService {
                 .replace("\r", "")
                 .replaceAll("\\n{3,}", "\n\n")
                 .trim();
+    }
+
+    private boolean shouldHideProductSuggestions(String reply) {
+        String normalized = normalizeText(reply);
+        return normalized.contains("chi co the giup ban tim kiem thong tin ve san pham")
+                || normalized.contains("chi co the ho tro thong tin ve san pham")
+                || normalized.contains("khong lien quan den mua sam")
+                || normalized.contains("minh chi co the giup ve san pham")
+                || normalized.contains("toi chi co the giup ve san pham");
     }
 
     private AIProductSuggestionDto toSuggestionDto(Product product) {

@@ -15,22 +15,22 @@ export default function PromoBanner() {
                 <div className="relative z-10 flex flex-col md:flex-row items-center justify-between px-6 py-6 md:py-5 gap-4">
                     <div className="flex flex-col md:flex-row items-center gap-4 text-center md:text-left">
                         <span className="bg-yellow-400 text-blue-950 text-[11px] font-black px-3.5 py-1.5 rounded-full shadow-sm whitespace-nowrap">
-                            Dac quyen Smember
+                            Đặc quyền Smember
                         </span>
 
                         <div>
                             <h3 className="text-white text-base md:text-lg font-black">
-                                Doi tien cong nghe, len doi sieu pham
+                                Đổi tiện công nghệ, lên đời siêu phẩm
                             </h3>
                             <p className="text-white/80 text-xs mt-0.5 max-w-xl font-medium">
-                                Nhap ma <span className="text-yellow-300 font-bold">SMEMBER5</span> giam them <span className="text-yellow-300 font-bold">5% toi da 500.000d</span> khi thanh toan qua the tin dung.
+                                Nhập mã <span className="text-yellow-300 font-bold">SMEMBER5</span> giảm thêm <span className="text-yellow-300 font-bold">5% tối đa 500.000đ</span> khi thanh toán qua thẻ tín dụng.
                             </p>
                         </div>
                     </div>
 
                     <div className="flex items-center gap-4 flex-shrink-0">
                         <div className="flex items-center gap-1.5 bg-white text-blue-700 font-bold text-xs px-5 py-2.5 rounded-full shadow transition-all duration-200 group-hover:bg-yellow-400 group-hover:text-blue-950">
-                            <span>Kham pha ngay</span>
+                            <span>Khám phá ngay</span>
                             <FaChevronRight className="w-2.5 h-2.5" />
                         </div>
                     </div>

@@ -1,33 +1,38 @@
 package com.ecommerce.backend.controller;
 
+import com.ecommerce.backend.dto.MessageResponse;
+import com.ecommerce.backend.dto.SignupRequest;
 import com.ecommerce.backend.entity.ERole;
+import com.ecommerce.backend.entity.OtpVerification;
 import com.ecommerce.backend.entity.Role;
 import com.ecommerce.backend.entity.User;
 import com.ecommerce.backend.payload.request.LoginRequest;
 import com.ecommerce.backend.payload.request.TokenRequest;
 import com.ecommerce.backend.payload.response.JwtResponse;
+import com.ecommerce.backend.repository.OtpVerificationRepository;
 import com.ecommerce.backend.repository.RoleRepository;
 import com.ecommerce.backend.repository.UserRepository;
 import com.ecommerce.backend.security.JwtUtils;
 import com.ecommerce.backend.security.services.UserDetailsImpl;
-import com.ecommerce.backend.dto.SignupRequest;
-import com.ecommerce.backend.dto.MessageResponse;
-import com.ecommerce.backend.entity.OtpVerification;
-import com.ecommerce.backend.repository.OtpVerificationRepository;
 import com.ecommerce.backend.service.EmailService;
-import org.springframework.transaction.annotation.Transactional;
 import jakarta.validation.Valid;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -129,12 +134,12 @@ public class AuthController {
         } else {
             user = new User();
             user.setEmail(email);
-            user.setUsername(email); // Dùng email làm username
+            user.setUsername(email);
             user.setFullName(name);
             user.setAvatar(picture);
             user.setProvider("google");
             user.setProviderId(googleId);
-            
+
             Set<Role> roles = new HashSet<>();
             Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                     .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy vai trò người dùng."));
@@ -143,11 +148,10 @@ public class AuthController {
             userRepository.save(user);
         }
 
-        // Tạo Authentication giả lập cho Spring Security
         UserDetailsImpl userDetails = UserDetailsImpl.build(user);
         Authentication authentication = new UsernamePasswordAuthenticationToken(
                 userDetails, null, userDetails.getAuthorities());
-        
+
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwt = jwtUtils.generateJwtToken(authentication);
 
@@ -192,7 +196,6 @@ public class AuthController {
             }
         }
 
-        // Create new user's account (disabled by default)
         User user = User.builder()
                 .username(signUpRequest.getUsername())
                 .email(signUpRequest.getEmail())
@@ -205,7 +208,7 @@ public class AuthController {
         Set<String> strRoles = signUpRequest.getRole();
         Set<Role> roles = new HashSet<>();
         if (strRoles != null && strRoles.stream().anyMatch(r -> "admin".equalsIgnoreCase(r))) {
-            return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Không thể tự đăng ký quyền quản trị."));
+            return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Không thể tự đăng ký quyền quản trị"));
         }
         Role userRole = roleRepository.findByName(ERole.ROLE_USER)
                 .orElseThrow(() -> new RuntimeException("Lỗi: Không tìm thấy vai trò người dùng."));
@@ -214,20 +217,18 @@ public class AuthController {
         user.setRoles(roles);
         userRepository.save(user);
 
-        // Generate OTP
         Random random = new Random();
         String otp = String.format("%06d", random.nextInt(1000000));
-        
+
         OtpVerification otpVerification = OtpVerification.builder()
                 .email(user.getEmail())
                 .otp(otp)
                 .expiryTime(LocalDateTime.now().plusMinutes(5))
                 .type("SIGNUP")
                 .build();
-        
+
         otpVerificationRepository.save(otpVerification);
 
-        // Send OTP Email with dev fallback
         try {
             emailService.sendOtpEmail(user.getEmail(), otp, "SIGNUP");
             return ResponseEntity.ok(new MessageResponse("Đăng ký thành công! Vui lòng kiểm tra email để lấy mã OTP."));
@@ -247,7 +248,7 @@ public class AuthController {
     @Transactional
     public ResponseEntity<?> verifyOtp(@RequestParam String email, @RequestParam String otp, @RequestParam(defaultValue = "SIGNUP") String type) {
         Optional<OtpVerification> otpOpt = otpVerificationRepository.findByEmailAndOtpAndType(email, otp, type);
-        
+
         if (otpOpt.isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: OTP hoặc email không đúng!"));
         }
@@ -258,7 +259,6 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: OTP đã hết hạn! Vui lòng yêu cầu mã mới."));
         }
 
-        // Activate user
         Optional<User> userOpt = userRepository.findByEmail(email);
         if (userOpt.isEmpty()) {
             return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Không tìm thấy người dùng!"));
@@ -268,7 +268,6 @@ public class AuthController {
         user.setEnabled(true);
         userRepository.save(user);
 
-        // Delete OTP
         otpVerificationRepository.delete(otpVerification);
 
         return ResponseEntity.ok(new MessageResponse("Kích hoạt tài khoản thành công! Bạn có thể đăng nhập ngay."));
@@ -287,10 +286,8 @@ public class AuthController {
             return ResponseEntity.badRequest().body(new MessageResponse("Lỗi: Tài khoản đã được xác thực và đang hoạt động!"));
         }
 
-        // Delete old OTPs for this email and type
         otpVerificationRepository.deleteByEmailAndType(email, type);
 
-        // Generate new OTP
         Random random = new Random();
         String otp = String.format("%06d", random.nextInt(1000000));
 
@@ -303,7 +300,6 @@ public class AuthController {
 
         otpVerificationRepository.save(otpVerification);
 
-        // Send Email with dev fallback
         try {
             emailService.sendOtpEmail(email, otp, type);
             return ResponseEntity.ok(new MessageResponse("Đã gửi mã OTP mới đến email của bạn."));

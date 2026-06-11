@@ -41,13 +41,13 @@ public class GeminiEmbeddingService {
 
         Map<String, Object> response = restTemplate.postForObject(url, requestBody, Map.class);
         if (response == null || !response.containsKey("embedding")) {
-            throw new RuntimeException("Embedding API khong tra ve embedding.");
+            throw new RuntimeException("Embedding API không trả về embedding.");
         }
 
         Map<String, Object> embedding = (Map<String, Object>) response.get("embedding");
         Object valuesObj = embedding.get("values");
         if (!(valuesObj instanceof List<?> values)) {
-            throw new RuntimeException("Embedding API tra ve du lieu khong hop le.");
+            throw new RuntimeException("Embedding API trả về dữ liệu không hợp lệ.");
         }
 
         List<Double> vector = new ArrayList<>(values.size());
@@ -58,7 +58,7 @@ public class GeminiEmbeddingService {
         }
 
         if (vector.isEmpty()) {
-            throw new RuntimeException("Embedding vector rong.");
+            throw new RuntimeException("Embedding vector rỗng.");
         }
 
         return vector;

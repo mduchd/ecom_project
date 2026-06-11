@@ -148,7 +148,7 @@ public class ProductRagRetrievalService {
             }
             return HexFormat.of().formatHex(digest.digest());
         } catch (Exception e) {
-            throw new RuntimeException("Khong tao duoc fingerprint cho product index.", e);
+            throw new RuntimeException("Không tạo được fingerprint cho product index.", e);
         }
     }
 

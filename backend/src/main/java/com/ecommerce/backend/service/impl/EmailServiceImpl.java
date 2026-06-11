@@ -49,11 +49,11 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendOtpEmail(String toEmail, String otp, String type) {
-        String subject = type.equals("SIGNUP") ? "Snapcart - OTP kich hoat tai khoan" : "Snapcart - OTP khoi phuc mat khau";
-        String actionTitle = type.equals("SIGNUP") ? "Kich hoat tai khoan" : "Khoi phuc mat khau";
+        String subject = type.equals("SIGNUP") ? "Snapcart - OTP kích hoạt tài khoản" : "Snapcart - OTP khôi phục mật khẩu";
+        String actionTitle = type.equals("SIGNUP") ? "Kích hoạt tài khoản" : "Khôi phục mật khẩu";
         String actionDesc = type.equals("SIGNUP")
-                ? "Cam on ban da lua chon Snapcart. Vui long nhap ma OTP ben duoi de kich hoat tai khoan."
-                : "Chung toi nhan duoc yeu cau khoi phuc mat khau tu ban. Hay su dung ma OTP ben duoi.";
+                ? "Cảm ơn bạn đã lựa chọn Snapcart. Vui lòng nhập mã OTP bên dưới để kích hoạt tài khoản."
+                : "Chúng tôi nhận được yêu cầu khôi phục mật khẩu từ bạn. Hãy sử dụng mã OTP bên dưới.";
 
         String htmlContent = "<div style=\"font-family: Arial, sans-serif; background:#0b0f19; padding:40px 20px; text-align:center; color:#ffffff;\">"
                 + "<div style=\"max-width:500px; margin:0 auto; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:40px; text-align:left;\">"
@@ -63,7 +63,7 @@ public class EmailServiceImpl implements EmailService {
                 + "<div style=\"margin:30px 0; padding:20px; text-align:center; border:1px solid rgba(59,130,246,0.25); border-radius:16px;\">"
                 + "<span style=\"font-size:36px; letter-spacing:8px; color:#60a5fa; font-weight:700;\">" + otp + "</span>"
                 + "</div>"
-                + "<p style=\"color:#94a3b8; font-size:12px; text-align:center;\">OTP co hieu luc trong 5 phut.</p>"
+                + "<p style=\"color:#94a3b8; font-size:12px; text-align:center;\">OTP có hiệu lực trong 5 phút.</p>"
                 + "</div>"
                 + "</div>";
 
@@ -72,7 +72,7 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendOrderConfirmationEmail(String toEmail, String fullName, String orderId, double totalAmount, List<Map<String, Object>> items) {
-        String subject = "Snapcart - Xac nhan don hang #" + orderId;
+        String subject = "Snapcart - Xác nhận đơn hàng #" + orderId;
         StringBuilder itemsHtml = new StringBuilder();
         for (Map<String, Object> item : items) {
             double price = parseMoney(item.get("price"));
@@ -86,14 +86,14 @@ public class EmailServiceImpl implements EmailService {
         String htmlContent = "<div style=\"font-family: Arial, sans-serif; background:#0b0f19; padding:40px 20px; color:#ffffff;\">"
                 + "<div style=\"max-width:600px; margin:0 auto; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:40px;\">"
                 + "<h2 style=\"margin:0 0 10px; text-align:center;\">Snapcart</h2>"
-                + "<h3 style=\"margin-top:0; text-align:center;\">Cam on ban da dat hang, " + fullName + "!</h3>"
-                + "<p style=\"color:#cbd5e1;\">Don hang cua ban da duoc ghi nhan va da co hoa don PDF dinh kem.</p>"
-                + "<p><strong>Ma don hang:</strong> #" + orderId + "</p>"
+                + "<h3 style=\"margin-top:0; text-align:center;\">Cảm ơn bạn đã đặt hàng, " + fullName + "!</h3>"
+                + "<p style=\"color:#cbd5e1;\">Đơn hàng của bạn đã được ghi nhận và đã có hóa đơn PDF đính kèm.</p>"
+                + "<p><strong>Mã đơn hàng:</strong> #" + orderId + "</p>"
                 + "<table style=\"width:100%; border-collapse:collapse; margin:20px 0;\">"
-                + "<thead><tr><th style=\"text-align:left; padding-bottom:10px; color:#94a3b8;\">San pham</th><th style=\"text-align:center; padding-bottom:10px; color:#94a3b8;\">SL</th><th style=\"text-align:right; padding-bottom:10px; color:#94a3b8;\">Don gia</th></tr></thead>"
+                + "<thead><tr><th style=\"text-align:left; padding-bottom:10px; color:#94a3b8;\">Sản phẩm</th><th style=\"text-align:center; padding-bottom:10px; color:#94a3b8;\">SL</th><th style=\"text-align:right; padding-bottom:10px; color:#94a3b8;\">Đơn giá</th></tr></thead>"
                 + "<tbody>" + itemsHtml + "</tbody>"
                 + "</table>"
-                + "<div style=\"text-align:right; font-size:20px; font-weight:700; color:#10b981;\">Tong thanh toan: " + formatVnd(totalAmount) + "</div>"
+                + "<div style=\"text-align:right; font-size:20px; font-weight:700; color:#10b981;\">Tổng thanh toán: " + formatVnd(totalAmount) + "</div>"
                 + "</div>"
                 + "</div>";
 
@@ -143,7 +143,7 @@ public class EmailServiceImpl implements EmailService {
                 throw new RuntimeException("Resend API error (" + response.statusCode() + "): " + response.body());
             }
         } catch (Exception e) {
-            throw new RuntimeException("Gui email that bai: " + e.getMessage(), e);
+            throw new RuntimeException("Gửi email thất bại: " + e.getMessage(), e);
         }
     }
 
@@ -160,15 +160,15 @@ public class EmailServiceImpl implements EmailService {
                 final float left = 50f;
 
                 y = drawText(content, boldFont, 22f, left, y, "SNAPCART");
-                y = drawText(content, regularFont, 12f, left, y - 8f, "Hoa don xac nhan don hang");
+                y = drawText(content, regularFont, 12f, left, y - 8f, "Hóa đơn xác nhận đơn hàng");
 
                 y -= 18f;
-                y = drawLabelValue(content, regularFont, boldFont, left, y, "Ma don hang", "#" + orderId);
-                y = drawLabelValue(content, regularFont, boldFont, left, y - 8f, "Khach hang", fullName);
-                y = drawLabelValue(content, regularFont, boldFont, left, y - 8f, "Tong thanh toan", formatVnd(totalAmount));
+                y = drawLabelValue(content, regularFont, boldFont, left, y, "Mã đơn hàng", "#" + orderId);
+                y = drawLabelValue(content, regularFont, boldFont, left, y - 8f, "Khách hàng", fullName);
+                y = drawLabelValue(content, regularFont, boldFont, left, y - 8f, "Tổng thanh toán", formatVnd(totalAmount));
                 y -= 20f;
 
-                y = drawText(content, boldFont, 13f, left, y, "Danh sach san pham");
+                y = drawText(content, boldFont, 13f, left, y, "Danh sách sản phẩm");
                 y = drawText(content, regularFont, 10.5f, left, y - 6f, "--------------------------------------------------------------");
                 y -= 12f;
 
@@ -187,8 +187,8 @@ public class EmailServiceImpl implements EmailService {
 
                 y -= 10f;
                 y = drawText(content, regularFont, 10.5f, left, y, "--------------------------------------------------------------");
-                y = drawText(content, boldFont, 13f, left, y - 4f, "Tong cong: " + formatVnd(totalAmount));
-                drawText(content, regularFont, 10.5f, left, 40f, "Hoa don nay duoc phat hanh tu dong boi he thong Snapcart.");
+                y = drawText(content, boldFont, 13f, left, y - 4f, "Tổng cộng: " + formatVnd(totalAmount));
+                drawText(content, regularFont, 10.5f, left, 40f, "Hóa đơn này được phát hành tự động bởi hệ thống Snapcart.");
             }
 
             document.save(output);

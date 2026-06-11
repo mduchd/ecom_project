@@ -33,6 +33,22 @@ const cleanMessageText = (text) => {
         .trim();
 };
 
+const shouldHideSuggestedProducts = (text) => {
+    if (!text) return false;
+    const normalized = text
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+
+    return (
+        normalized.includes("chi co the giup ban tim kiem thong tin ve san pham") ||
+        normalized.includes("chi co the ho tro thong tin ve san pham") ||
+        normalized.includes("khong lien quan den mua sam") ||
+        normalized.includes("minh chi co the giup ve san pham") ||
+        normalized.includes("toi chi co the giup ve san pham")
+    );
+};
+
 const inferProductNamesFromReply = (text) => {
     if (!text) return [];
 
@@ -183,7 +199,9 @@ export default function AIChatBot() {
             const replyText = cleanMessageText(response.data?.reply);
             let suggestedProducts = response.data?.products ?? [];
 
-            if (suggestedProducts.length === 0) {
+            if (shouldHideSuggestedProducts(replyText)) {
+                suggestedProducts = [];
+            } else if (suggestedProducts.length === 0) {
                 suggestedProducts = await enrichProductsFromReply(response.data?.reply);
             }
 
@@ -201,7 +219,7 @@ export default function AIChatBot() {
                 ...prev,
                 {
                     role: "bot",
-                    content: "Rất tiếc, mình đang gặp chút trục trặc kỹ thuật kết nối. Bạn vui lòng thử lại sau nhé!",
+                    content: "Rất tiếc, mình đang gặp trục trặc kỹ thuật kết nối. Bạn vui lòng thử lại sau nhé!",
                     products: []
                 }
             ]);

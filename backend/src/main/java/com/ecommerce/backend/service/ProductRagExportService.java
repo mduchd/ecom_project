@@ -65,7 +65,7 @@ public class ProductRagExportService {
 
             return normalizedPath;
         } catch (IOException e) {
-            throw new RuntimeException("Khong the xuat product docs ra file: " + normalizedPath, e);
+            throw new RuntimeException("Không thể xuất product docs ra file: " + normalizedPath, e);
         }
     }
 

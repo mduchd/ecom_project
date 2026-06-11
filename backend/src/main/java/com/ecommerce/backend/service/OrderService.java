@@ -82,7 +82,7 @@ public class OrderService {
         User user = userId == null
                 ? null
                 : userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay nguoi dung voi id: " + userId));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với id: " + userId));
 
         Map<Long, Product> productsById = loadProductsById(request.getItems());
         OrderPricing pricing = calculatePricing(request.getItems(), productsById);
@@ -127,19 +127,19 @@ public class OrderService {
     @Transactional
     public Order cancelPending(String orderCode, String cancelToken, Long authenticatedUserId) {
         if (orderCode == null || orderCode.trim().isEmpty()) {
-            throw new IllegalArgumentException("Vui long nhap ma don hang.");
+            throw new IllegalArgumentException("Vui lòng nhập mã đơn hàng.");
         }
 
         Order order = orderRepository
                 .findByOrderCodeWithUser(orderCode.trim())
-                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay don hang voi ma da cung cap."));
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng với mã đã cung cấp."));
 
         if (!STATUS_PENDING.equalsIgnoreCase(order.getStatus().trim())) {
-            throw new IllegalArgumentException("Chi co the huy don hang dang cho xu ly.");
+            throw new IllegalArgumentException("Chỉ có thể hủy đơn hàng đang chờ xử lý.");
         }
 
         if (!isAuthorizedToCancel(order, cancelToken, authenticatedUserId)) {
-            throw new IllegalArgumentException("Khong co quyen huy don hang nay.");
+            throw new IllegalArgumentException("Không có quyền hủy đơn hàng này.");
         }
 
         order.setStatus(STATUS_CANCELED);
@@ -192,7 +192,7 @@ public class OrderService {
     @Transactional
     public Order updateStatus(Long id, String status) {
         Order existing = orderRepository.findByIdWithUser(id)
-                .orElseThrow(() -> new RuntimeException("Khong tim thay don hang voi id: " + id));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với id: " + id));
         String oldStatus = normalizeTrackingStatus(existing.getStatus());
         String newStatus = normalizeTrackingStatus(status);
         existing.setStatus(toStoredStatus(status));
@@ -215,7 +215,7 @@ public class OrderService {
     @Transactional
     public Order markPaidByOrderCode(String orderCode) {
         Order existing = orderRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new RuntimeException("Khong tim thay don hang voi ma: " + orderCode));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với mã: " + orderCode));
 
         String currentStatus = existing.getStatus();
         if (isSameStatus(currentStatus, STATUS_CANCELED)) {
@@ -235,17 +235,17 @@ public class OrderService {
 
     public Order getByOrderCode(String orderCode) {
         return orderRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new RuntimeException("Khong tim thay don hang voi ma: " + orderCode));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với mã: " + orderCode));
     }
 
     public OrderTrackingResponse track(String orderCode, String email) {
         if (orderCode == null || orderCode.trim().isEmpty() || email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("Vui long nhap ma don hang va email.");
+            throw new IllegalArgumentException("Vui lòng nhập mã đơn hàng và email.");
         }
 
         Order order = orderRepository
                 .findByOrderCodeIgnoreCaseAndCustomerEmailIgnoreCase(orderCode.trim(), email.trim())
-                .orElseThrow(() -> new OrderTrackingNotFoundException("Khong tim thay don hang voi thong tin da cung cap."));
+                .orElseThrow(() -> new OrderTrackingNotFoundException("Không tìm thấy đơn hàng với thông tin đã cung cấp."));
 
         String normalized = normalizeTrackingStatus(order.getStatus());
 
@@ -267,7 +267,7 @@ public class OrderService {
 
     private Map<Long, Product> loadProductsById(List<CreateOrderItemRequest> items) {
         if (items == null || items.isEmpty()) {
-            throw new IllegalArgumentException("Don hang phai co it nhat mot san pham.");
+            throw new IllegalArgumentException("Đơn hàng phải có ít nhất một sản phẩm.");
         }
 
         Set<Long> productIds = new LinkedHashSet<>();
@@ -288,15 +288,15 @@ public class OrderService {
         for (CreateOrderItemRequest item : items) {
             Product product = productsById.get(item.getProductId());
             if (product == null) {
-                throw new IllegalArgumentException("Khong tim thay san pham voi id: " + item.getProductId());
+                throw new IllegalArgumentException("Không tìm thấy sản phẩm với id: " + item.getProductId());
             }
             if (product.getStockQuantity() != null && product.getStockQuantity() < item.getQuantity()) {
-                throw new IllegalArgumentException("San pham '" + product.getName() + "' khong du so luong.");
+                throw new IllegalArgumentException("Sản phẩm '" + product.getName() + "' không đủ số lượng.");
             }
 
             BigDecimal unitPrice = product.getPrice();
             if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Gia san pham khong hop le: " + product.getName());
+                throw new IllegalArgumentException("Giá sản phẩm không hợp lệ: " + product.getName());
             }
 
             BigDecimal lineTotal = unitPrice
@@ -435,19 +435,19 @@ public class OrderService {
 
     private String currentMessage(String status) {
         return switch (status) {
-            case "PAID" -> "Don hang da thanh toan va dang cho ban giao.";
-            case "SHIPPING" -> "Don hang dang duoc giao den ban.";
-            case "DELIVERED" -> "Don hang da duoc giao thanh cong.";
-            case "CANCELED" -> "Don hang da bi huy.";
-            default -> "Snapcart da ghi nhan don hang va dang xu ly.";
+            case "PAID" -> "Đơn hàng đã thanh toán và đang chờ bàn giao.";
+            case "SHIPPING" -> "Đơn hàng đang được giao đến bạn.";
+            case "DELIVERED" -> "Đơn hàng đã được giao thành công.";
+            case "CANCELED" -> "Đơn hàng đã bị hủy.";
+            default -> "Snapcart đã ghi nhận đơn hàng và đang xử lý.";
         };
     }
 
     private List<OrderTrackingStepResponse> buildTrackingSteps(String status, LocalDateTime createdAt) {
         if ("CANCELED".equals(status)) {
             return List.of(
-                    new OrderTrackingStepResponse("PLACED", "Da dat hang", "Snapcart da ghi nhan don hang.", "DONE", createdAt),
-                    new OrderTrackingStepResponse("CANCELED", "Da huy", "Don hang da bi huy.", "CURRENT", null)
+                    new OrderTrackingStepResponse("PLACED", "Đã đặt hàng", "Snapcart đã ghi nhận đơn hàng.", "DONE", createdAt),
+                    new OrderTrackingStepResponse("CANCELED", "Đã hủy", "Đơn hàng đã bị hủy.", "CURRENT", null)
             );
         }
 
@@ -456,10 +456,10 @@ public class OrderService {
         boolean delivered = "DELIVERED".equals(status);
 
         return List.of(
-                new OrderTrackingStepResponse("PLACED", "Da dat hang", "Snapcart da ghi nhan don hang.", "DONE", createdAt),
-                new OrderTrackingStepResponse("CONFIRMED", "Dang xu ly", "Don hang dang cho xac nhan hoac thanh toan.", paidOrBeyond ? "DONE" : "CURRENT", null),
-                new OrderTrackingStepResponse("SHIPPING", "Dang giao", "Don hang dang tren duong giao den ban.", delivered ? "DONE" : shippingOrBeyond ? "CURRENT" : "UPCOMING", null),
-                new OrderTrackingStepResponse("DELIVERED", "Da giao", "Don hang da duoc giao thanh cong.", delivered ? "CURRENT" : "UPCOMING", null)
+                new OrderTrackingStepResponse("PLACED", "Đã đặt hàng", "Snapcart đã ghi nhận đơn hàng.", "DONE", createdAt),
+                new OrderTrackingStepResponse("CONFIRMED", "Đang xử lý", "Đơn hàng đang chờ xác nhận hoặc thanh toán.", paidOrBeyond ? "DONE" : "CURRENT", null),
+                new OrderTrackingStepResponse("SHIPPING", "Đang giao", "Đơn hàng đang trên đường giao đến bạn.", delivered ? "DONE" : shippingOrBeyond ? "CURRENT" : "UPCOMING", null),
+                new OrderTrackingStepResponse("DELIVERED", "Đã giao", "Đơn hàng đã được giao thành công.", delivered ? "CURRENT" : "UPCOMING", null)
         );
     }
 
