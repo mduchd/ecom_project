@@ -1,26 +1,106 @@
 import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 import api from "../services/productService";
 import { FaRobot, FaPaperPlane, FaTimes, FaStar, FaUser } from "react-icons/fa";
 
-// ── Quick Suggestion Config ──────────────────────────────────────────────────
 const QUICK_SUGGESTIONS = [
     { label: "Sản phẩm bán chạy? 🔥", text: "Shop có những sản phẩm nào bán chạy nhất hiện nay?" },
     { label: "Chính sách đổi trả? 📦", text: "Chính sách bảo hành và đổi trả sản phẩm của shop như thế nào?" },
-    { label: "Mã giảm giá mới? 🎫", text: "Hiện tại shop đang có chương trình khuyến mãi hay mã giảm giá nào không?" },
-    { label: "Liên hệ hỗ trợ 📞", text: "Tôi muốn liên hệ trực tiếp với nhân viên tư vấn khách hàng thì làm thế nào?" }
+    { label: "Mã giảm giá mới? 🎁", text: "Hiện tại shop đang có chương trình khuyến mãi hay mã giảm giá nào không?" },
+    { label: "Liên hệ hỗ trợ ☎️", text: "Tôi muốn liên hệ trực tiếp với nhân viên tư vấn khách hàng thì làm thế nào?" }
 ];
+
+const BOT_WELCOME_MESSAGE = {
+    role: "bot",
+    content:
+        "Chào bạn! Mình là SnapBot, trợ lý mua sắm AI của SnapCart. Mình có thể giúp gì cho bạn hôm nay? Bạn có thể nhập câu hỏi hoặc chọn các câu hỏi gợi ý nhanh bên dưới nhé!",
+    products: []
+};
+
+const formatCurrency = (value) => {
+    if (value == null) return "";
+    return Number(value).toLocaleString("vi-VN") + " VND";
+};
+
+const cleanMessageText = (text) => {
+    if (!text) return "";
+    return text
+        .replace(/\*\*/g, "")
+        .replace(/__/g, "")
+        .replace(/`/g, "")
+        .replace(/\r/g, "")
+        .trim();
+};
+
+function ProductSuggestionCard({ product }) {
+    const salePrice = product.discountPrice ?? product.price;
+    const originalPrice = product.discountPrice ? product.price : null;
+    const isAvailable = (product.stockQuantity ?? 0) > 0;
+
+    return (
+        <Link
+            to={`/product/${product.id}`}
+            className="block rounded-2xl border border-blue-100 bg-gradient-to-br from-white to-blue-50/80 p-3 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
+        >
+            <div className="flex gap-3">
+                <div className="h-20 w-20 flex-shrink-0 overflow-hidden rounded-xl bg-white ring-1 ring-gray-100">
+                    {product.imageUrl ? (
+                        <img
+                            src={product.imageUrl}
+                            alt={product.name}
+                            className="h-full w-full object-cover"
+                        />
+                    ) : (
+                        <div className="flex h-full w-full items-center justify-center bg-gray-100 text-[11px] font-semibold text-gray-400">
+                            No image
+                        </div>
+                    )}
+                </div>
+
+                <div className="min-w-0 flex-1">
+                    <p className="line-clamp-2 text-sm font-semibold leading-5 text-gray-900">
+                        {product.name}
+                    </p>
+
+                    {(product.brand || product.category) && (
+                        <p className="mt-1 text-[11px] font-medium text-gray-500">
+                            {[product.brand, product.category].filter(Boolean).join(" • ")}
+                        </p>
+                    )}
+
+                    <div className="mt-2 flex items-baseline gap-2">
+                        <span className="text-sm font-bold text-blue-700">{formatCurrency(salePrice)}</span>
+                        {originalPrice && (
+                            <span className="text-[11px] text-gray-400 line-through">
+                                {formatCurrency(originalPrice)}
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="mt-2 flex items-center justify-between">
+                        <span
+                            className={`inline-flex rounded-full px-2 py-1 text-[10px] font-semibold ${
+                                isAvailable ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-500"
+                            }`}
+                        >
+                            {isAvailable ? "Còn hàng" : "Hết hàng"}
+                        </span>
+                        <span className="text-[11px] font-semibold text-blue-600">Xem chi tiết</span>
+                    </div>
+                </div>
+            </div>
+        </Link>
+    );
+}
 
 export default function AIChatBot() {
     const [isOpen, setIsOpen] = useState(false);
     const [showTooltip, setShowTooltip] = useState(true);
-    const [messages, setMessages] = useState([
-        { role: "bot", content: "Chào bạn! Mình là SnapBot, trợ lý mua sắm AI của SnapCart. Mình có thể giúp gì cho bạn hôm nay? Bạn có thể nhập câu hỏi hoặc chọn các câu hỏi gợi ý nhanh bên dưới nhé!" }
-    ]);
+    const [messages, setMessages] = useState([BOT_WELCOME_MESSAGE]);
     const [input, setInput] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const scrollRef = useRef(null);
 
-    // Tự động cuộn xuống khi có tin nhắn mới hoặc đang load câu trả lời
     useEffect(() => {
         if (scrollRef.current) {
             scrollRef.current.scrollTo({
@@ -30,7 +110,6 @@ export default function AIChatBot() {
         }
     }, [messages, isLoading]);
 
-    // Ẩn tooltip sau 8 giây tự động để tránh cản trở tầm nhìn
     useEffect(() => {
         const timer = setTimeout(() => {
             setShowTooltip(false);
@@ -46,21 +125,30 @@ export default function AIChatBot() {
         if (typeof messageText !== "string") {
             setInput("");
         }
-        
-        setMessages(prev => [...prev, { role: "user", content: userMsg }]);
+
+        setMessages((prev) => [...prev, { role: "user", content: userMsg, products: [] }]);
         setIsLoading(true);
 
         try {
-            const response = await api.post("/ai/chat", {
-                message: userMsg
-            });
-            setMessages(prev => [...prev, { role: "bot", content: response.data.reply }]);
+            const response = await api.post("/ai/chat", { message: userMsg });
+            setMessages((prev) => [
+                ...prev,
+                {
+                    role: "bot",
+                    content: cleanMessageText(response.data?.reply),
+                    products: response.data?.products ?? []
+                }
+            ]);
         } catch (error) {
             console.error("Chat error:", error);
-            setMessages(prev => [...prev, { 
-                role: "bot", 
-                content: "Rất tiếc, mình đang gặp chút trục trặc kỹ thuật kết nối. Bạn vui lòng thử lại sau nhé!" 
-            }]);
+            setMessages((prev) => [
+                ...prev,
+                {
+                    role: "bot",
+                    content: "Rất tiếc, mình đang gặp chút trục trặc kỹ thuật kết nối. Bạn vui lòng thử lại sau nhé!",
+                    products: []
+                }
+            ]);
         } finally {
             setIsLoading(false);
         }
@@ -68,110 +156,115 @@ export default function AIChatBot() {
 
     return (
         <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans">
-            {/* Tooltip Bubble (Hiển thị phía bên trái của Toggle Button khi chat đang đóng) */}
             {!isOpen && showTooltip && (
-                <div className="absolute bottom-16 right-2 mr-2 bg-slate-900/95 text-white text-xs font-bold py-2 px-3.5 rounded-2xl shadow-xl flex items-center gap-1.5 whitespace-nowrap border border-slate-800 animate-float pointer-events-auto z-40 select-none">
+                <div className="absolute bottom-16 right-2 mr-2 z-40 flex items-center gap-1.5 whitespace-nowrap rounded-2xl border border-slate-800 bg-slate-900/95 px-3.5 py-2 text-xs font-bold text-white shadow-xl pointer-events-auto select-none animate-float">
                     <span>Trò chuyện với SnapBot ✨</span>
-                    <button 
+                    <button
                         onClick={(e) => {
                             e.stopPropagation();
                             setShowTooltip(false);
                         }}
-                        className="text-gray-400 hover:text-white ml-1 focus:outline-none transition-colors"
+                        className="ml-1 text-gray-400 transition-colors hover:text-white focus:outline-none"
                     >
-                        <FaTimes className="w-2.5 h-2.5" />
+                        <FaTimes className="h-2.5 w-2.5" />
                     </button>
-                    {/* Arrow */}
-                    <div className="absolute right-6 top-full w-2 h-2 bg-slate-900 border-r border-b border-slate-800 rotate-45"></div>
+                    <div className="absolute right-6 top-full h-2 w-2 rotate-45 border-b border-r border-slate-800 bg-slate-900" />
                 </div>
             )}
 
-            {/* Chat Window */}
             {isOpen && (
-                <div className="mb-4 w-[360px] sm:w-[410px] h-[550px] bg-white border border-gray-100 rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-chatIn">
-                    {/* Header */}
-                    <div className="bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 p-4 flex items-center justify-between text-white shadow-md">
+                <div className="mb-4 flex h-[550px] w-[360px] flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white shadow-2xl animate-chatIn sm:w-[410px]">
+                    <div className="flex items-center justify-between bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 p-4 text-white shadow-md">
                         <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center border border-white/20 relative shadow-inner">
-                                <FaRobot className="w-5 h-5 text-white" />
-                                <span className="absolute bottom-0 right-0 w-2.5 h-2.5 bg-emerald-400 border-2 border-white rounded-full" />
+                            <div className="relative flex h-10 w-10 items-center justify-center rounded-full border border-white/20 bg-white/10 shadow-inner">
+                                <FaRobot className="h-5 w-5 text-white" />
+                                <span className="absolute bottom-0 right-0 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-400" />
                             </div>
                             <div>
-                                <h3 className="font-bold text-sm flex items-center gap-1">
+                                <h3 className="flex items-center gap-1 text-sm font-bold">
                                     SnapBot
-                                    <span className="bg-yellow-400/20 text-yellow-300 text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border border-yellow-400/30 flex items-center gap-0.5">
-                                        <FaStar className="w-2 h-2 fill-current" /> AI
+                                    <span className="flex items-center gap-0.5 rounded border border-yellow-400/30 bg-yellow-400/20 px-1.5 py-0.5 text-[9px] font-black uppercase tracking-wider text-yellow-300">
+                                        <FaStar className="h-2 w-2 fill-current" /> AI
                                     </span>
                                 </h3>
-                                <p className="text-[10px] text-blue-100/90 font-medium">Hỗ trợ khách hàng tự động</p>
+                                <p className="text-[10px] font-medium text-blue-100/90">Hỗ trợ khách hàng tự động</p>
                             </div>
                         </div>
-                        <button 
+                        <button
                             onClick={() => setIsOpen(false)}
-                            className="p-2 bg-white/10 hover:bg-white/20 rounded-xl transition-all duration-150 active:scale-95"
+                            className="rounded-xl bg-white/10 p-2 transition-all duration-150 active:scale-95 hover:bg-white/20"
                         >
-                            <FaTimes className="w-4 h-4" />
+                            <FaTimes className="h-4 w-4" />
                         </button>
                     </div>
 
-                    {/* Messages Area */}
-                    <div 
+                    <div
                         ref={scrollRef}
-                        className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-gray-50/50 to-white"
+                        className="flex-1 space-y-4 overflow-y-auto bg-gradient-to-b from-gray-50/50 to-white p-4"
                     >
                         {messages.map((msg, i) => (
-                            <div 
-                                key={i} 
-                                className={`flex items-start gap-2.5 ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-messageIn`}
+                            <div
+                                key={`${msg.role}-${i}`}
+                                className={`flex items-start gap-2.5 animate-messageIn ${msg.role === "user" ? "justify-end" : "justify-start"}`}
                             >
-                                {/* Bot Avatar */}
-                                {msg.role === 'bot' && (
-                                    <div className="w-7 h-7 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <FaRobot className="w-3.5 h-3.5 text-blue-600" />
+                                {msg.role === "bot" && (
+                                    <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-blue-100 bg-blue-50">
+                                        <FaRobot className="h-3.5 w-3.5 text-blue-600" />
                                     </div>
                                 )}
-                                
-                                <div className={`max-w-[78%] p-3.5 rounded-2xl text-xs sm:text-sm shadow-sm leading-relaxed ${
-                                    msg.role === 'user' 
-                                    ? 'bg-gradient-to-tr from-blue-600 to-indigo-600 text-white rounded-tr-none font-medium' 
-                                    : 'bg-white text-gray-700 border border-gray-100 rounded-tl-none font-medium'
-                                }`}>
-                                    {msg.content}
+
+                                <div className={`max-w-[78%] ${msg.role === "user" ? "items-end" : "items-start"} flex flex-col gap-2`}>
+                                    {!!msg.content && (
+                                        <div
+                                            className={`rounded-2xl p-3.5 text-xs font-medium leading-relaxed shadow-sm sm:text-sm ${
+                                                msg.role === "user"
+                                                    ? "rounded-tr-none bg-gradient-to-tr from-blue-600 to-indigo-600 text-white"
+                                                    : "rounded-tl-none border border-gray-100 bg-white text-gray-700"
+                                            }`}
+                                        >
+                                            <p className="whitespace-pre-line">{msg.content}</p>
+                                        </div>
+                                    )}
+
+                                    {msg.role === "bot" && msg.products?.length > 0 && (
+                                        <div className="w-full space-y-2">
+                                            {msg.products.map((product) => (
+                                                <ProductSuggestionCard key={product.id} product={product} />
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
 
-                                {/* User Avatar */}
-                                {msg.role === 'user' && (
-                                    <div className="w-7 h-7 rounded-full bg-indigo-50 border border-indigo-100 flex items-center justify-center flex-shrink-0 mt-0.5">
-                                        <FaUser className="w-3 h-3 text-indigo-600" />
+                                {msg.role === "user" && (
+                                    <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-indigo-100 bg-indigo-50">
+                                        <FaUser className="h-3 w-3 text-indigo-600" />
                                     </div>
                                 )}
                             </div>
                         ))}
 
-                        {/* Typing / Loading Indicator */}
                         {isLoading && (
                             <div className="flex items-start gap-2.5 animate-messageIn">
-                                <div className="w-7 h-7 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center flex-shrink-0">
-                                    <FaRobot className="w-3.5 h-3.5 text-blue-600" />
+                                <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full border border-blue-100 bg-blue-50">
+                                    <FaRobot className="h-3.5 w-3.5 text-blue-600" />
                                 </div>
-                                <div className="bg-white border border-gray-100 py-3.5 px-4 rounded-2xl rounded-tl-none shadow-sm flex items-center gap-1">
-                                    <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.3s]" />
-                                    <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
-                                    <span className="w-1.5 h-1.5 bg-blue-600 rounded-full animate-bounce" />
+                                <div className="flex items-center gap-1 rounded-2xl rounded-tl-none border border-gray-100 bg-white px-4 py-3.5 shadow-sm">
+                                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-blue-600 [animation-delay:-0.3s]" />
+                                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-blue-600 [animation-delay:-0.15s]" />
+                                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-blue-600" />
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* Quick Replies suggestions bar */}
-                    <div className="px-4 py-2 border-t border-gray-50 bg-gray-50/50">
-                        <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none snap-x">
+                    <div className="border-t border-gray-50 bg-gray-50/50 px-4 py-2">
+                        <div className="scrollbar-none flex snap-x gap-2 overflow-x-auto pb-1">
                             {QUICK_SUGGESTIONS.map((item, idx) => (
                                 <button
                                     key={idx}
                                     onClick={() => handleSend(item.text)}
                                     disabled={isLoading}
-                                    className="snap-center flex-shrink-0 bg-white hover:bg-blue-50 border border-gray-200/80 hover:border-blue-200 text-[11px] font-bold text-gray-600 hover:text-blue-700 px-3 py-1.5 rounded-full transition-all duration-150 shadow-sm active:scale-95 disabled:opacity-50 disabled:pointer-events-none"
+                                    className="snap-center flex-shrink-0 rounded-full border border-gray-200/80 bg-white px-3 py-1.5 text-[11px] font-bold text-gray-600 shadow-sm transition-all duration-150 hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 active:scale-95 disabled:pointer-events-none disabled:opacity-50"
                                 >
                                     {item.label}
                                 </button>
@@ -179,57 +272,56 @@ export default function AIChatBot() {
                         </div>
                     </div>
 
-                    {/* Input Area */}
-                    <div className="p-4 bg-white border-t border-gray-100">
+                    <div className="border-t border-gray-100 bg-white p-4">
                         <div className="relative flex items-center">
-                            <input 
+                            <input
                                 type="text"
                                 value={input}
                                 onChange={(e) => setInput(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+                                onKeyDown={(e) => e.key === "Enter" && handleSend()}
                                 placeholder="Hỏi SnapBot bất cứ điều gì..."
-                                className="w-full pl-4 pr-12 py-3 bg-gray-50/80 border border-gray-200/80 rounded-2xl text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/10 focus:border-blue-500 focus:bg-white transition-all placeholder-gray-400 font-medium"
+                                className="w-full rounded-2xl border border-gray-200/80 bg-gray-50/80 py-3 pl-4 pr-12 text-xs font-medium transition-all placeholder-gray-400 focus:border-blue-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/10 sm:text-sm"
                             />
-                            <button 
+                            <button
                                 onClick={handleSend}
                                 disabled={!input.trim() || isLoading}
-                                className={`absolute right-1.5 p-2.5 rounded-xl transition-all duration-150 ${
-                                    input.trim() && !isLoading 
-                                    ? 'bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-100 active:scale-95' 
-                                    : 'text-gray-300 bg-transparent'
+                                className={`absolute right-1.5 rounded-xl p-2.5 transition-all duration-150 ${
+                                    input.trim() && !isLoading
+                                        ? "bg-blue-600 text-white shadow-md shadow-blue-100 hover:bg-blue-700 active:scale-95"
+                                        : "bg-transparent text-gray-300"
                                 }`}
                             >
-                                <FaPaperPlane className="w-3.5 h-3.5" />
+                                <FaPaperPlane className="h-3.5 w-3.5" />
                             </button>
                         </div>
-                        <p className="text-[9px] text-center text-gray-400 mt-2 font-medium">
+                        <p className="mt-2 text-center text-[9px] font-medium text-gray-400">
                             Trợ lý SnapBot hoạt động tự động trên công nghệ AI Gemini.
                         </p>
                     </div>
                 </div>
             )}
 
-            {/* Toggle Button with Custom Pulse Glow and Floating Motion */}
-            <button 
+            <button
                 onClick={() => {
                     setIsOpen(!isOpen);
                     setShowTooltip(false);
                 }}
-                className={`w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 active:scale-95 relative z-50 ${
-                    isOpen 
-                    ? 'bg-slate-100 text-slate-600 rotate-90 border border-gray-200' 
-                    : 'bg-gradient-to-tr from-blue-600 via-indigo-600 to-indigo-700 text-white animate-float hover:shadow-indigo-500/20'
+                className={`relative z-50 flex h-14 w-14 items-center justify-center rounded-full shadow-2xl transition-all duration-300 hover:scale-105 active:scale-95 ${
+                    isOpen
+                        ? "rotate-90 border border-gray-200 bg-slate-100 text-slate-600"
+                        : "animate-float bg-gradient-to-tr from-blue-600 via-indigo-600 to-indigo-700 text-white hover:shadow-indigo-500/20"
                 }`}
             >
-                {isOpen ? <FaTimes className="w-5 h-5" /> : (
+                {isOpen ? (
+                    <FaTimes className="h-5 w-5" />
+                ) : (
                     <div className="relative">
-                        <FaRobot className="w-6 h-6" />
-                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 bg-emerald-400 border-2 border-white rounded-full" />
+                        <FaRobot className="h-6 w-6" />
+                        <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-white bg-emerald-400" />
                     </div>
                 )}
             </button>
 
-            {/* Custom Animation and Glow CSS Styles */}
             <style>{`
                 @keyframes float {
                     0%, 100% { transform: translateY(0); }
@@ -243,7 +335,7 @@ export default function AIChatBot() {
                     from { opacity: 0; transform: translateY(8px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
-                
+
                 .animate-float { animation: float 3s ease-in-out infinite; }
                 .animate-chatIn { animation: chatIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
                 .animate-messageIn { animation: messageIn 0.2s ease-out forwards; }
