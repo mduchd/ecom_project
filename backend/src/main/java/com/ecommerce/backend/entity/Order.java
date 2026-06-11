@@ -72,27 +72,27 @@ public class Order {
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean pointsCredited = false;
+    private Boolean pointsCredited = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean redeemedPointsRefunded = false;
+    private Boolean redeemedPointsRefunded = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean earnedPointsReversed = false;
+    private Boolean earnedPointsReversed = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean membershipSpendCredited = false;
+    private Boolean membershipSpendCredited = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean membershipSpendReversed = false;
+    private Boolean membershipSpendReversed = false;
 
     @Column(nullable = false)
     @Builder.Default
-    private boolean confirmationEmailSent = false;
+    private Boolean confirmationEmailSent = false;
 
     @Column(length = 64)
     @JsonIgnore
@@ -109,5 +109,29 @@ public class Order {
         if (createdAt == null) {
             createdAt = LocalDateTime.now();
         }
+    }
+
+    public boolean isPointsCredited() {
+        return Boolean.TRUE.equals(pointsCredited);
+    }
+
+    public boolean isRedeemedPointsRefunded() {
+        return Boolean.TRUE.equals(redeemedPointsRefunded);
+    }
+
+    public boolean isEarnedPointsReversed() {
+        return Boolean.TRUE.equals(earnedPointsReversed);
+    }
+
+    public boolean isMembershipSpendCredited() {
+        return Boolean.TRUE.equals(membershipSpendCredited);
+    }
+
+    public boolean isMembershipSpendReversed() {
+        return Boolean.TRUE.equals(membershipSpendReversed);
+    }
+
+    public boolean isConfirmationEmailSent() {
+        return Boolean.TRUE.equals(confirmationEmailSent);
     }
 }
