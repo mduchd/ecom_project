@@ -1,5 +1,7 @@
 package com.ecommerce.backend.service;
 
+import com.ecommerce.backend.dto.AIChatResponse;
+import com.ecommerce.backend.dto.AIProductSuggestionDto;
 import com.ecommerce.backend.entity.Product;
 import com.ecommerce.backend.util.ProductRagDocumentBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +14,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 @Service
 public class GeminiService {
+    private static final Pattern MARKDOWN_DECORATORS = Pattern.compile("(\\*\\*|__|`|#+\\s*)");
 
     @Value("${google.gemini.api.key}")
     private String apiKey;
@@ -50,10 +54,18 @@ public class GeminiService {
         return sb.toString();
     }
 
-    public String getChatResponse(String userMessage) {
-        String url = apiUrl + apiKey;
-
+    public AIChatResponse getChatResponse(String userMessage) {
         List<Product> relevantProducts = productRagRetrievalService.retrieveRelevantProducts(userMessage, 5);
+        List<AIProductSuggestionDto> suggestions = relevantProducts.stream()
+                .map(this::toSuggestionDto)
+                .toList();
+
+        String reply = generateReply(userMessage, relevantProducts);
+        return new AIChatResponse(reply, suggestions);
+    }
+
+    private String generateReply(String userMessage, List<Product> relevantProducts) {
+        String url = apiUrl + apiKey;
         String productContext = formatProductsAsContext(relevantProducts);
 
         String systemInstruction =
@@ -62,7 +74,8 @@ public class GeminiService {
                 "Khong duoc tu them san pham khong co trong kho. " +
                 "Neu co gia khuyen mai thi uu tien gia khuyen mai. " +
                 "Neu cau hoi khong lien quan den mua sam, hay lich su va ngan gon. " +
-                "Tra loi ngan gon, than thien, va luon dung tieng Viet.\n\n" +
+                "Tra loi ngan gon, than thien, luon dung tieng Viet va KHONG dung markdown, KHONG dung ky tu **, __, # hay bullet list. " +
+                "Neu co san pham phu hop, chi can gioi thieu ngan gon de frontend hien card san pham rieng.\n\n" +
                 productContext;
 
         Map<String, Object> requestBody = new HashMap<>();
@@ -89,7 +102,7 @@ public class GeminiService {
                         Map<String, Object> responseContent = (Map<String, Object>) candidate.get("content");
                         List<Map<String, Object>> responseParts = (List<Map<String, Object>>) responseContent.get("parts");
                         if (!responseParts.isEmpty()) {
-                            return String.valueOf(responseParts.get(0).get("text"));
+                            return sanitizeReply(String.valueOf(responseParts.get(0).get("text")));
                         }
                     }
                 }
@@ -109,5 +122,30 @@ public class GeminiService {
         }
 
         return "Xin loi, AI dang ban. Ban vui long thu lai sau.";
+    }
+
+    private String sanitizeReply(String reply) {
+        if (reply == null || reply.isBlank()) {
+            return "Xin loi, minh chua xu ly duoc yeu cau nay.";
+        }
+
+        return MARKDOWN_DECORATORS.matcher(reply)
+                .replaceAll("")
+                .replace("\r", "")
+                .replaceAll("\\n{3,}", "\n\n")
+                .trim();
+    }
+
+    private AIProductSuggestionDto toSuggestionDto(Product product) {
+        return new AIProductSuggestionDto(
+                product.getId(),
+                product.getName(),
+                product.getImageUrl(),
+                product.getPrice(),
+                product.getDiscountPrice(),
+                product.getStockQuantity(),
+                product.getBrand(),
+                product.getCategory()
+        );
     }
 }

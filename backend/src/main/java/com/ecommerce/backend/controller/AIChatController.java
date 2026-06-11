@@ -16,7 +16,6 @@ public class AIChatController {
 
     @PostMapping("/chat")
     public AIChatResponse chat(@RequestBody AIChatRequest request) {
-        String reply = geminiService.getChatResponse(request.getMessage());
-        return new AIChatResponse(reply);
+        return geminiService.getChatResponse(request.getMessage());
     }
 }
