@@ -6,6 +6,7 @@ import com.ecommerce.backend.dto.OrderTrackingResponse;
 import com.ecommerce.backend.entity.Order;
 import com.ecommerce.backend.entity.Product;
 import com.ecommerce.backend.exception.OrderTrackingNotFoundException;
+import com.ecommerce.backend.repository.OrderItemRepository;
 import com.ecommerce.backend.repository.OrderRepository;
 import com.ecommerce.backend.repository.ProductRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,20 +28,24 @@ import static org.mockito.Mockito.when;
 
 class OrderServiceTest {
     private OrderRepository orderRepository;
+    private OrderItemRepository orderItemRepository;
     private com.ecommerce.backend.repository.UserRepository userRepository;
     private ProductRepository productRepository;
     private LoyaltyService loyaltyService;
     private MemberTierService memberTierService;
+    private EmailService emailService;
     private OrderService orderService;
     private Map<Long, Product> productsById;
 
     @BeforeEach
     void setUp() {
         orderRepository = Mockito.mock(OrderRepository.class);
+        orderItemRepository = Mockito.mock(OrderItemRepository.class);
         userRepository = Mockito.mock(com.ecommerce.backend.repository.UserRepository.class);
         productRepository = Mockito.mock(ProductRepository.class);
         loyaltyService = Mockito.mock(LoyaltyService.class);
         memberTierService = Mockito.mock(MemberTierService.class);
+        emailService = Mockito.mock(EmailService.class);
         productsById = new HashMap<>();
         when(productRepository.findAllById(Mockito.any())).thenAnswer(invocation -> {
             Iterable<Long> ids = invocation.getArgument(0);
@@ -49,7 +54,15 @@ class OrderServiceTest {
                     .filter(java.util.Objects::nonNull)
                     .toList();
         });
-        orderService = new OrderService(orderRepository, userRepository, productRepository, loyaltyService, memberTierService);
+        orderService = new OrderService(
+                orderRepository,
+                orderItemRepository,
+                userRepository,
+                productRepository,
+                loyaltyService,
+                memberTierService,
+                emailService
+        );
     }
 
     private CreateOrderRequest buildRequest(String paymentMethod, int pointsToRedeem) {
