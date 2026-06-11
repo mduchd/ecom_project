@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
-import api from "../services/productService";
+import api, { getProducts } from "../services/productService";
 import { FaRobot, FaPaperPlane, FaTimes, FaStar, FaUser } from "react-icons/fa";
 
 const QUICK_SUGGESTIONS = [
@@ -28,8 +28,57 @@ const cleanMessageText = (text) => {
         .replace(/\*\*/g, "")
         .replace(/__/g, "")
         .replace(/`/g, "")
+        .replace(/^\s*[-*]\s+/gm, "")
         .replace(/\r/g, "")
         .trim();
+};
+
+const inferProductNamesFromReply = (text) => {
+    if (!text) return [];
+
+    const normalized = text.replace(/\r/g, "");
+    const candidates = [];
+
+    const numberedMatches = normalized.matchAll(/\d+\.\s*\*{0,2}([^*\n:]+?)\*{0,2}(?::|\n|$)/g);
+    for (const match of numberedMatches) {
+        const name = match[1]?.trim();
+        if (name && name.length > 4) {
+            candidates.push(name);
+        }
+    }
+
+    const emphasisMatches = normalized.matchAll(/\*{2}([^*\n]+?)\*{2}/g);
+    for (const match of emphasisMatches) {
+        const name = match[1]?.trim();
+        if (name && /^laptop|^iphone|^samsung|^asus|^dell|^macbook/i.test(name)) {
+            candidates.push(name);
+        }
+    }
+
+    return [...new Set(candidates)].slice(0, 4);
+};
+
+const enrichProductsFromReply = async (replyText) => {
+    const inferredNames = inferProductNamesFromReply(replyText);
+    if (inferredNames.length === 0) {
+        return [];
+    }
+
+    const results = await Promise.all(
+        inferredNames.map(async (name) => {
+            try {
+                const products = await getProducts(null, name);
+                return products?.find((product) =>
+                    product.name?.toLowerCase().includes(name.toLowerCase())
+                ) ?? products?.[0] ?? null;
+            } catch (error) {
+                console.error("Failed to enrich AI product suggestion:", error);
+                return null;
+            }
+        })
+    );
+
+    return results.filter(Boolean);
 };
 
 function ProductSuggestionCard({ product }) {
@@ -131,12 +180,19 @@ export default function AIChatBot() {
 
         try {
             const response = await api.post("/ai/chat", { message: userMsg });
+            const replyText = cleanMessageText(response.data?.reply);
+            let suggestedProducts = response.data?.products ?? [];
+
+            if (suggestedProducts.length === 0) {
+                suggestedProducts = await enrichProductsFromReply(response.data?.reply);
+            }
+
             setMessages((prev) => [
                 ...prev,
                 {
                     role: "bot",
-                    content: cleanMessageText(response.data?.reply),
-                    products: response.data?.products ?? []
+                    content: replyText,
+                    products: suggestedProducts
                 }
             ]);
         } catch (error) {
