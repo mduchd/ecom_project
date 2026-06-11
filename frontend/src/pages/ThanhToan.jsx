@@ -246,19 +246,6 @@ export default function ThanhToan() {
         createdAt: savedOrder?.createdAt || new Date().toISOString(),
       });
 
-      api.post("/orders/confirm", {
-        email: email,
-        fullName: shippingInfo.fullName.trim() || "Khách hàng Snapcart",
-        orderId: savedOrder?.orderCode || String(savedOrder?.id || ""),
-        totalAmount: payableAmount,
-        items: cart.map(item => ({
-          name: item.name,
-          quantity: item.qty,
-          price: item.price
-        }))
-      }).catch(err => {
-        console.error("Gửi email xác nhận thất bại:", err);
-      });
 
       if (selectedMethod === "momo" || selectedMethod === "bank") {
         setPendingPaymentOrderCode(savedOrder?.orderCode || "ThanhToanCart");

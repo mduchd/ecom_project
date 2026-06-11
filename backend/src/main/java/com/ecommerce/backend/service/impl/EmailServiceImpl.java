@@ -1,35 +1,51 @@
 package com.ecommerce.backend.service.impl;
 
+import com.ecommerce.backend.dto.ResendEmailRequest;
 import com.ecommerce.backend.service.EmailService;
-import jakarta.mail.internet.MimeMessage;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.pdmodel.PDPage;
 import org.apache.pdfbox.pdmodel.PDPageContentStream;
 import org.apache.pdfbox.pdmodel.common.PDRectangle;
 import org.apache.pdfbox.pdmodel.font.PDFont;
 import org.apache.pdfbox.pdmodel.font.PDType0Font;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.ByteArrayResource;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
 @Service
 public class EmailServiceImpl implements EmailService {
 
-    @Autowired(required = false)
-    private JavaMailSender mailSender;
+    private final ObjectMapper objectMapper;
+    private final HttpClient httpClient;
+
+    @Value("${resend.api.key:}")
+    private String resendApiKey;
+
+    @Value("${resend.api.url:https://api.resend.com/emails}")
+    private String resendApiUrl;
 
     @Value("${app.mail.from:no-reply@snap-cart.app}")
     private String fromEmail;
+
+    public EmailServiceImpl(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+        this.httpClient = HttpClient.newHttpClient();
+    }
 
     @Override
     public void sendOtpEmail(String toEmail, String otp, String type) {
@@ -92,25 +108,40 @@ public class EmailServiceImpl implements EmailService {
     }
 
     private void sendHtmlMessage(String to, String subject, String htmlBody, String attachmentName, byte[] attachmentBytes) {
-        if (mailSender == null) {
-            System.err.println("WARN: Email sender is not configured. Simulating email send to: " + to + " subject: " + subject);
-            return;
+        String apiKey = resendApiKey == null ? "" : resendApiKey.trim();
+        if (apiKey.isEmpty()) {
+            throw new RuntimeException("Resend API key is not configured.");
         }
 
         try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-            String sender = (fromEmail != null && !fromEmail.trim().isEmpty()) ? fromEmail : "no-reply@snap-cart.app";
-            helper.setFrom("Snapcart <" + sender + ">");
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlBody, true);
-
+            ResendEmailRequest.Attachment attachment = null;
             if (attachmentBytes != null && attachmentBytes.length > 0) {
-                helper.addAttachment(attachmentName, new ByteArrayResource(attachmentBytes));
+                attachment = ResendEmailRequest.Attachment.builder()
+                        .filename(attachmentName)
+                        .content(Base64.getEncoder().encodeToString(attachmentBytes))
+                        .build();
             }
 
-            mailSender.send(message);
+            String sender = (fromEmail != null && !fromEmail.trim().isEmpty()) ? fromEmail.trim() : "no-reply@snap-cart.app";
+            ResendEmailRequest payload = ResendEmailRequest.builder()
+                    .from("Snapcart <" + sender + ">")
+                    .to(List.of(to))
+                    .subject(subject)
+                    .html(htmlBody)
+                    .attachments(attachment == null ? null : List.of(attachment))
+                    .build();
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(resendApiUrl))
+                    .header("Authorization", "Bearer " + apiKey)
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(toJson(payload), StandardCharsets.UTF_8))
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString(StandardCharsets.UTF_8));
+            if (response.statusCode() < 200 || response.statusCode() >= 300) {
+                throw new RuntimeException("Resend API error (" + response.statusCode() + "): " + response.body());
+            }
         } catch (Exception e) {
             throw new RuntimeException("Gui email that bai: " + e.getMessage(), e);
         }
@@ -118,8 +149,8 @@ public class EmailServiceImpl implements EmailService {
 
     private byte[] createInvoicePdf(String fullName, String orderId, double totalAmount, List<Map<String, Object>> items) throws IOException {
         try (PDDocument document = new PDDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
-            PDFont regularFont = loadFont(document, "/fonts/NotoSans-Regular.ttf");
-            PDFont boldFont = loadFont(document, "/fonts/NotoSans-Bold.ttf");
+            PDFont regularFont = loadRegularFont(document);
+            PDFont boldFont = loadBoldFont(document);
 
             PDPage page = new PDPage(PDRectangle.A4);
             document.addPage(page);
@@ -165,8 +196,20 @@ public class EmailServiceImpl implements EmailService {
         }
     }
 
-    private PDFont loadFont(PDDocument document, String classpathLocation) throws IOException {
-        try (InputStream inputStream = new ClassPathResource(classpathLocation).getInputStream()) {
+    private PDFont loadRegularFont(PDDocument document) throws IOException {
+        return loadFontOrFallback(document, "/fonts/NotoSans-Regular.ttf", PDType1Font.HELVETICA);
+    }
+
+    private PDFont loadBoldFont(PDDocument document) throws IOException {
+        return loadFontOrFallback(document, "/fonts/NotoSans-Bold.ttf", PDType1Font.HELVETICA_BOLD);
+    }
+
+    private PDFont loadFontOrFallback(PDDocument document, String classpathLocation, PDFont fallback) throws IOException {
+        ClassPathResource resource = new ClassPathResource(classpathLocation);
+        if (!resource.exists()) {
+            return fallback;
+        }
+        try (InputStream inputStream = resource.getInputStream()) {
             return PDType0Font.load(document, inputStream, true);
         }
     }
@@ -213,5 +256,9 @@ public class EmailServiceImpl implements EmailService {
             return "invoice";
         }
         return value.replaceAll("[^a-zA-Z0-9._-]", "_");
+    }
+
+    private String toJson(ResendEmailRequest payload) throws JsonProcessingException {
+        return objectMapper.writeValueAsString(payload);
     }
 }

@@ -8,13 +8,17 @@ import com.ecommerce.backend.dto.OrderTrackingResponse;
 import com.ecommerce.backend.dto.OrderTrackingStepResponse;
 import com.ecommerce.backend.dto.PagedResponse;
 import com.ecommerce.backend.entity.Order;
+import com.ecommerce.backend.entity.OrderItem;
 import com.ecommerce.backend.entity.Product;
 import com.ecommerce.backend.entity.User;
 import com.ecommerce.backend.exception.OrderTrackingNotFoundException;
+import com.ecommerce.backend.repository.OrderItemRepository;
 import com.ecommerce.backend.repository.OrderRepository;
 import com.ecommerce.backend.repository.ProductRepository;
 import com.ecommerce.backend.repository.UserRepository;
 import com.ecommerce.backend.util.PageFetch;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,6 +42,8 @@ import java.util.concurrent.ThreadLocalRandom;
 @Service
 public class OrderService {
 
+    private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
+
     private static final String STATUS_PENDING = "Chờ duyệt";
     private static final String STATUS_SHIPPING = "Đang giao";
     private static final String STATUS_DELIVERED = "Đã giao";
@@ -48,21 +54,27 @@ public class OrderService {
     private static final DateTimeFormatter CODE_TIME = DateTimeFormatter.ofPattern("yyMMddHHmm", Locale.ROOT);
 
     private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
     private final LoyaltyService loyaltyService;
     private final MemberTierService memberTierService;
+    private final EmailService emailService;
 
     public OrderService(OrderRepository orderRepository,
+                        OrderItemRepository orderItemRepository,
                         UserRepository userRepository,
                         ProductRepository productRepository,
                         LoyaltyService loyaltyService,
-                        MemberTierService memberTierService) {
+                        MemberTierService memberTierService,
+                        EmailService emailService) {
         this.orderRepository = orderRepository;
+        this.orderItemRepository = orderItemRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
         this.loyaltyService = loyaltyService;
         this.memberTierService = memberTierService;
+        this.emailService = emailService;
     }
 
     @Transactional
@@ -70,9 +82,10 @@ public class OrderService {
         User user = userId == null
                 ? null
                 : userRepository.findById(userId)
-                        .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy người dùng với id: " + userId));
+                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay nguoi dung voi id: " + userId));
 
-        OrderPricing pricing = calculatePricing(request.getItems());
+        Map<Long, Product> productsById = loadProductsById(request.getItems());
+        OrderPricing pricing = calculatePricing(request.getItems(), productsById);
         int pointsToRedeem = request.getPointsToRedeem() == null ? 0 : request.getPointsToRedeem();
 
         Order order = Order.builder()
@@ -94,6 +107,7 @@ public class OrderService {
         applyCancelToken(order);
 
         order = orderRepository.save(order);
+        saveOrderItems(order, request.getItems(), productsById);
 
         if (pointsToRedeem > 0) {
             BigDecimal pointsDiscount = loyaltyService.redeemPoints(user, order, pointsToRedeem, pricing.getSubtotal());
@@ -103,25 +117,29 @@ public class OrderService {
             order = orderRepository.save(order);
         }
 
+        if (!isOnlinePayment(order.getPaymentMethod())) {
+            sendOrderConfirmationEmailIfNeeded(order);
+        }
+
         return order;
     }
 
     @Transactional
     public Order cancelPending(String orderCode, String cancelToken, Long authenticatedUserId) {
         if (orderCode == null || orderCode.trim().isEmpty()) {
-            throw new IllegalArgumentException("Vui lòng nhập mã đơn hàng.");
+            throw new IllegalArgumentException("Vui long nhap ma don hang.");
         }
 
         Order order = orderRepository
                 .findByOrderCodeWithUser(orderCode.trim())
-                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy đơn hàng với mã đã cung cấp."));
+                .orElseThrow(() -> new IllegalArgumentException("Khong tim thay don hang voi ma da cung cap."));
 
         if (!STATUS_PENDING.equalsIgnoreCase(order.getStatus().trim())) {
-            throw new IllegalArgumentException("Chỉ có thể hủy đơn hàng đang chờ xử lý.");
+            throw new IllegalArgumentException("Chi co the huy don hang dang cho xu ly.");
         }
 
         if (!isAuthorizedToCancel(order, cancelToken, authenticatedUserId)) {
-            throw new IllegalArgumentException("Không có quyền hủy đơn hàng này.");
+            throw new IllegalArgumentException("Khong co quyen huy don hang nay.");
         }
 
         order.setStatus(STATUS_CANCELED);
@@ -174,7 +192,7 @@ public class OrderService {
     @Transactional
     public Order updateStatus(Long id, String status) {
         Order existing = orderRepository.findByIdWithUser(id)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với id: " + id));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay don hang voi id: " + id));
         String oldStatus = normalizeTrackingStatus(existing.getStatus());
         String newStatus = normalizeTrackingStatus(status);
         existing.setStatus(toStoredStatus(status));
@@ -197,32 +215,37 @@ public class OrderService {
     @Transactional
     public Order markPaidByOrderCode(String orderCode) {
         Order existing = orderRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với mã: " + orderCode));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay don hang voi ma: " + orderCode));
 
         String currentStatus = existing.getStatus();
+        if (isSameStatus(currentStatus, STATUS_CANCELED)) {
+            return existing;
+        }
         if (isSameStatus(currentStatus, STATUS_DELIVERED)
-                || isSameStatus(currentStatus, STATUS_SHIPPING)
-                || isSameStatus(currentStatus, STATUS_CANCELED)) {
+                || isSameStatus(currentStatus, STATUS_SHIPPING)) {
+            sendOrderConfirmationEmailIfNeeded(existing);
             return existing;
         }
 
         existing.setStatus(STATUS_SHIPPING);
-        return orderRepository.save(existing);
+        existing = orderRepository.save(existing);
+        sendOrderConfirmationEmailIfNeeded(existing);
+        return existing;
     }
 
     public Order getByOrderCode(String orderCode) {
         return orderRepository.findByOrderCode(orderCode)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy đơn hàng với mã: " + orderCode));
+                .orElseThrow(() -> new RuntimeException("Khong tim thay don hang voi ma: " + orderCode));
     }
 
     public OrderTrackingResponse track(String orderCode, String email) {
         if (orderCode == null || orderCode.trim().isEmpty() || email == null || email.trim().isEmpty()) {
-            throw new IllegalArgumentException("Vui lòng nhập mã đơn hàng và email.");
+            throw new IllegalArgumentException("Vui long nhap ma don hang va email.");
         }
 
         Order order = orderRepository
                 .findByOrderCodeIgnoreCaseAndCustomerEmailIgnoreCase(orderCode.trim(), email.trim())
-                .orElseThrow(() -> new OrderTrackingNotFoundException("Không tìm thấy đơn hàng với thông tin đã cung cấp."));
+                .orElseThrow(() -> new OrderTrackingNotFoundException("Khong tim thay don hang voi thong tin da cung cap."));
 
         String normalized = normalizeTrackingStatus(order.getStatus());
 
@@ -242,9 +265,9 @@ public class OrderService {
         );
     }
 
-    private OrderPricing calculatePricing(List<CreateOrderItemRequest> items) {
+    private Map<Long, Product> loadProductsById(List<CreateOrderItemRequest> items) {
         if (items == null || items.isEmpty()) {
-            throw new IllegalArgumentException("Đơn hàng phải có ít nhất một sản phẩm.");
+            throw new IllegalArgumentException("Don hang phai co it nhat mot san pham.");
         }
 
         Set<Long> productIds = new LinkedHashSet<>();
@@ -255,22 +278,25 @@ public class OrderService {
         Map<Long, Product> productsById = new HashMap<>();
         productRepository.findAllById(productIds)
                 .forEach(product -> productsById.put(product.getId(), product));
+        return productsById;
+    }
 
+    private OrderPricing calculatePricing(List<CreateOrderItemRequest> items, Map<Long, Product> productsById) {
         BigDecimal subtotal = BigDecimal.ZERO;
         StringBuilder summary = new StringBuilder();
 
         for (CreateOrderItemRequest item : items) {
             Product product = productsById.get(item.getProductId());
             if (product == null) {
-                throw new IllegalArgumentException("Không tìm thấy sản phẩm với id: " + item.getProductId());
+                throw new IllegalArgumentException("Khong tim thay san pham voi id: " + item.getProductId());
             }
             if (product.getStockQuantity() != null && product.getStockQuantity() < item.getQuantity()) {
-                throw new IllegalArgumentException("Sản phẩm '" + product.getName() + "' không đủ số lượng.");
+                throw new IllegalArgumentException("San pham '" + product.getName() + "' khong du so luong.");
             }
 
             BigDecimal unitPrice = product.getPrice();
             if (unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) <= 0) {
-                throw new IllegalArgumentException("Giá sản phẩm không hợp lệ: " + product.getName());
+                throw new IllegalArgumentException("Gia san pham khong hop le: " + product.getName());
             }
 
             BigDecimal lineTotal = unitPrice
@@ -291,6 +317,69 @@ public class OrderService {
         BigDecimal prePointsTotal = subtotal.add(shipping);
 
         return new OrderPricing(subtotal, shipping, prePointsTotal, summary.toString());
+    }
+
+    private void saveOrderItems(Order order, List<CreateOrderItemRequest> items, Map<Long, Product> productsById) {
+        List<OrderItem> orderItems = new ArrayList<>();
+        for (CreateOrderItemRequest item : items) {
+            Product product = productsById.get(item.getProductId());
+            if (product == null) {
+                continue;
+            }
+            BigDecimal lineTotal = product.getPrice()
+                    .multiply(BigDecimal.valueOf(item.getQuantity()))
+                    .setScale(0, RoundingMode.HALF_UP);
+            orderItems.add(OrderItem.builder()
+                    .order(order)
+                    .product(product)
+                    .productName(product.getName())
+                    .unitPrice(product.getPrice())
+                    .quantity(item.getQuantity())
+                    .lineTotal(lineTotal)
+                    .build());
+        }
+        if (!orderItems.isEmpty()) {
+            orderItemRepository.saveAll(orderItems);
+        }
+    }
+
+    @Transactional
+    public void sendOrderConfirmationEmailIfNeeded(Order order) {
+        if (order == null || order.getId() == null || order.isConfirmationEmailSent()) {
+            return;
+        }
+
+        List<OrderItem> orderItems = orderItemRepository.findByOrderIdOrderByIdAsc(order.getId());
+        List<Map<String, Object>> emailItems = new ArrayList<>();
+        for (OrderItem item : orderItems) {
+            Map<String, Object> row = new HashMap<>();
+            row.put("name", item.getProductName());
+            row.put("quantity", item.getQuantity());
+            row.put("price", item.getUnitPrice());
+            emailItems.add(row);
+        }
+
+        if (emailItems.isEmpty() && order.getProductSummary() != null) {
+            Map<String, Object> fallback = new HashMap<>();
+            fallback.put("name", order.getProductSummary());
+            fallback.put("quantity", 1);
+            fallback.put("price", order.getTotalAmount());
+            emailItems.add(fallback);
+        }
+
+        try {
+            emailService.sendOrderConfirmationEmail(
+                    order.getCustomerEmail(),
+                    order.getCustomerName(),
+                    order.getOrderCode(),
+                    order.getTotalAmount().doubleValue(),
+                    emailItems
+            );
+            order.setConfirmationEmailSent(true);
+            orderRepository.save(order);
+        } catch (RuntimeException ex) {
+            logger.warn("Failed to send confirmation email for order {}", order.getOrderCode(), ex);
+        }
     }
 
     private String maskEmail(String email) {
@@ -346,19 +435,19 @@ public class OrderService {
 
     private String currentMessage(String status) {
         return switch (status) {
-            case "PAID" -> "Đơn hàng đã thanh toán và đang chờ bàn giao.";
-            case "SHIPPING" -> "Đơn hàng đang được giao đến bạn.";
-            case "DELIVERED" -> "Đơn hàng đã được giao thành công.";
-            case "CANCELED" -> "Đơn hàng đã bị hủy.";
-            default -> "Snapcart đã ghi nhận đơn hàng và đang xử lý.";
+            case "PAID" -> "Don hang da thanh toan va dang cho ban giao.";
+            case "SHIPPING" -> "Don hang dang duoc giao den ban.";
+            case "DELIVERED" -> "Don hang da duoc giao thanh cong.";
+            case "CANCELED" -> "Don hang da bi huy.";
+            default -> "Snapcart da ghi nhan don hang va dang xu ly.";
         };
     }
 
     private List<OrderTrackingStepResponse> buildTrackingSteps(String status, LocalDateTime createdAt) {
         if ("CANCELED".equals(status)) {
             return List.of(
-                    new OrderTrackingStepResponse("PLACED", "Đã đặt hàng", "Snapcart đã ghi nhận đơn hàng.", "DONE", createdAt),
-                    new OrderTrackingStepResponse("CANCELED", "Đã hủy", "Đơn hàng đã bị hủy.", "CURRENT", null)
+                    new OrderTrackingStepResponse("PLACED", "Da dat hang", "Snapcart da ghi nhan don hang.", "DONE", createdAt),
+                    new OrderTrackingStepResponse("CANCELED", "Da huy", "Don hang da bi huy.", "CURRENT", null)
             );
         }
 
@@ -367,10 +456,10 @@ public class OrderService {
         boolean delivered = "DELIVERED".equals(status);
 
         return List.of(
-                new OrderTrackingStepResponse("PLACED", "Đã đặt hàng", "Snapcart đã ghi nhận đơn hàng.", "DONE", createdAt),
-                new OrderTrackingStepResponse("CONFIRMED", "Đang xử lý", "Đơn hàng đang chờ xác nhận hoặc thanh toán.", paidOrBeyond ? "DONE" : "CURRENT", null),
-                new OrderTrackingStepResponse("SHIPPING", "Đang giao", "Đơn hàng đang trên đường giao đến bạn.", delivered ? "DONE" : shippingOrBeyond ? "CURRENT" : "UPCOMING", null),
-                new OrderTrackingStepResponse("DELIVERED", "Đã giao", "Đơn hàng đã được giao thành công.", delivered ? "CURRENT" : "UPCOMING", null)
+                new OrderTrackingStepResponse("PLACED", "Da dat hang", "Snapcart da ghi nhan don hang.", "DONE", createdAt),
+                new OrderTrackingStepResponse("CONFIRMED", "Dang xu ly", "Don hang dang cho xac nhan hoac thanh toan.", paidOrBeyond ? "DONE" : "CURRENT", null),
+                new OrderTrackingStepResponse("SHIPPING", "Dang giao", "Don hang dang tren duong giao den ban.", delivered ? "DONE" : shippingOrBeyond ? "CURRENT" : "UPCOMING", null),
+                new OrderTrackingStepResponse("DELIVERED", "Da giao", "Don hang da duoc giao thanh cong.", delivered ? "CURRENT" : "UPCOMING", null)
         );
     }
 

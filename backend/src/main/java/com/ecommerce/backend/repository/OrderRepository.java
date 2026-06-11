@@ -15,8 +15,11 @@ import java.util.Optional;
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long> {
     List<Order> findAllByOrderByCreatedAtDesc();
+
     List<Order> findByUserIdOrderByCreatedAtDesc(Long userId);
+
     Optional<Order> findByOrderCode(String orderCode);
+
     Optional<Order> findByOrderCodeIgnoreCaseAndCustomerEmailIgnoreCase(String orderCode, String customerEmail);
 
     @Query("SELECT o FROM Order o LEFT JOIN FETCH o.user WHERE o.id = :id")
@@ -35,11 +38,11 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("""
             SELECT o FROM Order o
             WHERE (:statusGroup IS NULL OR
-                   (:statusGroup = 'PENDING' AND LOWER(o.status) IN ('chờ duyệt', 'pending')) OR
-                   (:statusGroup = 'PAID' AND LOWER(o.status) IN ('đã thanh toán', 'paid')) OR
-                   (:statusGroup = 'SHIPPING' AND LOWER(o.status) IN ('đang giao', 'shipping', 'shipped')) OR
-                   (:statusGroup = 'DELIVERED' AND LOWER(o.status) IN ('đã giao', 'delivered')) OR
-                   (:statusGroup = 'CANCELED' AND LOWER(o.status) IN ('đã hủy', 'canceled', 'cancelled')))
+                   (:statusGroup = 'PENDING' AND LOWER(o.status) IN ('chờ duyệt', 'pending', 'ch盻・duy盻㏄')) OR
+                   (:statusGroup = 'PAID' AND LOWER(o.status) IN ('đã thanh toán', 'paid', 'ﾄ妥｣ thanh toﾃ｡n')) OR
+                   (:statusGroup = 'SHIPPING' AND LOWER(o.status) IN ('đang giao', 'shipping', 'shipped', 'ﾄ疎ng giao')) OR
+                   (:statusGroup = 'DELIVERED' AND LOWER(o.status) IN ('đã giao', 'delivered', 'ﾄ妥｣ giao')) OR
+                   (:statusGroup = 'CANCELED' AND LOWER(o.status) IN ('đã hủy', 'canceled', 'cancelled', 'ﾄ妥｣ h盻ｧy')))
             AND (:search IS NULL OR :search = '' OR
                  LOWER(o.orderCode) LIKE LOWER(CONCAT('%', :search, '%')) OR
                  LOWER(o.customerName) LIKE LOWER(CONCAT('%', :search, '%')) OR
@@ -50,16 +53,16 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
             """)
     Page<Order> findAdminOrders(@Param("statusGroup") String statusGroup, @Param("search") String search, Pageable pageable);
 
-    @Query("SELECT COUNT(o) FROM Order o WHERE LOWER(o.status) IN ('chờ duyệt', 'pending', 'đã thanh toán', 'paid')")
+    @Query("SELECT COUNT(o) FROM Order o WHERE LOWER(o.status) IN ('chờ duyệt', 'pending', 'ch盻・duy盻㏄', 'đã thanh toán', 'paid', 'ﾄ妥｣ thanh toﾃ｡n')")
     long countAwaitingActionOrders();
 
-    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE LOWER(o.status) IN ('đã giao', 'delivered')")
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o WHERE LOWER(o.status) IN ('đã giao', 'delivered', 'ﾄ妥｣ giao')")
     BigDecimal sumDeliveredRevenue();
 
     @Query("""
             SELECT MONTH(o.createdAt), COALESCE(SUM(o.totalAmount), 0)
             FROM Order o
-            WHERE LOWER(o.status) IN ('đã giao', 'delivered')
+            WHERE LOWER(o.status) IN ('đã giao', 'delivered', 'ﾄ妥｣ giao')
             AND YEAR(o.createdAt) = :year
             GROUP BY MONTH(o.createdAt)
             """)
@@ -73,7 +76,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("""
             SELECT COALESCE(SUM(o.totalAmount), 0) FROM Order o
-            WHERE LOWER(o.status) IN ('đã giao', 'delivered')
+            WHERE LOWER(o.status) IN ('đã giao', 'delivered', 'ﾄ妥｣ giao')
             AND YEAR(o.createdAt) = :year AND MONTH(o.createdAt) = :month
             """)
     BigDecimal sumDeliveredRevenueForMonth(@Param("year") int year, @Param("month") int month);
