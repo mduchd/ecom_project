@@ -90,6 +90,10 @@ public class Order {
     @Builder.Default
     private boolean membershipSpendReversed = false;
 
+    @Column(nullable = false)
+    @Builder.Default
+    private boolean confirmationEmailSent = false;
+
     @Column(length = 64)
     @JsonIgnore
     private String cancelToken;
