@@ -368,11 +368,18 @@ public class OrderService {
         }
 
         try {
+            double subtotalAmount = order.getMembershipSpendAmount() == null ? 0d : order.getMembershipSpendAmount().doubleValue();
+            double discountAmount = order.getPointsDiscount() == null ? 0d : order.getPointsDiscount().doubleValue();
+            double totalAmount = order.getTotalAmount() == null ? 0d : order.getTotalAmount().doubleValue();
+            double shippingAmount = Math.max(0d, totalAmount + discountAmount - subtotalAmount);
             emailService.sendOrderConfirmationEmail(
                     order.getCustomerEmail(),
                     order.getCustomerName(),
                     order.getOrderCode(),
-                    order.getTotalAmount().doubleValue(),
+                    subtotalAmount,
+                    shippingAmount,
+                    discountAmount,
+                    totalAmount,
                     emailItems
             );
             order.setConfirmationEmailSent(true);

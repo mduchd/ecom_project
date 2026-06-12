@@ -20,7 +20,7 @@ public class OrderTestController {
 
     @PostMapping("/test-email")
     public ResponseEntity<?> testOrderEmail(@RequestParam String email) {
-        // Tạo danh sách sản phẩm giả lập
+        // T陂ｯ・｡o danh s・・ｽ｡ch s陂ｯ・｣n ph陂ｯ・ｩm gi陂ｯ・｣ l陂ｯ・ｭp
         List<Map<String, Object>> items = new ArrayList<>();
         
         Map<String, Object> item1 = new HashMap<>();
@@ -39,9 +39,18 @@ public class OrderTestController {
         double totalAmount = 1199.00 + (799.00 * 2);
         String orderId = String.format("SPC%d", System.currentTimeMillis() % 1000000);
 
-        emailService.sendOrderConfirmationEmail(email, "Khách Hàng Thân Thiết", orderId, totalAmount, items);
+        emailService.sendOrderConfirmationEmail(
+                email,
+                "Khách Hàng Thân Thiết",
+                orderId,
+                totalAmount,
+                0,
+                0,
+                totalAmount,
+                items
+        );
 
-        return ResponseEntity.ok(Map.of("message", "Đã gửi Email hóa đơn đặt hàng mẫu thành công tới " + email + "!"));
+        return ResponseEntity.ok(Map.of("message", "・・撕・｣ g逶ｻ・ｭi Email h・・ｽｳa ・・氈・｡n ・・ｻ幢ｽｺ・ｷt h・・｣ｰng m陂ｯ・ｫu th・・｣ｰnh c・・ｽｴng t逶ｻ螫・" + email + "!"));
     }
 
 }

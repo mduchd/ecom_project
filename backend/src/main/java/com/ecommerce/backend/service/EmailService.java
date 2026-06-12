@@ -5,5 +5,8 @@ import java.util.Map;
 
 public interface EmailService {
     void sendOtpEmail(String toEmail, String otp, String type);
-    void sendOrderConfirmationEmail(String toEmail, String fullName, String orderId, double totalAmount, List<Map<String, Object>> items);
+    void sendOrderConfirmationEmail(String toEmail, String fullName, String orderId,
+                                    double subtotalAmount, double shippingAmount,
+                                    double discountAmount, double totalAmount,
+                                    List<Map<String, Object>> items);
 }

@@ -49,11 +49,11 @@ public class EmailServiceImpl implements EmailService {
 
     @Override
     public void sendOtpEmail(String toEmail, String otp, String type) {
-        String subject = type.equals("SIGNUP") ? "Snapcart - OTP kích hoạt tài khoản" : "Snapcart - OTP khôi phục mật khẩu";
-        String actionTitle = type.equals("SIGNUP") ? "Kích hoạt tài khoản" : "Khôi phục mật khẩu";
+        String subject = type.equals("SIGNUP") ? "Snapcart - OTP k繝ｻ繝ｻ・ｽ・ｭch ho髯ゑｽｯ繝ｻ・｡t t繝ｻ繝ｻ・｣・ｰi kho髯ゑｽｯ繝ｻ・｣n" : "Snapcart - OTP kh繝ｻ繝ｻ・ｽ・ｴi ph騾ｶ・ｻ繝ｻ・･c m髯ゑｽｯ繝ｻ・ｭt kh髯ゑｽｯ繝ｻ・ｩu";
+        String actionTitle = type.equals("SIGNUP") ? "K繝ｻ繝ｻ・ｽ・ｭch ho髯ゑｽｯ繝ｻ・｡t t繝ｻ繝ｻ・｣・ｰi kho髯ゑｽｯ繝ｻ・｣n" : "Kh繝ｻ繝ｻ・ｽ・ｴi ph騾ｶ・ｻ繝ｻ・･c m髯ゑｽｯ繝ｻ・ｭt kh髯ゑｽｯ繝ｻ・ｩu";
         String actionDesc = type.equals("SIGNUP")
-                ? "Cảm ơn bạn đã lựa chọn Snapcart. Vui lòng nhập mã OTP bên dưới để kích hoạt tài khoản."
-                : "Chúng tôi nhận được yêu cầu khôi phục mật khẩu từ bạn. Hãy sử dụng mã OTP bên dưới.";
+                ? "C髯ゑｽｯ繝ｻ・｣m 繝ｻ繝ｻ・ｽ・｡n b髯ゑｽｯ繝ｻ・｡n 繝ｻ繝ｻ・ｦ・･繝ｻ・｣ l騾ｶ・ｻ繝ｻ・ｱa ch騾ｶ・ｻ髢ｧ・ｱ Snapcart. Vui l繝ｻ繝ｻ・ｽ・ｲng nh髯ゑｽｯ繝ｻ・ｭp m繝ｻ繝ｻ・ｽ・｣ OTP b繝ｻ繝ｻ・ｽ・ｪn d繝ｻ繝ｻ・ｽ・ｰ騾ｶ・ｻ陞ｫ繝ｻ繝ｻ繝ｻ・ｻ蟷｢・ｽ・ｻ郢晢ｽｻk繝ｻ繝ｻ・ｽ・ｭch ho髯ゑｽｯ繝ｻ・｡t t繝ｻ繝ｻ・｣・ｰi kho髯ゑｽｯ繝ｻ・｣n."
+                : "Ch繝ｻ繝ｻ・ｽ・ｺng t繝ｻ繝ｻ・ｽ・ｴi nh髯ゑｽｯ繝ｻ・ｭn 繝ｻ繝ｻ豌医・・ｰ騾ｶ・ｻ繝ｻ・｣c y繝ｻ繝ｻ・ｽ・ｪu c髯ゑｽｯ繝ｻ・ｧu kh繝ｻ繝ｻ・ｽ・ｴi ph騾ｶ・ｻ繝ｻ・･c m髯ゑｽｯ繝ｻ・ｭt kh髯ゑｽｯ繝ｻ・ｩu t騾ｶ・ｻ繝ｻ・ｫ b髯ゑｽｯ繝ｻ・｡n. H繝ｻ繝ｻ・ｽ・｣y s騾ｶ・ｻ繝ｻ・ｭ d騾ｶ・ｻ繝ｻ・･ng m繝ｻ繝ｻ・ｽ・｣ OTP b繝ｻ繝ｻ・ｽ・ｪn d繝ｻ繝ｻ・ｽ・ｰ騾ｶ・ｻ陞ｫ繝ｻ";
 
         String htmlContent = "<div style=\"font-family: Arial, sans-serif; background:#0b0f19; padding:40px 20px; text-align:center; color:#ffffff;\">"
                 + "<div style=\"max-width:500px; margin:0 auto; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:40px; text-align:left;\">"
@@ -63,7 +63,7 @@ public class EmailServiceImpl implements EmailService {
                 + "<div style=\"margin:30px 0; padding:20px; text-align:center; border:1px solid rgba(59,130,246,0.25); border-radius:16px;\">"
                 + "<span style=\"font-size:36px; letter-spacing:8px; color:#60a5fa; font-weight:700;\">" + otp + "</span>"
                 + "</div>"
-                + "<p style=\"color:#94a3b8; font-size:12px; text-align:center;\">OTP có hiệu lực trong 5 phút.</p>"
+                + "<p style=\"color:#94a3b8; font-size:12px; text-align:center;\">OTP c繝ｻ繝ｻ・ｽ・ｳ hi騾ｶ・ｻ邱包ｽ｡ l騾ｶ・ｻ繝ｻ・ｱc trong 5 ph繝ｻ繝ｻ・ｽ・ｺt.</p>"
                 + "</div>"
                 + "</div>";
 
@@ -71,42 +71,54 @@ public class EmailServiceImpl implements EmailService {
     }
 
     @Override
-    public void sendOrderConfirmationEmail(String toEmail, String fullName, String orderId, double totalAmount, List<Map<String, Object>> items) {
+    public void sendOrderConfirmationEmail(String toEmail, String fullName, String orderId,
+                                           double subtotalAmount, double shippingAmount,
+                                           double discountAmount, double totalAmount,
+                                           List<Map<String, Object>> items) {
         String subject = "Snapcart - Xác nhận đơn hàng #" + orderId;
         StringBuilder itemsHtml = new StringBuilder();
         for (Map<String, Object> item : items) {
             double price = parseMoney(item.get("price"));
+            int quantity = parseInt(item.get("quantity"));
+            double lineTotal = price * quantity;
             itemsHtml.append("<tr style=\"border-bottom:1px solid rgba(255,255,255,0.05);\">")
                     .append("<td style=\"padding:12px 0; color:#f1f5f9;\">").append(item.get("name")).append("</td>")
-                    .append("<td style=\"padding:12px 0; text-align:center; color:#94a3b8;\">x").append(item.get("quantity")).append("</td>")
+                    .append("<td style=\"padding:12px 0; text-align:center; color:#94a3b8;\">x").append(quantity).append("</td>")
                     .append("<td style=\"padding:12px 0; text-align:right; color:#3b82f6; font-weight:600;\">").append(formatVnd(price)).append("</td>")
+                    .append("<td style=\"padding:12px 0; text-align:right; color:#10b981; font-weight:700;\">").append(formatVnd(lineTotal)).append("</td>")
                     .append("</tr>");
         }
+
+        String orderSummaryHtml = "<div style=\"margin-top:20px; margin-left:auto; width:260px; color:#e2e8f0;\">"
+                + "<div style=\"display:flex; justify-content:space-between; padding:6px 0;\"><span>Tạm tính</span><strong>" + formatVnd(subtotalAmount) + "</strong></div>"
+                + "<div style=\"display:flex; justify-content:space-between; padding:6px 0;\"><span>Phí vận chuyển</span><strong>" + formatVnd(shippingAmount) + "</strong></div>"
+                + "<div style=\"display:flex; justify-content:space-between; padding:6px 0;\"><span>Giảm giá</span><strong>-" + formatVnd(discountAmount) + "</strong></div>"
+                + "<div style=\"display:flex; justify-content:space-between; padding:10px 0 0; margin-top:8px; border-top:1px solid rgba(255,255,255,0.08); font-size:20px; color:#10b981;\"><span>Tổng thanh toán</span><strong>" + formatVnd(totalAmount) + "</strong></div>"
+                + "</div>";
 
         String htmlContent = "<div style=\"font-family: Arial, sans-serif; background:#0b0f19; padding:40px 20px; color:#ffffff;\">"
                 + "<div style=\"max-width:600px; margin:0 auto; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:24px; padding:40px;\">"
                 + "<h2 style=\"margin:0 0 10px; text-align:center;\">Snapcart</h2>"
                 + "<h3 style=\"margin-top:0; text-align:center;\">Cảm ơn bạn đã đặt hàng, " + fullName + "!</h3>"
-                + "<p style=\"color:#cbd5e1;\">Đơn hàng của bạn đã được ghi nhận và đã có hóa đơn PDF đính kèm.</p>"
+                + "<p style=\"color:#cbd5e1;\">Đơn hàng của bạn đã được ghi nhận và đính kèm hóa đơn PDF.</p>"
                 + "<p><strong>Mã đơn hàng:</strong> #" + orderId + "</p>"
                 + "<table style=\"width:100%; border-collapse:collapse; margin:20px 0;\">"
-                + "<thead><tr><th style=\"text-align:left; padding-bottom:10px; color:#94a3b8;\">Sản phẩm</th><th style=\"text-align:center; padding-bottom:10px; color:#94a3b8;\">SL</th><th style=\"text-align:right; padding-bottom:10px; color:#94a3b8;\">Đơn giá</th></tr></thead>"
+                + "<thead><tr><th style=\"text-align:left; padding-bottom:10px; color:#94a3b8;\">Sản phẩm</th><th style=\"text-align:center; padding-bottom:10px; color:#94a3b8;\">SL</th><th style=\"text-align:right; padding-bottom:10px; color:#94a3b8;\">Đơn giá</th><th style=\"text-align:right; padding-bottom:10px; color:#94a3b8;\">Thành tiền</th></tr></thead>"
                 + "<tbody>" + itemsHtml + "</tbody>"
                 + "</table>"
-                + "<div style=\"text-align:right; font-size:20px; font-weight:700; color:#10b981;\">Tổng thanh toán: " + formatVnd(totalAmount) + "</div>"
+                + orderSummaryHtml
                 + "</div>"
                 + "</div>";
 
         byte[] invoicePdf = null;
         try {
-            invoicePdf = createInvoicePdf(fullName, orderId, totalAmount, items);
+            invoicePdf = createInvoicePdf(fullName, orderId, subtotalAmount, shippingAmount, discountAmount, totalAmount, items);
         } catch (Exception e) {
             System.err.println("WARN: Failed to generate PDF invoice for order " + orderId + ": " + e.getMessage());
         }
 
         sendHtmlMessage(toEmail, subject, htmlContent, "invoice-" + safeFileName(orderId) + ".pdf", invoicePdf);
     }
-
     private void sendHtmlMessage(String to, String subject, String htmlBody, String attachmentName, byte[] attachmentBytes) {
         String apiKey = resendApiKey == null ? "" : resendApiKey.trim();
         if (apiKey.isEmpty()) {
@@ -143,11 +155,14 @@ public class EmailServiceImpl implements EmailService {
                 throw new RuntimeException("Resend API error (" + response.statusCode() + "): " + response.body());
             }
         } catch (Exception e) {
-            throw new RuntimeException("Gửi email thất bại: " + e.getMessage(), e);
+            throw new RuntimeException("G騾ｶ・ｻ繝ｻ・ｭi email th髯ゑｽｯ繝ｻ・･t b髯ゑｽｯ繝ｻ・｡i: " + e.getMessage(), e);
         }
     }
 
-    private byte[] createInvoicePdf(String fullName, String orderId, double totalAmount, List<Map<String, Object>> items) throws IOException {
+    private byte[] createInvoicePdf(String fullName, String orderId,
+                                    double subtotalAmount, double shippingAmount,
+                                    double discountAmount, double totalAmount,
+                                    List<Map<String, Object>> items) throws IOException {
         try (PDDocument document = new PDDocument(); ByteArrayOutputStream output = new ByteArrayOutputStream()) {
             PDFont regularFont = loadRegularFont(document);
             PDFont boldFont = loadBoldFont(document);
@@ -160,15 +175,19 @@ public class EmailServiceImpl implements EmailService {
                 final float left = 50f;
 
                 y = drawText(content, boldFont, 22f, left, y, "SNAPCART");
-                y = drawText(content, regularFont, 12f, left, y - 8f, "Hóa đơn xác nhận đơn hàng");
+                y = drawText(content, regularFont, 12f, left, y - 8f, "Hoa don xac nhan don hang");
 
                 y -= 18f;
-                y = drawLabelValue(content, regularFont, boldFont, left, y, "Mã đơn hàng", "#" + orderId);
-                y = drawLabelValue(content, regularFont, boldFont, left, y - 8f, "Khách hàng", fullName);
-                y = drawLabelValue(content, regularFont, boldFont, left, y - 8f, "Tổng thanh toán", formatVnd(totalAmount));
+                y = drawLabelValue(content, regularFont, boldFont, left, y, "Ma don hang", "#" + orderId);
+                y = drawLabelValue(content, regularFont, boldFont, left, y - 8f, "Khach hang", fullName);
+                y -= 8f;
+                y = drawLabelValue(content, regularFont, boldFont, left, y - 8f, "Tam tinh", formatVnd(subtotalAmount));
+                y = drawLabelValue(content, regularFont, boldFont, left, y - 8f, "Phi van chuyen", formatVnd(shippingAmount));
+                y = drawLabelValue(content, regularFont, boldFont, left, y - 8f, "Giam gia", "-" + formatVnd(discountAmount));
+                y = drawLabelValue(content, regularFont, boldFont, left, y - 8f, "Tong thanh toan", formatVnd(totalAmount));
                 y -= 20f;
 
-                y = drawText(content, boldFont, 13f, left, y, "Danh sách sản phẩm");
+                y = drawText(content, boldFont, 13f, left, y, "Danh sach san pham");
                 y = drawText(content, regularFont, 10.5f, left, y - 6f, "--------------------------------------------------------------");
                 y -= 12f;
 
@@ -180,15 +199,18 @@ public class EmailServiceImpl implements EmailService {
                     String name = String.valueOf(item.getOrDefault("name", ""));
                     int quantity = parseInt(item.get("quantity"));
                     double price = parseMoney(item.get("price"));
-                    String row = index + ". " + name + " x" + quantity + " - " + formatVnd(price * quantity);
+                    double lineTotal = price * quantity;
+                    String row = index + ". " + name + " x" + quantity
+                            + " - " + formatVnd(price)
+                            + "/sp - Thanh tien: " + formatVnd(lineTotal);
                     y = drawText(content, regularFont, 10.5f, left, y, row);
                     index++;
                 }
 
                 y -= 10f;
                 y = drawText(content, regularFont, 10.5f, left, y, "--------------------------------------------------------------");
-                y = drawText(content, boldFont, 13f, left, y - 4f, "Tổng cộng: " + formatVnd(totalAmount));
-                drawText(content, regularFont, 10.5f, left, 40f, "Hóa đơn này được phát hành tự động bởi hệ thống Snapcart.");
+                y = drawText(content, boldFont, 13f, left, y - 4f, "Tong cong: " + formatVnd(totalAmount));
+                drawText(content, regularFont, 10.5f, left, 40f, "Hoa don nay duoc phat hanh tu dong boi he thong Snapcart.");
             }
 
             document.save(output);

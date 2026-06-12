@@ -1,36 +1,36 @@
-# 🛒 Snapcart - Dự án Thương mại Điện tử thông minh
+# 將 Snapcart - D盻ｱ ﾃ｡n Thﾆｰﾆ｡ng m蘯｡i ﾄ進盻㌻ t盻ｭ thﾃｴng minh
 
-Dự án website thương mại điện tử tích hợp trợ lý mua sắm AI (RAG), cổng thanh toán tự động qua SePay, tải ảnh lên Cloudinary và hệ thống gửi Email qua Resend. Hệ thống sử dụng kiến trúc phân tách rõ ràng giữa Backend (Spring Boot) và Frontend (ReactJS).
+D盻ｱ ﾃ｡n website thﾆｰﾆ｡ng m蘯｡i ﾄ訴盻㌻ t盻ｭ tﾃｭch h盻｣p tr盻｣ lﾃｽ mua s蘯ｯm AI (RAG), c盻貧g thanh toﾃ｡n t盻ｱ ﾄ黛ｻ冢g qua SePay, t蘯｣i 蘯｣nh lﾃｪn Cloudinary vﾃ h盻・th盻創g g盻ｭi Email qua Resend. H盻・th盻創g s盻ｭ d盻･ng ki蘯ｿn trﾃｺc phﾃ｢n tﾃ｡ch rﾃｵ rﾃng gi盻ｯa Backend (Spring Boot) vﾃ Frontend (ReactJS).
 
 *   **Website Demo:** [https://snap-cart.app](https://snap-cart.app)
 
 ---
 
-## 🚀 Hướng dẫn khởi chạy dự án (Quick Start)
+## 噫 Hﾆｰ盻嬾g d蘯ｫn kh盻殃 ch蘯｡y d盻ｱ ﾃ｡n (Quick Start)
 
-### Cách 1: Chạy bằng Docker Compose (Khuyên dùng - Nhanh nhất)
-Bạn không cần cài đặt Java hay Node.js trên máy cá nhân, chỉ cần cài đặt **Docker Desktop**.
+### Cﾃ｡ch 1: Ch蘯｡y b蘯ｱng Docker Compose (Khuyﾃｪn dﾃｹng - Nhanh nh蘯･t)
+B蘯｡n khﾃｴng c蘯ｧn cﾃi ﾄ黛ｺｷt Java hay Node.js trﾃｪn mﾃ｡y cﾃ｡ nhﾃ｢n, ch盻・c蘯ｧn cﾃi ﾄ黛ｺｷt **Docker Desktop**.
 
-1.  Mở terminal tại thư mục gốc của dự án (nơi chứa file `docker-compose.yml`).
-2.  Chạy lệnh khởi tạo và xây dựng container:
+1.  M盻・terminal t蘯｡i thﾆｰ m盻･c g盻祖 c盻ｧa d盻ｱ ﾃ｡n (nﾆ｡i ch盻ｩa file `docker-compose.yml`).
+2.  Ch蘯｡y l盻㌻h kh盻殃 t蘯｡o vﾃ xﾃ｢y d盻ｱng container:
     ```bash
     docker-compose up --build
     ```
-3.  Docker sẽ tự động tạo cơ sở dữ liệu MySQL, build ứng dụng Spring Boot và chạy giao diện ReactJS.
+3.  Docker s蘯ｽ t盻ｱ ﾄ黛ｻ冢g t蘯｡o cﾆ｡ s盻・d盻ｯ li盻㎡ MySQL, build 盻ｩng d盻･ng Spring Boot vﾃ ch蘯｡y giao di盻㌻ ReactJS.
     *   **Frontend:** `http://localhost:5173`
     *   **Backend API:** `http://localhost:8080`
-    *   **MySQL Database:** Cổng `3306` của localhost.
+    *   **MySQL Database:** C盻貧g `3306` c盻ｧa localhost.
 
 ---
 
-### Cách 2: Chạy trực tiếp từ mã nguồn (Yêu cầu cài đặt Java 21+ và Node.js 18+)
+### Cﾃ｡ch 2: Ch蘯｡y tr盻ｱc ti蘯ｿp t盻ｫ mﾃ｣ ngu盻渡 (Yﾃｪu c蘯ｧu cﾃi ﾄ黛ｺｷt Java 21+ vﾃ Node.js 18+)
 
-#### Bước 1: Khởi động Database
-*   Tạo database MySQL có tên `ecom_db` trên localhost hoặc cloud.
-*   Cập nhật thông số kết nối trong `application.properties`.
+#### Bﾆｰ盻嫩 1: Kh盻殃 ﾄ黛ｻ冢g Database
+*   T蘯｡o database MySQL cﾃｳ tﾃｪn `ecom_db` trﾃｪn localhost ho蘯ｷc cloud.
+*   C蘯ｭp nh蘯ｭt thﾃｴng s盻・k蘯ｿt n盻訴 trong `application.properties`.
 
-#### Bước 2: Chạy Backend
-Mở terminal tại thư mục `backend` và chạy lệnh:
+#### Bﾆｰ盻嫩 2: Ch蘯｡y Backend
+M盻・terminal t蘯｡i thﾆｰ m盻･c `backend` vﾃ ch蘯｡y l盻㌻h:
 ```bash
 # Windows
 mvnw.cmd spring-boot:run
@@ -39,25 +39,25 @@ mvnw.cmd spring-boot:run
 chmod +x mvnw
 ./mvnw spring-boot:run
 ```
-*   *Backend sẽ khởi chạy ở cổng `8080`. Tài liệu API Swagger có thể truy cập tại: `http://localhost:8080/swagger-ui/index.html`*
+*   *Backend s蘯ｽ kh盻殃 ch蘯｡y 盻・c盻貧g `8080`. Tﾃi li盻㎡ API Swagger cﾃｳ th盻・truy c蘯ｭp t蘯｡i: `http://localhost:8080/swagger-ui/index.html`*
 
-#### Bước 3: Chạy Frontend
-Mở terminal mới tại thư mục `frontend` và chạy lệnh:
+#### Bﾆｰ盻嫩 3: Ch蘯｡y Frontend
+M盻・terminal m盻嬖 t蘯｡i thﾆｰ m盻･c `frontend` vﾃ ch蘯｡y l盻㌻h:
 ```bash
 npm install
 npm run dev
 ```
-*   *Frontend sẽ khởi chạy ở cổng `5173`. Bạn truy cập ứng dụng tại `http://localhost:5173`*
+*   *Frontend s蘯ｽ kh盻殃 ch蘯｡y 盻・c盻貧g `5173`. B蘯｡n truy c蘯ｭp 盻ｩng d盻･ng t蘯｡i `http://localhost:5173`*
 
 ---
 
-## ⚙️ Cấu hình môi trường (Environment Variables)
+## 笞呻ｸ・C蘯･u hﾃｬnh mﾃｴi trﾆｰ盻拵g (Environment Variables)
 
 ### 1. Backend (`backend/src/main/resources/application.properties`)
-Trước khi chạy backend, bạn cần cấu hình các thông số kết nối hoặc thiết lập qua các biến môi trường:
+Trﾆｰ盻嫩 khi ch蘯｡y backend, b蘯｡n c蘯ｧn c蘯･u hﾃｬnh cﾃ｡c thﾃｴng s盻・k蘯ｿt n盻訴 ho蘯ｷc thi蘯ｿt l蘯ｭp qua cﾃ｡c bi蘯ｿn mﾃｴi trﾆｰ盻拵g:
 
 ```properties
-# MySQL Connection (Chạy Local hoặc cloud)
+# MySQL Connection (Ch蘯｡y Local ho蘯ｷc cloud)
 spring.datasource.url=jdbc:mysql://localhost:3306/ecom_db?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&characterEncoding=UTF-8
 spring.datasource.username=YOUR_MYSQL_USERNAME
 spring.datasource.password=YOUR_MYSQL_PASSWORD
@@ -66,28 +66,28 @@ spring.datasource.password=YOUR_MYSQL_PASSWORD
 ecommerce.app.jwtSecret=SnapcartSecretKeyForJWTEncryption2026SnapcartSecretKeyForJWTEncryption2026
 ecommerce.app.jwtExpirationMs=86400000
 
-# Gemini AI API (Cần thiết cho trợ lý ảo mua sắm)
+# Gemini AI API (C蘯ｧn thi蘯ｿt cho tr盻｣ lﾃｽ 蘯｣o mua s蘯ｯm)
 GEMINI_API_KEY=YOUR_GEMINI_API_KEY
 
-# Google OAuth2 (Đăng nhập Google)
+# Google OAuth2 (ﾄ斉ハg nh蘯ｭp Google)
 GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID
 GOOGLE_CLIENT_SECRET=YOUR_GOOGLE_CLIENT_SECRET
 
-# Cloudinary (Quản lý hình ảnh)
+# Cloudinary (Qu蘯｣n lﾃｽ hﾃｬnh 蘯｣nh)
 cloudinary.cloud-name=YOUR_CLOUDINARY_CLOUD_NAME
 cloudinary.api-key=YOUR_CLOUDINARY_API_KEY
 cloudinary.api-secret=YOUR_CLOUDINARY_API_SECRET
 
-# Resend Email (Thông báo đơn hàng)
+# Resend Email (Thﾃｴng bﾃ｡o ﾄ柁｡n hﾃng)
 RESEND_API_KEY=YOUR_RESEND_API_KEY
-APP_MAIL_FROM=no-reply@yourdomain.com
+RESEND_FROM_EMAIL=no-reply@yourdomain.com
 
-# SePay Webhook Key (Để xác thực thanh toán an toàn)
-app.sepay.webhook-api-key=YOUR_SEPAY_WEBHOOK_API_KEY
+# SePay Webhook Key (ﾄ雪ｻ・xﾃ｡c th盻ｱc thanh toﾃ｡n an toﾃn)
+SEPAY_WEBHOOK_API_KEY=YOUR_SEPAY_WEBHOOK_API_KEY
 ```
 
 ### 2. Frontend (`frontend/.env`)
-Tạo file `.env` trong thư mục `frontend` và cấu hình:
+T蘯｡o file `.env` trong thﾆｰ m盻･c `frontend` vﾃ c蘯･u hﾃｬnh:
 
 ```env
 VITE_GOOGLE_CLIENT_ID=YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com
@@ -95,63 +95,63 @@ VITE_API_URL=http://localhost:8080/api
 VITE_BANK_NAME=MB
 VITE_BANK_ACC=0368163301
 ```
-*(Thay thế ngân hàng và số tài khoản nhận tiền thực tế khi chạy thử thanh toán QR)*
+*(Thay th蘯ｿ ngﾃ｢n hﾃng vﾃ s盻・tﾃi kho蘯｣n nh蘯ｭn ti盻］ th盻ｱc t蘯ｿ khi ch蘯｡y th盻ｭ thanh toﾃ｡n QR)*
 
 ---
 
-## 🛠️ Công nghệ & Hạ tầng sử dụng
+## 屏・・Cﾃｴng ngh盻・& H蘯｡ t蘯ｧng s盻ｭ d盻･ng
 
-### 1. Công nghệ cốt lõi
+### 1. Cﾃｴng ngh盻・c盻奏 lﾃｵi
 *   **Backend:** Spring Boot 3.2.4, Spring Security, Spring Data JPA, JWT (JSON Web Token), Lombok, Swagger/OpenAPI.
 *   **Frontend:** ReactJS 19 (Vite), Tailwind CSS, Framer Motion, React Icons, Axios, React Router.
-*   **Database:** MySQL (lưu trữ thông tin người dùng, đơn hàng, sản phẩm).
+*   **Database:** MySQL (lﾆｰu tr盻ｯ thﾃｴng tin ngﾆｰ盻拱 dﾃｹng, ﾄ柁｡n hﾃng, s蘯｣n ph蘯ｩm).
 
-### 2. Tích hợp bên thứ ba (Third-party Services)
-*   **Gemini AI (Cơ chế RAG):** Tích hợp Gemini 2.5 Flash thông qua API để tư vấn sản phẩm thông minh dựa trên dữ liệu sản phẩm thực tế được đồng bộ (đọc từ file `docs/products.jsonl`).
-*   **SePay (Thanh toán tự động):** Tự động tạo mã QR VietQR (thông qua cổng SePay), bắt webhook phản hồi từ SePay để cập nhật trạng thái đơn hàng ngay khi khách hàng chuyển khoản thành công.
-*   **Cloudinary:** Lưu trữ và quản lý hình ảnh sản phẩm tải lên từ Admin Dashboard.
-*   **Resend Email:** Gửi email tự động thông báo đơn hàng và xác thực tài khoản.
+### 2. Tﾃｭch h盻｣p bﾃｪn th盻ｩ ba (Third-party Services)
+*   **Gemini AI (Cﾆ｡ ch蘯ｿ RAG):** Tﾃｭch h盻｣p Gemini 2.5 Flash thﾃｴng qua API ﾄ黛ｻ・tﾆｰ v蘯･n s蘯｣n ph蘯ｩm thﾃｴng minh d盻ｱa trﾃｪn d盻ｯ li盻㎡ s蘯｣n ph蘯ｩm th盻ｱc t蘯ｿ ﾄ柁ｰ盻｣c ﾄ黛ｻ渡g b盻・(ﾄ黛ｻ皇 t盻ｫ file `docs/products.jsonl`).
+*   **SePay (Thanh toﾃ｡n t盻ｱ ﾄ黛ｻ冢g):** T盻ｱ ﾄ黛ｻ冢g t蘯｡o mﾃ｣ QR VietQR (thﾃｴng qua c盻貧g SePay), b蘯ｯt webhook ph蘯｣n h盻妬 t盻ｫ SePay ﾄ黛ｻ・c蘯ｭp nh蘯ｭt tr蘯｡ng thﾃ｡i ﾄ柁｡n hﾃng ngay khi khﾃ｡ch hﾃng chuy盻ハ kho蘯｣n thﾃnh cﾃｴng.
+*   **Cloudinary:** Lﾆｰu tr盻ｯ vﾃ qu蘯｣n lﾃｽ hﾃｬnh 蘯｣nh s蘯｣n ph蘯ｩm t蘯｣i lﾃｪn t盻ｫ Admin Dashboard.
+*   **Resend Email:** G盻ｭi email t盻ｱ ﾄ黛ｻ冢g thﾃｴng bﾃ｡o ﾄ柁｡n hﾃng vﾃ xﾃ｡c th盻ｱc tﾃi kho蘯｣n.
 
-### 3. Hạ tầng & Deploy
-*   **Backend:** Deploy lên **Railway** (kết nối trực tiếp với database MySQL lưu trữ trên mây).
-*   **Frontend:** Deploy lên **Vercel** để tối ưu hóa tốc độ tải trang toàn cầu và SSL miễn phí.
-*   **Containerization:** Hỗ trợ **Docker & Docker Compose** giúp khởi chạy toàn bộ dự án (Database + Backend + Frontend) chỉ với 1 câu lệnh duy nhất.
+### 3. H蘯｡ t蘯ｧng & Deploy
+*   **Backend:** Deploy lﾃｪn **Railway** (k蘯ｿt n盻訴 tr盻ｱc ti蘯ｿp v盻嬖 database MySQL lﾆｰu tr盻ｯ trﾃｪn mﾃ｢y).
+*   **Frontend:** Deploy lﾃｪn **Vercel** ﾄ黛ｻ・t盻訴 ﾆｰu hﾃｳa t盻祖 ﾄ黛ｻ・t蘯｣i trang toﾃn c蘯ｧu vﾃ SSL mi盻・ phﾃｭ.
+*   **Containerization:** H盻・tr盻｣ **Docker & Docker Compose** giﾃｺp kh盻殃 ch蘯｡y toﾃn b盻・d盻ｱ ﾃ｡n (Database + Backend + Frontend) ch盻・v盻嬖 1 cﾃ｢u l盻㌻h duy nh蘯･t.
 
 ---
 
-## 📋 Phân chia công việc (Thành viên nhóm)
+## 搭 Phﾃ｢n chia cﾃｴng vi盻㌘ (Thﾃnh viﾃｪn nhﾃｳm)
 
-### 1. Đức - Backend Security, Infrastructure & AI Integration
-*   **AI Shopping Assistant:** Tích hợp Gemini/OpenAI API, xây dựng cơ chế **RAG (Retrieval-Augmented Generation)** để AI tư vấn sản phẩm dựa trên dữ liệu từ Database.
-*   **Security:** Thiết lập hệ thống JWT, mã hóa mật khẩu, phân quyền Role-based (Admin/User).
-*   **Email:** Tích hợp dịch vụ gửi Mail (Resend/Nodemailer) để xác thực tài khoản và báo đơn hàng.
-*   **Infrastructure:** Chủ trì cấu hình môi trường **Railway** cho Backend, quản lý biến môi trường (Env).
-*   **Payment Logic:** Viết API Webhook/IPN để nhận kết quả thanh toán từ SePay/Momo và cập nhật đơn hàng.
+### 1. ﾄ雪ｻｩc - Backend Security, Infrastructure & AI Integration
+*   **AI Shopping Assistant:** Tﾃｭch h盻｣p Gemini/OpenAI API, xﾃ｢y d盻ｱng cﾆ｡ ch蘯ｿ **RAG (Retrieval-Augmented Generation)** ﾄ黛ｻ・AI tﾆｰ v蘯･n s蘯｣n ph蘯ｩm d盻ｱa trﾃｪn d盻ｯ li盻㎡ t盻ｫ Database.
+*   **Security:** Thi蘯ｿt l蘯ｭp h盻・th盻創g JWT, mﾃ｣ hﾃｳa m蘯ｭt kh蘯ｩu, phﾃ｢n quy盻］ Role-based (Admin/User).
+*   **Email:** Tﾃｭch h盻｣p d盻議h v盻･ g盻ｭi Mail (Resend/Nodemailer) ﾄ黛ｻ・xﾃ｡c th盻ｱc tﾃi kho蘯｣n vﾃ bﾃ｡o ﾄ柁｡n hﾃng.
+*   **Infrastructure:** Ch盻ｧ trﾃｬ c蘯･u hﾃｬnh mﾃｴi trﾆｰ盻拵g **Railway** cho Backend, qu蘯｣n lﾃｽ bi蘯ｿn mﾃｴi trﾆｰ盻拵g (Env).
+*   **Payment Logic:** Vi蘯ｿt API Webhook/IPN ﾄ黛ｻ・nh蘯ｭn k蘯ｿt qu蘯｣ thanh toﾃ｡n t盻ｫ SePay/Momo vﾃ c蘯ｭp nh蘯ｭt ﾄ柁｡n hﾃng.
 
-### 2. Sơn - Backend Core & Payment SDK
-*   **Database:** Thiết lập cấu trúc MySQL trên Railway, tối ưu hóa Index và các câu truy vấn phức tạp.
-*   **Payment SDK:** Tích hợp SDK SePay/QR để tạo mã thanh toán chuyển khoản nhanh.
-*   **Order Service:** Viết API xử lý logic đặt hàng, tính phí vận chuyển và áp dụng mã giảm giá.
-*   **User API:** Viết các API quản lý thông tin cá nhân khách hàng.
+### 2. Sﾆ｡n - Backend Core & Payment SDK
+*   **Database:** Thi蘯ｿt l蘯ｭp c蘯･u trﾃｺc MySQL trﾃｪn Railway, t盻訴 ﾆｰu hﾃｳa Index vﾃ cﾃ｡c cﾃ｢u truy v蘯･n ph盻ｩc t蘯｡p.
+*   **Payment SDK:** Tﾃｭch h盻｣p SDK SePay/QR ﾄ黛ｻ・t蘯｡o mﾃ｣ thanh toﾃ｡n chuy盻ハ kho蘯｣n nhanh.
+*   **Order Service:** Vi蘯ｿt API x盻ｭ lﾃｽ logic ﾄ黛ｺｷt hﾃng, tﾃｭnh phﾃｭ v蘯ｭn chuy盻ハ vﾃ ﾃ｡p d盻･ng mﾃ｣ gi蘯｣m giﾃ｡.
+*   **User API:** Vi蘯ｿt cﾃ｡c API qu蘯｣n lﾃｽ thﾃｴng tin cﾃ｡ nhﾃ｢n khﾃ｡ch hﾃng.
 
-### 3. Tuấn - Main UI & Fullstack Module 1
-*   **Frontend Home:** Code giao diện Trang chủ (Banner, Hero Section, Sản phẩm nổi bật).
-*   **Frontend Shop:** Code trang danh sách sản phẩm (Product Listing) và logic gọi dữ liệu từ API.
-*   **Fullstack Product:** Chịu trách nhiệm cả API Backend và Giao diện Frontend cho phần quản lý sản phẩm (CRUD).
-*   **Vercel:** Cấu hình và quản lý việc deploy Frontend lên Vercel.
+### 3. Tu蘯･n - Main UI & Fullstack Module 1
+*   **Frontend Home:** Code giao di盻㌻ Trang ch盻ｧ (Banner, Hero Section, S蘯｣n ph蘯ｩm n盻品 b蘯ｭt).
+*   **Frontend Shop:** Code trang danh sﾃ｡ch s蘯｣n ph蘯ｩm (Product Listing) vﾃ logic g盻絞 d盻ｯ li盻㎡ t盻ｫ API.
+*   **Fullstack Product:** Ch盻丘 trﾃ｡ch nhi盻㍊ c蘯｣ API Backend vﾃ Giao di盻㌻ Frontend cho ph蘯ｧn qu蘯｣n lﾃｽ s蘯｣n ph蘯ｩm (CRUD).
+*   **Vercel:** C蘯･u hﾃｬnh vﾃ qu蘯｣n lﾃｽ vi盻㌘ deploy Frontend lﾃｪn Vercel.
 
 ### 4. Duy - Shopping Flow & Fullstack Module 2
-*   **Shopping UI:** Code giao diện trang Chi tiết sản phẩm, Giỏ hàng và trang Thanh toán (Checkout).
-*   **Frontend Logic:** Quản lý State toàn cục, logic cộng dồn giỏ hàng.
-*   **Admin Dashboard:** Code giao diện quản trị (Bảng điều khiển doanh thu, quản lý đơn hàng).
-*   **Fullstack Category:** Chịu trách nhiệm cả API Backend và Giao diện Frontend cho phần quản lý danh mục (Category).
+*   **Shopping UI:** Code giao di盻㌻ trang Chi ti蘯ｿt s蘯｣n ph蘯ｩm, Gi盻・hﾃng vﾃ trang Thanh toﾃ｡n (Checkout).
+*   **Frontend Logic:** Qu蘯｣n lﾃｽ State toﾃn c盻･c, logic c盻冢g d盻渡 gi盻・hﾃng.
+*   **Admin Dashboard:** Code giao di盻㌻ qu蘯｣n tr盻・(B蘯｣ng ﾄ訴盻「 khi盻ハ doanh thu, qu蘯｣n lﾃｽ ﾄ柁｡n hﾃng).
+*   **Fullstack Category:** Ch盻丘 trﾃ｡ch nhi盻㍊ c蘯｣ API Backend vﾃ Giao di盻㌻ Frontend cho ph蘯ｧn qu蘯｣n lﾃｽ danh m盻･c (Category).
 
-### 5. Việt Anh - UI Static & UX Enhancement
-*   **AI UI:** Thiết kế giao diện khung chat (Chat bubble) và giao diện tin nhắn AI mượt mà.
-*   **Static Pages:** Code giao diện trang Đăng nhập/Đăng ký, Contact, About Us, Footer và trang 404.
-*   **UX Components:** Xây dựng hệ thống **Toast Notifications** và **Loading Skeletons** cho toàn bộ web.
-*   **Search & Filter UI:** Code giao diện Thanh tìm kiếm và Sidebar lọc sản phẩm (Visual).
-*   **SEO & Support:** Tối ưu Meta tags, ảnh. Nhập liệu dữ liệu mẫu và viết báo cáo dự án.
+### 5. Vi盻㏄ Anh - UI Static & UX Enhancement
+*   **AI UI:** Thi蘯ｿt k蘯ｿ giao di盻㌻ khung chat (Chat bubble) vﾃ giao di盻㌻ tin nh蘯ｯn AI mﾆｰ盻｣t mﾃ.
+*   **Static Pages:** Code giao di盻㌻ trang ﾄ斉ハg nh蘯ｭp/ﾄ斉ハg kﾃｽ, Contact, About Us, Footer vﾃ trang 404.
+*   **UX Components:** Xﾃ｢y d盻ｱng h盻・th盻創g **Toast Notifications** vﾃ **Loading Skeletons** cho toﾃn b盻・web.
+*   **Search & Filter UI:** Code giao di盻㌻ Thanh tﾃｬm ki蘯ｿm vﾃ Sidebar l盻皇 s蘯｣n ph蘯ｩm (Visual).
+*   **SEO & Support:** T盻訴 ﾆｰu Meta tags, 蘯｣nh. Nh蘯ｭp li盻㎡ d盻ｯ li盻㎡ m蘯ｫu vﾃ vi蘯ｿt bﾃ｡o cﾃ｡o d盻ｱ ﾃ｡n.
 
 ---
-*Cập nhật lần cuối chuẩn bị nộp bài: 11/06/2026*
+*C蘯ｭp nh蘯ｭt l蘯ｧn cu盻訴 chu蘯ｩn b盻・n盻冪 bﾃi: 11/06/2026*
