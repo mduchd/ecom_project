@@ -2,8 +2,10 @@
 import axios from "axios";
 
 // ── Axios instance dùng chung ─────────────────────────────────────────────
+const defaultApiBaseUrl = import.meta.env.DEV ? "http://localhost:8080/api" : "/api";
+
 const api = axios.create({
-    baseURL: import.meta.env.VITE_API_URL || "http://localhost:8080/api",
+    baseURL: import.meta.env.VITE_API_URL || defaultApiBaseUrl,
     timeout: 10000, // 10 giây timeout
     headers: {
         "Content-Type": "application/json",

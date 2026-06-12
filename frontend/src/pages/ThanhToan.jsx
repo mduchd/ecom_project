@@ -81,7 +81,13 @@ export default function ThanhToan() {
     } catch (err) {
       console.error("Lỗi khi kiểm tra trạng thái thanh toán:", err);
       if (!silent) {
-        toast.error("Không kiểm tra được trạng thái thanh toán lúc này. Vui lòng thử lại.");
+        if (err.response?.status === 404) {
+          toast.warning("Chưa tìm thấy đơn hàng hoặc thông tin email chưa khớp. Vui lòng kiểm tra lại mã đơn.");
+        } else if (!err.response) {
+          toast.warning("Không kết nối được tới máy chủ thanh toán. Vui lòng thử lại sau vài giây.");
+        } else {
+          toast.warning("Máy chủ đang bận hoặc chưa phản hồi đúng lúc. Vui lòng thử lại.");
+        }
       }
       return false;
     }
