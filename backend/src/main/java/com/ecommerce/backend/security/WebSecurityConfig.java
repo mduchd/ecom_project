@@ -76,6 +76,7 @@ public class WebSecurityConfig {
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/orders/quote")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/orders/test-email")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/payments/sepay/webhook")).permitAll()
+                    .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/billing/sepay/webhook")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.POST, "/api/orders/cancel")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/loyalty/checkout-settings")).permitAll()
                     .requestMatchers(AntPathRequestMatcher.antMatcher(HttpMethod.GET, "/api/orders/track")).permitAll()

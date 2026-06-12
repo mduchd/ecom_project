@@ -8,7 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/payments/sepay")
+@RequestMapping({"/api/payments/sepay", "/api/billing/sepay"})
 @CrossOrigin(origins = "*", maxAge = 3600)
 public class SepayWebhookController {
 
