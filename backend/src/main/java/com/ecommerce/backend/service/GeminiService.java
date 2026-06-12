@@ -13,6 +13,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.text.Normalizer;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -80,7 +81,8 @@ public class GeminiService {
         if (isLowestPriceQuery(userMessage)) {
             return findExtremePriceProduct(false);
         }
-        return productRagRetrievalService.retrieveRelevantProducts(userMessage, 5);
+        List<Product> retrieved = productRagRetrievalService.retrieveRelevantProducts(userMessage, 8);
+        return filterProductsByIntent(userMessage, retrieved);
     }
 
     private boolean isHighestPriceQuery(String userMessage) {
@@ -130,6 +132,73 @@ public class GeminiService {
         String normalized = Normalizer.normalize(value, Normalizer.Form.NFD)
                 .replaceAll("\\p{M}+", "");
         return normalized.toLowerCase(Locale.ROOT);
+    }
+
+    private List<Product> filterProductsByIntent(String userMessage, List<Product> candidates) {
+        String normalizedQuery = normalizeText(userMessage);
+        List<String> intentKeywords = detectIntentKeywords(normalizedQuery);
+        if (intentKeywords.isEmpty()) {
+            return candidates.stream().limit(5).toList();
+        }
+
+        List<Product> filtered = candidates.stream()
+                .filter(product -> matchesIntent(product, intentKeywords))
+                .limit(5)
+                .toList();
+        if (!filtered.isEmpty()) {
+            return filtered;
+        }
+
+        return productRepository.findByStockQuantityGreaterThan(0).stream()
+                .filter(product -> matchesIntent(product, intentKeywords))
+                .limit(5)
+                .toList();
+    }
+
+    private List<String> detectIntentKeywords(String normalizedQuery) {
+        if (containsAny(normalizedQuery, "tai nghe", "headphone", "earbuds", "earbud")) {
+            return List.of("tai nghe", "headphone", "earbud", "buds", "am thanh", "audio", "sony", "jbl");
+        }
+        if (containsAny(normalizedQuery, "loa", "speaker")) {
+            return List.of("loa", "speaker", "am thanh", "audio", "jbl", "sony");
+        }
+        if (containsAny(normalizedQuery, "chuot", "mouse")) {
+            return List.of("chuot", "mouse", "logitech", "phu kien gaming");
+        }
+        if (containsAny(normalizedQuery, "ban phim", "keyboard")) {
+            return List.of("ban phim", "keyboard", "keychron", "phu kien", "phu kien gaming");
+        }
+        if (containsAny(normalizedQuery, "sac du phong", "pin du phong", "power bank")) {
+            return List.of("pin du phong", "sac du phong", "power bank", "anker", "phu kien");
+        }
+        if (containsAny(normalizedQuery, "laptop", "macbook")) {
+            return List.of("laptop", "macbook", "asus", "apple", "dell");
+        }
+        if (containsAny(normalizedQuery, "dien thoai", "smartphone", "iphone", "samsung", "xiaomi", "oppo")) {
+            return List.of("dien thoai", "smartphone", "iphone", "samsung", "xiaomi", "oppo", "apple");
+        }
+        if (containsAny(normalizedQuery, "ipad", "tablet", "may tinh bang")) {
+            return List.of("ipad", "tablet", "may tinh bang", "apple");
+        }
+        if (containsAny(normalizedQuery, "dong ho", "smartwatch", "watch")) {
+            return List.of("dong ho", "smartwatch", "watch", "apple watch");
+        }
+        return List.of();
+    }
+
+    private boolean matchesIntent(Product product, List<String> keywords) {
+        String haystack = String.join(" ",
+                normalizeText(product.getName()),
+                normalizeText(product.getCategory()),
+                normalizeText(product.getBrand()),
+                normalizeText(product.getDescription()),
+                normalizeText(product.getSpecifications())
+        );
+        return keywords.stream().anyMatch(haystack::contains);
+    }
+
+    private boolean containsAny(String text, String... values) {
+        return Arrays.stream(values).anyMatch(text::contains);
     }
 
     private String generateReply(String userMessage, List<Product> relevantProducts) {
