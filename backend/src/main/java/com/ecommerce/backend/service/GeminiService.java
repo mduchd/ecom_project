@@ -117,7 +117,10 @@ public class GeminiService {
         if (product == null) {
             return null;
         }
-        return product.getDiscountPrice() != null ? product.getDiscountPrice() : product.getPrice();
+        if (product.getPrice() != null) {
+            return product.getPrice();
+        }
+        return product.getDiscountPrice();
     }
 
     private String normalizeText(String value) {
