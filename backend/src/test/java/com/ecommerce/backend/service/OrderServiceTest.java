@@ -23,6 +23,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -212,7 +213,7 @@ class OrderServiceTest {
     }
 
     @Test
-    void markPaidUpdatesStatusToShipping() {
+    void markPaidUpdatesStatusToPaid() {
         Order order = Order.builder()
                 .id(1L)
                 .orderCode("SPC123456")
@@ -225,8 +226,10 @@ class OrderServiceTest {
         Order updated = orderService.markPaidByOrderCode("SPC123456");
 
         assertNotNull(updated);
-        assertEquals("Đang giao", updated.getStatus());
-        verify(orderRepository).save(order);
+        assertEquals("Đã thanh toán", updated.getStatus());
+        verify(orderRepository, Mockito.atLeastOnce()).save(argThat(savedOrder ->
+                "Đã thanh toán".equals(savedOrder.getStatus())
+        ));
     }
 
     @Test

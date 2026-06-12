@@ -45,6 +45,7 @@ public class OrderService {
     private static final Logger logger = LoggerFactory.getLogger(OrderService.class);
 
     private static final String STATUS_PENDING = "Chờ duyệt";
+    private static final String STATUS_PAID = "Đã thanh toán";
     private static final String STATUS_SHIPPING = "Đang giao";
     private static final String STATUS_DELIVERED = "Đã giao";
     private static final String STATUS_CANCELED = "Đã hủy";
@@ -226,13 +227,17 @@ public class OrderService {
         if (isSameStatus(currentStatus, STATUS_CANCELED)) {
             return existing;
         }
+        if (isSameStatus(currentStatus, STATUS_PAID)) {
+            sendOrderConfirmationEmailIfNeeded(existing);
+            return existing;
+        }
         if (isSameStatus(currentStatus, STATUS_DELIVERED)
                 || isSameStatus(currentStatus, STATUS_SHIPPING)) {
             sendOrderConfirmationEmailIfNeeded(existing);
             return existing;
         }
 
-        existing.setStatus(STATUS_SHIPPING);
+        existing.setStatus(STATUS_PAID);
         existing = orderRepository.save(existing);
         sendOrderConfirmationEmailIfNeeded(existing);
         return existing;
@@ -427,7 +432,7 @@ public class OrderService {
 
     private String toStoredStatus(String status) {
         return switch (normalizeTrackingStatus(status)) {
-            case "PAID" -> "Đã thanh toán";
+            case "PAID" -> STATUS_PAID;
             case "SHIPPING" -> STATUS_SHIPPING;
             case "DELIVERED" -> STATUS_DELIVERED;
             case "CANCELED" -> STATUS_CANCELED;
