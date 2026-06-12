@@ -28,6 +28,9 @@ public class SepayWebhookController {
         if (result.unauthorized()) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(result);
         }
+        if (!result.processed()) {
+            return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(result);
+        }
         return ResponseEntity.ok(result);
     }
 }

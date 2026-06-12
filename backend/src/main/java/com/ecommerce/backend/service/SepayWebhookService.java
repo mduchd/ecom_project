@@ -2,6 +2,8 @@ package com.ecommerce.backend.service;
 
 import com.ecommerce.backend.entity.Order;
 import com.fasterxml.jackson.databind.JsonNode;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -18,6 +20,7 @@ import java.util.regex.Pattern;
 @Service
 public class SepayWebhookService {
 
+    private static final Logger logger = LoggerFactory.getLogger(SepayWebhookService.class);
     private static final Pattern ORDER_CODE_PATTERN = Pattern.compile("\\bSPC[0-9A-Z]{8,}\\b", Pattern.CASE_INSENSITIVE);
 
     private final OrderService orderService;
@@ -32,32 +35,45 @@ public class SepayWebhookService {
     }
 
     public SepayWebhookResult handle(String authorizationHeader, String apiKeyHeader, JsonNode payload) {
+        logger.info("SePay webhook received: authorizationPresent={}, apiKeyPresent={}, payload={}",
+                StringUtils.hasText(authorizationHeader),
+                StringUtils.hasText(apiKeyHeader),
+                payload);
+
         if (!isAuthorized(authorizationHeader, apiKeyHeader)) {
-            return SepayWebhookResult.unauthorized("Webhook SePay không hợp lệ: sai API key.");
+            logger.warn("SePay webhook unauthorized.");
+            return SepayWebhookResult.unauthorized("Webhook SePay khong hop le: sai API key.");
         }
 
         if (payload == null || payload.isNull()) {
-            return SepayWebhookResult.ignored("Payload rỗng.");
+            logger.warn("SePay webhook ignored: empty payload.");
+            return SepayWebhookResult.ignored("Payload rong.");
         }
 
         BigDecimal amountIn = extractAmountIn(payload);
-        if (amountIn != null && amountIn.signum() <= 0) {
-            return SepayWebhookResult.ignored("Giao dịch không tăng số dư, bỏ qua.");
+        if (amountIn != null && amountIn.signum() < 0) {
+            logger.warn("SePay webhook ignored: negative amountIn={}", amountIn);
+            return SepayWebhookResult.ignored("Giao dich khong tang so du, bo qua.");
         }
 
         String orderCode = extractOrderCode(payload);
+        logger.info("SePay webhook parsed: orderCode={}, amountIn={}", orderCode, amountIn);
         if (!StringUtils.hasText(orderCode)) {
-            return SepayWebhookResult.ignored("Không tìm thấy mã đơn hàng (SPC...) trong nội dung giao dịch.");
+            logger.warn("SePay webhook ignored: order code not found.");
+            return SepayWebhookResult.ignored("Khong tim thay ma don hang (SPC...) trong noi dung giao dich.");
         }
 
         try {
             Order updatedOrder = orderService.markPaidByOrderCode(orderCode.toUpperCase(Locale.ROOT));
+            logger.info("SePay webhook processed successfully for orderCode={}, newStatus={}",
+                    updatedOrder.getOrderCode(), updatedOrder.getStatus());
             return SepayWebhookResult.processed(
                     updatedOrder.getOrderCode(),
                     updatedOrder.getStatus(),
-                    "Đã cập nhật trạng thái đơn hàng từ webhook SePay."
+                    "Da cap nhat trang thai don hang tu webhook SePay."
             );
         } catch (RuntimeException ex) {
+            logger.warn("SePay webhook ignored due to processing error for orderCode={}: {}", orderCode, ex.getMessage(), ex);
             return SepayWebhookResult.ignored(ex.getMessage());
         }
     }
@@ -173,6 +189,7 @@ public class SepayWebhookService {
                     root.get("content"),
                     root.get("description"),
                     root.get("transactionContent"),
+                    root.get("transferContent"),
                     root.get("reference"),
                     root.get("code"),
                     root.get("orderCode")

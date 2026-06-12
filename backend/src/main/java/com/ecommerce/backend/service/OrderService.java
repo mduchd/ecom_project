@@ -209,7 +209,12 @@ public class OrderService {
             }
         }
 
-        return orderRepository.save(existing);
+        existing = orderRepository.save(existing);
+        if (!"CANCELED".equals(newStatus)
+                && ("PAID".equals(newStatus) || "SHIPPING".equals(newStatus) || "DELIVERED".equals(newStatus))) {
+            sendOrderConfirmationEmailIfNeeded(existing);
+        }
+        return existing;
     }
 
     @Transactional
