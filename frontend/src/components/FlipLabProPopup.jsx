@@ -2,6 +2,10 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { FaCopy, FaTimes, FaGift, FaCheck, FaExternalLinkAlt, FaStar, FaArrowRight, FaRedo } from "react-icons/fa";
 
+const DISMISSED_KEY = "snapcart_fliplab_dismissed";
+const CLAIMED_KEY = "snapcart_fliplab_claimed";
+const SEEN_SESSION_KEY = "snapcart_fliplab_seen_session";
+
 export default function FlipLabProPopup() {
   const [isOpen, setIsOpen] = useState(false);
   const [isClaimed, setIsClaimed] = useState(false);
@@ -38,10 +42,12 @@ export default function FlipLabProPopup() {
   ];
 
   useEffect(() => {
-    const dismissed = localStorage.getItem("snapcart_fliplab_dismissed");
-    const claimed = localStorage.getItem("snapcart_fliplab_claimed");
+    const dismissed = localStorage.getItem(DISMISSED_KEY);
+    const claimed = localStorage.getItem(CLAIMED_KEY);
+    const seenThisSession = sessionStorage.getItem(SEEN_SESSION_KEY);
 
-    if (!dismissed && !claimed) {
+    if (!dismissed && !claimed && !seenThisSession) {
+      sessionStorage.setItem(SEEN_SESSION_KEY, "true");
       const timer = setTimeout(() => {
         setIsOpen(true);
       }, 2000);
@@ -52,13 +58,13 @@ export default function FlipLabProPopup() {
   const handleDismiss = (permanent = false) => {
     setIsOpen(false);
     if (permanent) {
-      localStorage.setItem("snapcart_fliplab_dismissed", "true");
+      localStorage.setItem(DISMISSED_KEY, "true");
     }
   };
 
   const handleClaim = () => {
     setIsClaimed(true);
-    localStorage.setItem("snapcart_fliplab_claimed", "true");
+    localStorage.setItem(CLAIMED_KEY, "true");
     triggerConfetti();
   };
 
