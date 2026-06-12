@@ -47,7 +47,7 @@ public class GeminiService {
 
     private String formatProductsAsContext(List<Product> products) {
         if (products.isEmpty()) {
-            return "Hiện tại cửa hàng không có sản phẩm phù hợp.";
+            return "Hi騾ｶ・ｻ郢ｻ・ｻ t髯ゑｽｯ繝ｻ・｡i c騾ｶ・ｻ繝ｻ・ｭa h繝ｻ繝ｻ・｣・ｰng kh繝ｻ繝ｻ・ｽ・ｴng c繝ｻ繝ｻ・ｽ・ｳ s髯ゑｽｯ繝ｻ・｣n ph髯ゑｽｯ繝ｻ・ｩm ph繝ｻ繝ｻ・ｽ・ｹ h騾ｶ・ｻ繝ｻ・｣p.";
         }
 
         StringBuilder sb = new StringBuilder();
@@ -137,13 +137,14 @@ public class GeminiService {
         String productContext = formatProductsAsContext(relevantProducts);
 
         String systemInstruction =
-                "Bạn là SnapBot, trợ lý mua sắm thông minh của SnapCart. " +
-                "Chỉ được trả lời dựa trên dữ liệu sản phẩm thực tế được cung cấp bên dưới. " +
-                "Không được tự thêm sản phẩm không có trong kho. " +
-                "Nếu có giá khuyến mãi thì ưu tiên giá khuyến mãi. " +
-                "Nếu câu hỏi không liên quan đến mua sắm, hãy lịch sự và ngắn gọn. " +
-                "Trả lời ngắn gọn, thân thiện, luôn dùng tiếng Việt và không dùng markdown, không dùng ký tự **, __, # hay bullet list. " +
-                "Nếu có sản phẩm phù hợp, chỉ cần giới thiệu ngắn gọn để frontend hiển thị card sản phẩm riêng.\n\n" +
+                "B髯ゑｽｯ繝ｻ・｡n l繝ｻ繝ｻ・｣・ｰ SnapBot, tr騾ｶ・ｻ繝ｻ・｣ l繝ｻ繝ｻ・ｽ・ｽ mua s髯ゑｽｯ繝ｻ・ｯm th繝ｻ繝ｻ・ｽ・ｴng minh c騾ｶ・ｻ繝ｻ・ｧa SnapCart. " +
+                "Ch騾ｶ・ｻ郢晢ｽｻ繝ｻ繝ｻ豌医・・ｰ騾ｶ・ｻ繝ｻ・｣c tr髯ゑｽｯ繝ｻ・｣ l騾ｶ・ｻ隲｡・ｱ d騾ｶ・ｻ繝ｻ・ｱa tr繝ｻ繝ｻ・ｽ・ｪn d騾ｶ・ｻ繝ｻ・ｯ li騾ｶ・ｻ邱包ｽ｡ s髯ゑｽｯ繝ｻ・｣n ph髯ゑｽｯ繝ｻ・ｩm th騾ｶ・ｻ繝ｻ・ｱc t髯ゑｽｯ繝ｻ・ｿ 繝ｻ繝ｻ豌医・・ｰ騾ｶ・ｻ繝ｻ・｣c cung c髯ゑｽｯ繝ｻ・･p b繝ｻ繝ｻ・ｽ・ｪn d繝ｻ繝ｻ・ｽ・ｰ騾ｶ・ｻ陞ｫ繝ｻ " +
+                "Kh繝ｻ繝ｻ・ｽ・ｴng 繝ｻ繝ｻ豌医・・ｰ騾ｶ・ｻ繝ｻ・｣c t騾ｶ・ｻ繝ｻ・ｱ th繝ｻ繝ｻ・ｽ・ｪm s髯ゑｽｯ繝ｻ・｣n ph髯ゑｽｯ繝ｻ・ｩm kh繝ｻ繝ｻ・ｽ・ｴng c繝ｻ繝ｻ・ｽ・ｳ trong kho. " +
+                "Gia hien tai cua san pham nam o truong price, con discountPrice la gia goc truoc khi giam. " +
+                "Khi nhac den gia ban, luon uu tien gia hien tai. " +
+                "N髯ゑｽｯ繝ｻ・ｿu c繝ｻ繝ｻ・ｽ・｢u h騾ｶ・ｻ雎ｺ繝ｻkh繝ｻ繝ｻ・ｽ・ｴng li繝ｻ繝ｻ・ｽ・ｪn quan 繝ｻ繝ｻ・ｻ蟷｢・ｽ・ｺ繝ｻ・ｿn mua s髯ゑｽｯ繝ｻ・ｯm, h繝ｻ繝ｻ・ｽ・｣y l騾ｶ・ｻ髫ｴ・ｰh s騾ｶ・ｻ繝ｻ・ｱ v繝ｻ繝ｻ・｣・ｰ ng髯ゑｽｯ繝ｻ・ｯn g騾ｶ・ｻ髢ｧ・ｱ. " +
+                "Tr髯ゑｽｯ繝ｻ・｣ l騾ｶ・ｻ隲｡・ｱ ng髯ゑｽｯ繝ｻ・ｯn g騾ｶ・ｻ髢ｧ・ｱ, th繝ｻ繝ｻ・ｽ・｢n thi騾ｶ・ｻ郢ｻ・ｻ, lu繝ｻ繝ｻ・ｽ・ｴn d繝ｻ繝ｻ・ｽ・ｹng ti髯ゑｽｯ繝ｻ・ｿng Vi騾ｶ・ｻ郢ｽ繝ｻv繝ｻ繝ｻ・｣・ｰ kh繝ｻ繝ｻ・ｽ・ｴng d繝ｻ繝ｻ・ｽ・ｹng markdown, kh繝ｻ繝ｻ・ｽ・ｴng d繝ｻ繝ｻ・ｽ・ｹng k繝ｻ繝ｻ・ｽ・ｽ t騾ｶ・ｻ繝ｻ・ｱ **, __, # hay bullet list. " +
+                "N髯ゑｽｯ繝ｻ・ｿu c繝ｻ繝ｻ・ｽ・ｳ s髯ゑｽｯ繝ｻ・｣n ph髯ゑｽｯ繝ｻ・ｩm ph繝ｻ繝ｻ・ｽ・ｹ h騾ｶ・ｻ繝ｻ・｣p, ch騾ｶ・ｻ郢晢ｽｻc髯ゑｽｯ繝ｻ・ｧn gi騾ｶ・ｻ陞ｫ繝ｻthi騾ｶ・ｻ邱包ｽ｡ ng髯ゑｽｯ繝ｻ・ｯn g騾ｶ・ｻ髢ｧ・ｱ 繝ｻ繝ｻ・ｻ蟷｢・ｽ・ｻ郢晢ｽｻfrontend hi騾ｶ・ｻ郢昴・th騾ｶ・ｻ郢晢ｽｻcard s髯ゑｽｯ繝ｻ・｣n ph髯ゑｽｯ繝ｻ・ｩm ri繝ｻ繝ｻ・ｽ・ｪng.\n\n" +
                 productContext;
 
         Map<String, Object> requestBody = new HashMap<>();
@@ -152,7 +153,7 @@ public class GeminiService {
         List<Map<String, Object>> parts = new ArrayList<>();
         Map<String, Object> part = new HashMap<>();
 
-        part.put("text", systemInstruction + "\nKhách hàng hỏi: " + userMessage);
+        part.put("text", systemInstruction + "\nKh繝ｻ繝ｻ・ｽ・｡ch h繝ｻ繝ｻ・｣・ｰng h騾ｶ・ｻ雎ｺ繝ｻ " + userMessage);
         parts.add(part);
         content.put("parts", parts);
         contents.add(content);
@@ -175,7 +176,7 @@ public class GeminiService {
                     }
                 }
 
-                return "Xin lỗi, mình chưa xử lý được yêu cầu này.";
+                return "Xin l騾ｶ・ｻ隰ｫ繝ｻ m繝ｻ繝ｻ・ｽ・ｬnh ch繝ｻ繝ｻ・ｽ・ｰa x騾ｶ・ｻ繝ｻ・ｭ l繝ｻ繝ｻ・ｽ・ｽ 繝ｻ繝ｻ豌医・・ｰ騾ｶ・ｻ繝ｻ・｣c y繝ｻ繝ｻ・ｽ・ｪu c髯ゑｽｯ繝ｻ・ｧu n繝ｻ繝ｻ・｣・ｰy.";
             } catch (Exception e) {
                 if (attempt < maxRetries) {
                     try {
@@ -184,17 +185,17 @@ public class GeminiService {
                         Thread.currentThread().interrupt();
                     }
                 } else {
-                    return "Xin lỗi, AI đang bận. Bạn vui lòng thử lại sau.";
+                    return "Xin l騾ｶ・ｻ隰ｫ繝ｻ AI 繝ｻ繝ｻ魄ｪng b髯ゑｽｯ繝ｻ・ｭn. B髯ゑｽｯ繝ｻ・｡n vui l繝ｻ繝ｻ・ｽ・ｲng th騾ｶ・ｻ繝ｻ・ｭ l髯ゑｽｯ繝ｻ・｡i sau.";
                 }
             }
         }
 
-        return "Xin lỗi, AI đang bận. Bạn vui lòng thử lại sau.";
+        return "Xin l騾ｶ・ｻ隰ｫ繝ｻ AI 繝ｻ繝ｻ魄ｪng b髯ゑｽｯ繝ｻ・ｭn. B髯ゑｽｯ繝ｻ・｡n vui l繝ｻ繝ｻ・ｽ・ｲng th騾ｶ・ｻ繝ｻ・ｭ l髯ゑｽｯ繝ｻ・｡i sau.";
     }
 
     private String sanitizeReply(String reply) {
         if (reply == null || reply.isBlank()) {
-            return "Xin lỗi, mình chưa xử lý được yêu cầu này.";
+            return "Xin l騾ｶ・ｻ隰ｫ繝ｻ m繝ｻ繝ｻ・ｽ・ｬnh ch繝ｻ繝ｻ・ｽ・ｰa x騾ｶ・ｻ繝ｻ・ｭ l繝ｻ繝ｻ・ｽ・ｽ 繝ｻ繝ｻ豌医・・ｰ騾ｶ・ｻ繝ｻ・｣c y繝ｻ繝ｻ・ｽ・ｪu c髯ゑｽｯ繝ｻ・ｧu n繝ｻ繝ｻ・｣・ｰy.";
         }
 
         return MARKDOWN_DECORATORS.matcher(reply)

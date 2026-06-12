@@ -98,8 +98,10 @@ const enrichProductsFromReply = async (replyText) => {
 };
 
 function ProductSuggestionCard({ product }) {
-    const salePrice = product.discountPrice ?? product.price;
-    const originalPrice = product.discountPrice ? product.price : null;
+    const salePrice = product.price;
+    const originalPrice = product.discountPrice && product.discountPrice > product.price
+        ? product.discountPrice
+        : null;
     const isAvailable = (product.stockQuantity ?? 0) > 0;
 
     return (

@@ -20,8 +20,8 @@ public final class ProductRagDocumentBuilder {
         sb.append("name: ").append(safe(product.getName())).append('\n');
         sb.append("category: ").append(safe(product.getCategory())).append('\n');
         sb.append("brand: ").append(safe(product.getBrand())).append('\n');
-        sb.append("price_vnd: ").append(formatMoney(product.getPrice())).append('\n');
-        sb.append("discount_price_vnd: ").append(formatMoney(product.getDiscountPrice())).append('\n');
+        sb.append("current_price_vnd: ").append(formatMoney(product.getPrice())).append('\n');
+        sb.append("original_price_vnd: ").append(formatMoney(product.getDiscountPrice())).append('\n');
         sb.append("in_stock: ").append(isInStock(product)).append('\n');
         sb.append("stock_quantity: ").append(safe(product.getStockQuantity())).append('\n');
         sb.append("summary: ").append(limit(normalize(product.getDescription()), DESCRIPTION_LIMIT)).append('\n');
@@ -31,9 +31,7 @@ public final class ProductRagDocumentBuilder {
     }
 
     public static String buildCompactLabel(Product product) {
-        String price = product.getDiscountPrice() != null
-                ? formatMoney(product.getDiscountPrice())
-                : formatMoney(product.getPrice());
+        String price = formatMoney(product.getPrice());
         return String.format(Locale.US, "#%s | %s | %s | %s VND | stock=%s",
                 safe(product.getId()),
                 safe(product.getName()),
